@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+      }
+      .left-column {
+        flex: 1;
+      }
+      .right-column {
+        flex: 1;
+      }
+      .future-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .future-image {
+        width: 100%;
+        max-height: 280px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .direction-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 15px;
+      }
+      .direction-icon {
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #bbdefb;
+        flex-shrink: 0;
+      }
+      .direction-content h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #bbdefb;
+      }
+      .direction-content p {
+        font-size: 16px;
+        line-height: 1.4;
+      }
+      .chart-container {
+        height: 300px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">未来展望</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <img src="/home/ubuntu/ppt_assets/cyber_range_visualization.png" alt="未来靶场可视化" class="future-image">
+          
+          <div class="future-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">技术发展路线</h2>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="direction-content">
+                <h3>多模态AI Agent</h3>
+                <p>融合视觉、语音等多模态输入，提升Agent对复杂环境的感知和理解能力，实现更接近人类专家的攻防决策。</p>
+              </div>
+            </div>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-network-wired"></i>
+              </div>
+              <div class="direction-content">
+                <h3>数字孪生靶场</h3>
+                <p>构建关键基础设施的数字孪生靶场，实现物理世界与网络空间的深度融合，支持更复杂的攻防场景。</p>
+              </div>
+            </div>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="direction-content">
+                <h3>群体智能协同</h3>
+                <p>发展Agent群体智能，实现多Agent协同攻防，模拟APT组织和安全运营中心的团队协作模式。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div class="chart-container">
+            <canvas id="marketChart"></canvas>
+          </div>
+          
+          <div class="future-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">应用场景拓展</h2>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-graduation-cap"></i>
+              </div>
+              <div class="direction-content">
+                <h3>网络安全教育</h3>
+                <p>为高校和培训机构提供定制化的教学靶场，支持课程实践和技能认证，培养新一代网络安全人才。</p>
+              </div>
+            </div>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="direction-content">
+                <h3>企业安全建设</h3>
+                <p>为企业提供安全能力评估和提升服务，帮助构建自适应安全防御体系，提升应对高级威胁的能力。</p>
+              </div>
+            </div>
+            
+            <div class="direction-item">
+              <div class="direction-icon">
+                <i class="fas fa-flag"></i>
+              </div>
+              <div class="direction-content">
+                <h3>国家级演练支撑</h3>
+                <p>为国家级网络安全演练提供技术支撑，模拟关键信息基础设施遭受的复杂攻击场景，提升国家网络空间防御能力。</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // 创建市场预测图表
+      const ctx = document.getElementById('marketChart').getContext('2d');
+      const marketChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['2025', '2026', '2027', '2028', '2029', '2030'],
+          datasets: [{
+            label: '传统靶场市场规模',
+            data: [100, 110, 115, 120, 125, 130],
+            borderColor: '#bbdefb',
+            backgroundColor: 'rgba(187, 222, 251, 0.1)',
+            tension: 0.3,
+            fill: true
+          }, {
+            label: 'AI驱动靶场市场规模',
+            data: [50, 100, 180, 280, 400, 550],
+            borderColor: '#42a5f5',
+            backgroundColor: 'rgba(66, 165, 245, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: '市场规模（亿元）',
+                color: '#ffffff'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#ffffff'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#ffffff'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#ffffff',
+                font: {
+                  size: 14
+                }
+              }
+            },
+            title: {
+              display: true,
+              text: '网络安全靶场市场规模预测',
+              color: '#ffffff',
+              font: {
+                size: 16,
+                weight: 'bold'
+              }
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+

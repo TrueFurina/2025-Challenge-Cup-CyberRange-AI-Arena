@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+      }
+      .left-column {
+        flex: 1;
+      }
+      .right-column {
+        flex: 1;
+      }
+      .solution-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .solution-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .tech-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .tech-icon {
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #bbdefb;
+      }
+      .tech-content h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #bbdefb;
+      }
+      .tech-content p {
+        font-size: 16px;
+        line-height: 1.4;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">解决方案概述</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <div class="solution-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">核心理念</h2>
+            <p class="text-lg mb-4">以网络安全攻防动态推演为突破方向，依托生成式AI、AI Agent、大数据分析等技术，设计具备动态演化能力的靶场系统。</p>
+            
+            <h2 class="text-2xl font-bold mb-4 mt-6 text-bbdefb">技术路线</h2>
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-brain"></i>
+              </div>
+              <div class="tech-content">
+                <h3>生成式AI</h3>
+                <p>用于动态场景生成和智能内容创建，模拟真实业务环境</p>
+              </div>
+            </div>
+            
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-robot"></i>
+              </div>
+              <div class="tech-content">
+                <h3>AI Agent</h3>
+                <p>实现智能攻击模拟和自适应防御决策，支持自主决策</p>
+              </div>
+            </div>
+            
+            <div class="tech-item">
+              <div class="tech-icon">
+                <i class="fas fa-chart-bar"></i>
+              </div>
+              <div class="tech-content">
+                <h3>大数据分析</h3>
+                <p>提供演练评估自动化，构建量化模型和技能画像</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <img src="/home/ubuntu/ppt_assets/defense_solution.png" alt="解决方案架构" class="solution-image">
+          
+          <div class="solution-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">解决方案价值</h2>
+            
+            <div class="mb-4">
+              <h3 class="text-xl font-bold mb-2 text-bbdefb">动态适应性</h3>
+              <p>平台能够根据最新威胁情报和业务需求，动态生成和调整攻防场景，确保演练内容与实际威胁同步。</p>
+            </div>
+            
+            <div class="mb-4">
+              <h3 class="text-xl font-bold mb-2 text-bbdefb">智能对抗性</h3>
+              <p>AI Agent驱动的攻防双方能够模拟真实攻防对抗过程，提供多样化攻击路径和防御策略。</p>
+            </div>
+            
+            <div>
+              <h3 class="text-xl font-bold mb-2 text-bbdefb">量化评估</h3>
+              <p>自动化评估系统提供客观、全面的量化评估，形成个人和团队的技能画像和改进建议。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

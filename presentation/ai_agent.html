@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+        height: 600px;
+      }
+      .left-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .agent-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        flex-grow: 1;
+      }
+      .agent-image {
+        width: 100%;
+        max-height: 280px;
+        object-fit: contain;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .agent-type {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .agent-icon {
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #bbdefb;
+      }
+      .agent-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #bbdefb;
+      }
+      .agent-feature {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 10px;
+      }
+      .feature-bullet {
+        color: #42a5f5;
+        margin-right: 10px;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">AI Agent技术实现</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <img src="/home/ubuntu/ppt_assets/ai_agent_security.jpg" alt="AI Agent安全" class="agent-image">
+          
+          <div class="agent-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">Agent架构设计</h2>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">多智能体协作框架</span>：构建攻击Agent、防御Agent和协调Agent的协作机制，实现动态对抗和协同决策。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">知识图谱支撑</span>：集成网络安全领域知识图谱，为Agent提供专业知识支持和推理基础。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">强化学习机制</span>：通过强化学习不断优化Agent的决策策略，提升攻防对抗的智能水平。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">可解释性设计</span>：Agent决策过程透明化，支持决策路径追踪和分析，便于教学和评估。
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div class="agent-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">Agent类型与功能</h2>
+            
+            <div class="agent-type">
+              <div class="agent-icon">
+                <i class="fas fa-user-ninja"></i>
+              </div>
+              <h3 class="agent-title">攻击Agent</h3>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">攻击策略生成</span>：基于目标环境自动生成攻击策略，包括侦察、渗透、横向移动等阶段。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">漏洞利用决策</span>：智能选择适合的漏洞利用方式，根据防御反馈动态调整攻击手段。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">攻击链模拟</span>：模拟APT等高级威胁的完整攻击链，实现持续性渗透和目标达成。
+              </div>
+            </div>
+            
+            <div class="agent-type mt-6">
+              <div class="agent-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h3 class="agent-title">防御Agent</h3>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">威胁检测</span>：实时监控网络行为和系统状态，识别潜在威胁和异常活动。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">防御策略优化</span>：根据攻击特征自动调整防御策略，优化资源分配和防御重点。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">自动化响应</span>：执行自动化的威胁响应，包括隔离、修复和恢复等操作。
+              </div>
+            </div>
+            
+            <div class="agent-type mt-6">
+              <div class="agent-icon">
+                <i class="fas fa-cogs"></i>
+              </div>
+              <h3 class="agent-title">协调Agent</h3>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">演练控制</span>：管理演练流程，调整难度和进度，确保演练目标达成。
+              </div>
+            </div>
+            
+            <div class="agent-feature">
+              <i class="fas fa-circle feature-bullet text-xs"></i>
+              <div>
+                <span class="font-bold">数据收集</span>：收集攻防过程中的关键数据，为评估分析提供基础。
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

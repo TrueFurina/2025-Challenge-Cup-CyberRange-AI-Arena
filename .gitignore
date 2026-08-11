@@ -1,0 +1,32 @@
+# ── 虚拟环境 / 缓存 ──────────────────────────
+.venv*/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# ── 数据库与运行时数据（含默认凭据，不进开源仓库） ──
+*.db
+*.sqlite3
+*.sqlite
+submission/代码/app_backup_*.db
+submission/代码/app.db-journal
+
+# ── 归档 / 草稿 / 内部材料（不进开源仓库） ──
+backup/
+programs/
+screenshots/
+submission/PPT和视频/
+submission/声明函/
+submission/GOAL_PROGRESS.md
+
+# ── 日志 ──────────────────────────────────
+*.log
+logs/
+
+# ── 编辑器 / 系统 ──────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

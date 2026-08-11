@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+      }
+      .left-column {
+        flex: 1;
+      }
+      .right-column {
+        flex: 1;
+      }
+      .architecture-image {
+        width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .layer-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .layer-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #bbdefb;
+        display: flex;
+        align-items: center;
+      }
+      .layer-icon {
+        font-size: 18px;
+        margin-right: 10px;
+        color: #42a5f5;
+      }
+      .layer-description {
+        font-size: 16px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+      }
+      .layer-components {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .component-tag {
+        background: rgba(26, 35, 126, 0.5);
+        color: #bbdefb;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">系统架构设计</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <img src="/home/ubuntu/ppt_assets/system_architecture.png" alt="系统架构图" class="architecture-image">
+          
+          <div class="layer-section">
+            <div class="layer-title">
+              <i class="fas fa-layer-group layer-icon"></i>
+              <span>架构设计原则</span>
+            </div>
+            <p class="layer-description">平台采用分层设计，确保各功能模块解耦合，便于扩展和维护。核心AI Agent层与环境层交互，实现动态攻防推演。</p>
+            
+            <div class="layer-components">
+              <div class="component-tag">模块化设计</div>
+              <div class="component-tag">松耦合架构</div>
+              <div class="component-tag">可扩展性</div>
+              <div class="component-tag">高可用性</div>
+              <div class="component-tag">安全性</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div class="layer-section">
+            <div class="layer-title">
+              <i class="fas fa-desktop layer-icon"></i>
+              <span>用户界面层</span>
+            </div>
+            <p class="layer-description">提供直观的用户交互界面，包括场景管理、演练控制、态势感知和评估报告等功能模块。</p>
+            <div class="layer-components">
+              <div class="component-tag">Web界面</div>
+              <div class="component-tag">可视化大屏</div>
+              <div class="component-tag">移动端适配</div>
+            </div>
+          </div>
+          
+          <div class="layer-section">
+            <div class="layer-title">
+              <i class="fas fa-cogs layer-icon"></i>
+              <span>应用服务层</span>
+            </div>
+            <p class="layer-description">实现业务逻辑处理，包括场景管理、演练管理、用户管理和系统配置等核心服务。</p>
+            <div class="layer-components">
+              <div class="component-tag">RESTful API</div>
+              <div class="component-tag">微服务架构</div>
+              <div class="component-tag">消息队列</div>
+            </div>
+          </div>
+          
+          <div class="layer-section">
+            <div class="layer-title">
+              <i class="fas fa-robot layer-icon"></i>
+              <span>AI Agent层</span>
+            </div>
+            <p class="layer-description">平台的核心智能层，包括攻击Agent、防御Agent和协调Agent，实现智能攻防对抗。</p>
+            <div class="layer-components">
+              <div class="component-tag">攻击决策引擎</div>
+              <div class="component-tag">防御策略引擎</div>
+              <div class="component-tag">Agent协调器</div>
+            </div>
+          </div>
+          
+          <div class="layer-section">
+            <div class="layer-title">
+              <i class="fas fa-server layer-icon"></i>
+              <span>靶场环境层</span>
+            </div>
+            <p class="layer-description">提供虚拟化的网络环境，支持动态场景构建和网络仿真。</p>
+            <div class="layer-components">
+              <div class="component-tag">容器编排</div>
+              <div class="component-tag">网络仿真</div>
+              <div class="component-tag">安全设备模拟</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

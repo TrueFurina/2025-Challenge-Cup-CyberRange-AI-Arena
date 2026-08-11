@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+      }
+      .left-column {
+        flex: 1;
+      }
+      .right-column {
+        flex: 1;
+      }
+      .background-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .pain-point {
+        background: rgba(26, 35, 126, 0.3);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+      }
+      .pain-point-icon {
+        font-size: 36px;
+        margin-right: 20px;
+        color: #bbdefb;
+      }
+      .pain-point-content h3 {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #bbdefb;
+      }
+      .pain-point-content p {
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .background-image {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">项目背景与痛点</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <img src="/home/ubuntu/ppt_assets/attack_surface.jpg" alt="网络安全攻防" class="background-image">
+          
+          <div class="background-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">政策与战略背景</h2>
+            <p class="text-lg mb-4">为落实《网络安全法》和《国家网络空间安全战略》关于提升实战化攻防能力的要求，响应"十四五"规划中强化关键信息基础设施安全防护的部署。</p>
+            <p class="text-lg">当前网络安全攻防演练与关键人才培养过程中，亟需突破动态化、智能化需求的瓶颈，提升实战效果。</p>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <h2 class="text-2xl font-bold mb-4 text-bbdefb">三大核心痛点</h2>
+          
+          <div class="pain-point">
+            <div class="pain-point-icon">
+              <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="pain-point-content">
+              <h3>场景静态化与威胁动态化矛盾</h3>
+              <p>传统靶场无法及时模拟最新业务场景和新型攻击手段，导致演练效果滞后于实际威胁。</p>
+            </div>
+          </div>
+          
+          <div class="pain-point">
+            <div class="pain-point-icon">
+              <i class="fas fa-random"></i>
+            </div>
+            <div class="pain-point-content">
+              <h3>攻击路径单一性与实战复杂性脱节</h3>
+              <p>人工设计的攻击路径无法覆盖多样化的渗透手段，缺乏智能推演能力。</p>
+            </div>
+          </div>
+          
+          <div class="pain-point">
+            <div class="pain-point-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="pain-point-content">
+              <h3>评估主观化与量化反馈缺失</h3>
+              <p>演练效果依赖人工复盘，缺少对攻防态势和人员能力的自动化评估。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #ffffff;
+      }
+      .feature-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr 1fr;
+        gap: 20px;
+        flex-grow: 1;
+      }
+      .feature-box {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 15px;
+        display: flex;
+        flex-direction: column;
+      }
+      .feature-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 10px;
+      }
+      .feature-icon {
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #bbdefb;
+      }
+      .feature-title {
+        font-size: 22px;
+        font-weight: bold;
+        color: #bbdefb;
+      }
+      .feature-description {
+        font-size: 16px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+      }
+      .feature-points {
+        margin-left: 15px;
+      }
+      .feature-point {
+        display: flex;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+      .point-icon {
+        color: #42a5f5;
+        margin-right: 8px;
+        font-size: 14px;
+      }
+      .chart-container {
+        width: 100%;
+        height: 250px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">四大核心功能</h1>
+      
+      <div class="chart-container">
+        <canvas id="featuresChart"></canvas>
+      </div>
+      
+      <div class="feature-container">
+        <div class="feature-box">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-cubes"></i>
+            </div>
+            <h2 class="feature-title">动态场景生成</h2>
+          </div>
+          <p class="feature-description">自动生成与真实业务相关的多维攻防场景，并能实时调整环境参数。</p>
+          <div class="feature-points">
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>基于业务模型的场景自动构建</span>
+            </div>
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>威胁情报驱动的漏洞植入</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feature-box">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-robot"></i>
+            </div>
+            <h2 class="feature-title">智能攻击模拟</h2>
+          </div>
+          <p class="feature-description">通过攻击AI Agent模拟复杂的攻击链，支持攻击路径的自主决策。</p>
+          <div class="feature-points">
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>多样化攻击技术库</span>
+            </div>
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>自主决策的攻击路径规划</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feature-box">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-shield-alt"></i>
+            </div>
+            <h2 class="feature-title">自适应防御决策</h2>
+          </div>
+          <p class="feature-description">防御AI Agent动态优化安全策略，实现自动化的漏洞修复和威胁阻断。</p>
+          <div class="feature-points">
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>多层次防御策略自动部署</span>
+            </div>
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>实时威胁检测与响应</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="feature-box">
+          <div class="feature-header">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h2 class="feature-title">演练评估自动化</h2>
+          </div>
+          <p class="feature-description">构建量化模型，自动评估攻防态势和人员能力，形成技能画像。</p>
+          <div class="feature-points">
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>多维度评估指标体系</span>
+            </div>
+            <div class="feature-point">
+              <i class="fas fa-check-circle point-icon"></i>
+              <span>个人与团队技能画像</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // 创建功能关系图
+      const ctx = document.getElementById('featuresChart').getContext('2d');
+      const featuresChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: ['场景动态化', '攻击智能化', '防御自适应', '评估自动化', '实战贴合度', '人才培养效果'],
+          datasets: [{
+            label: '传统靶场平台',
+            data: [30, 25, 20, 15, 35, 30],
+            backgroundColor: 'rgba(187, 222, 251, 0.2)',
+            borderColor: 'rgba(187, 222, 251, 0.8)',
+            pointBackgroundColor: 'rgba(187, 222, 251, 1)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(187, 222, 251, 1)'
+          }, {
+            label: 'AI Agent驱动靶场平台',
+            data: [90, 85, 80, 90, 85, 90],
+            backgroundColor: 'rgba(66, 165, 245, 0.2)',
+            borderColor: 'rgba(66, 165, 245, 0.8)',
+            pointBackgroundColor: 'rgba(66, 165, 245, 1)',
+            pointBorderColor: '#fff',
+            pointHoverBackgroundColor: '#fff',
+            pointHoverBorderColor: 'rgba(66, 165, 245, 1)'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              angleLines: {
+                color: 'rgba(255, 255, 255, 0.2)'
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.2)'
+              },
+              pointLabels: {
+                color: '#ffffff',
+                font: {
+                  size: 14
+                }
+              },
+              ticks: {
+                color: '#bbdefb',
+                backdropColor: 'transparent',
+                showLabelBackdrop: false
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'top',
+              labels: {
+                color: '#ffffff',
+                font: {
+                  size: 14
+                }
+              }
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+

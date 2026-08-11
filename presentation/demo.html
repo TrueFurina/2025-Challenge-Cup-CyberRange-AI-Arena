@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+        height: 580px;
+      }
+      .left-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+      .demo-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        flex-grow: 1;
+      }
+      .demo-image {
+        width: 100%;
+        height: 280px;
+        object-fit: cover;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .feature-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #bbdefb;
+      }
+      .feature-description {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      .feature-highlight {
+        display: flex;
+        align-items: center;
+        margin-top: 15px;
+      }
+      .highlight-icon {
+        font-size: 18px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 12px;
+        color: #bbdefb;
+      }
+      .highlight-text {
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">系统演示</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <img src="/home/ubuntu/ppt_assets/security_dashboard.jpeg" alt="攻防态势可视化界面" class="demo-image">
+          
+          <div class="demo-section">
+            <h2 class="feature-title">攻防态势可视化</h2>
+            <p class="feature-description">平台提供实时、直观的攻防态势可视化界面，支持多维度数据展示和交互式操作。</p>
+            
+            <div class="feature-highlight">
+              <div class="highlight-icon">
+                <i class="fas fa-network-wired"></i>
+              </div>
+              <p class="highlight-text">网络拓扑实时展示，攻击路径动态追踪</p>
+            </div>
+            
+            <div class="feature-highlight">
+              <div class="highlight-icon">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <p class="highlight-text">多维数据分析，攻防态势一目了然</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <img src="/home/ubuntu/ppt_assets/cyber_range_platform.jpg" alt="场景管理界面" class="demo-image">
+          
+          <div class="demo-section">
+            <h2 class="feature-title">场景管理与演练控制</h2>
+            <p class="feature-description">提供丰富的场景管理功能和演练控制能力，支持场景定制、参数调整和演练监控。</p>
+            
+            <div class="feature-highlight">
+              <div class="highlight-icon">
+                <i class="fas fa-sliders-h"></i>
+              </div>
+              <p class="highlight-text">场景参数灵活调整，满足不同演练需求</p>
+            </div>
+            
+            <div class="feature-highlight">
+              <div class="highlight-icon">
+                <i class="fas fa-play-circle"></i>
+              </div>
+              <p class="highlight-text">演练全流程控制，支持暂停、回放和分析</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+

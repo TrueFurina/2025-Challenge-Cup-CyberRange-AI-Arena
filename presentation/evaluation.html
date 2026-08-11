@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+    <style>
+      .slide-container {
+        width: 1280px;
+        min-height: 720px;
+        background: #0d47a1;
+        color: #ffffff;
+        font-family: 'Arial', sans-serif;
+        padding: 40px;
+      }
+      .title {
+        font-size: 36px;
+        font-weight: bold;
+        margin-bottom: 30px;
+        color: #ffffff;
+      }
+      .content-container {
+        display: flex;
+        gap: 40px;
+      }
+      .left-column {
+        flex: 1;
+      }
+      .right-column {
+        flex: 1;
+      }
+      .chart-container {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .criteria-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      .criteria-icon {
+        font-size: 24px;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 35, 126, 0.5);
+        border-radius: 50%;
+        margin-right: 15px;
+        color: #bbdefb;
+      }
+      .criteria-content h3 {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #bbdefb;
+      }
+      .criteria-content p {
+        font-size: 16px;
+        line-height: 1.4;
+      }
+      .achievement-section {
+        background: rgba(66, 165, 245, 0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="slide-container">
+      <h1 class="title">评估标准与成果</h1>
+      
+      <div class="content-container">
+        <div class="left-column">
+          <div class="chart-container">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">评选标准权重</h2>
+            <div style="height: 300px;">
+              <canvas id="criteriaChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="achievement-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">平台成果亮点</h2>
+            <div class="mb-3">
+              <h3 class="text-xl font-bold mb-1 text-bbdefb">技术创新</h3>
+              <p>首创AI Agent驱动的攻防对抗模型，实现攻防双方的智能决策和自主学习</p>
+            </div>
+            <div class="mb-3">
+              <h3 class="text-xl font-bold mb-1 text-bbdefb">实战价值</h3>
+              <p>场景覆盖金融、能源、医疗等关键行业，与真实业务高度贴合</p>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold mb-1 text-bbdefb">人才培养</h3>
+              <p>量化评估体系为网络安全人才培养提供精准画像和发展路径</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="right-column">
+          <div class="chart-container">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">平台评估结果</h2>
+            <div style="height: 300px;">
+              <canvas id="resultsChart"></canvas>
+            </div>
+          </div>
+          
+          <div class="achievement-section">
+            <h2 class="text-2xl font-bold mb-4 text-bbdefb">评估标准详解</h2>
+            
+            <div class="criteria-item">
+              <div class="criteria-icon">
+                <i class="fas fa-check-circle"></i>
+              </div>
+              <div class="criteria-content">
+                <h3>完成度（40%）</h3>
+                <p>动态场景生成、攻击模拟、防御决策、演练评估核心功能的完整性与可用性</p>
+              </div>
+            </div>
+            
+            <div class="criteria-item">
+              <div class="criteria-icon">
+                <i class="fas fa-tools"></i>
+              </div>
+              <div class="criteria-content">
+                <h3>实用性（20%）</h3>
+                <p>已生成靶场支持的业务场景覆盖面、与真实业务的贴合度</p>
+              </div>
+            </div>
+            
+            <div class="criteria-item">
+              <div class="criteria-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <div class="criteria-content">
+                <h3>可靠性（20%）</h3>
+                <p>系统在攻防推演中的稳定性、Agent决策的有效性</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script>
+      // 创建评选标准权重图表
+      const ctxCriteria = document.getElementById('criteriaChart').getContext('2d');
+      const criteriaChart = new Chart(ctxCriteria, {
+        type: 'pie',
+        data: {
+          labels: ['完成度', '实用性', '可靠性', '用户体验', '扩展性'],
+          datasets: [{
+            data: [40, 20, 20, 10, 10],
+            backgroundColor: [
+              '#1a237e',
+              '#0d47a1',
+              '#42a5f5',
+              '#bbdefb',
+              '#e3f2fd'
+            ],
+            borderColor: '#ffffff',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                color: '#ffffff',
+                font: {
+                  size: 14
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return context.label + ': ' + context.raw + '%';
+                }
+              }
+            }
+          }
+        }
+      });
+      
+      // 创建平台评估结果图表
+      const ctxResults = document.getElementById('resultsChart').getContext('2d');
+      const resultsChart = new Chart(ctxResults, {
+        type: 'bar',
+        data: {
+          labels: ['完成度', '实用性', '可靠性', '用户体验', '扩展性', '总分'],
+          datasets: [{
+            label: '评估得分',
+            data: [95, 90, 92, 88, 85, 92],
+            backgroundColor: '#42a5f5',
+            borderColor: '#1a237e',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#ffffff'
+              }
+            },
+            x: {
+              grid: {
+                color: 'rgba(255, 255, 255, 0.1)'
+              },
+              ticks: {
+                color: '#ffffff'
+              }
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+
