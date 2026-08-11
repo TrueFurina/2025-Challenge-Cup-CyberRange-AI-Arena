@@ -1,8 +1,10 @@
-# AI Agent-Driven Dynamic Attack-Defense Cyber Range Platform
+# 2025 Challenge Cup - CyberRange AI Arena
 
-> **中文版说明**：[README.zh.md](README.zh.md)
+LLM Driven Dynamic Offense & Defense Simulation Platform
 
-An AI-Agent-powered cyber range platform for dynamic attack-defense drills, built for the 19th "Challenge Cup" 2025 Hackathon & Decree Board (SH24, proposed by DBAPPSecurity/安恒信息). The platform replaces manual red/blue teams with AI Agents to deliver **dynamic scenario generation, intelligent attack simulation, adaptive defense decisions, and automated drill evaluation**.
+> **中文版说明**: [README.zh.md](README.zh.md)
+
+An AI-Agent-powered cyber range platform for dynamic attack-defense drills, built for the 19th "Challenge Cup" 2025 Hackathon & Decree Board — **co-sponsored by Anheng Security (安恒信息, SH24 proposal)**. The platform replaces manual red/blue teams with AI Agents to deliver **dynamic scenario generation, intelligent attack simulation, adaptive defense decisions, and automated drill evaluation**.
 
 ## ✨ Features
 
