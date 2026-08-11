@@ -1,0 +1,40 @@
+/* 设备表格样式 */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    background-color: transparent;
+}
+
+.data-table th,
+.data-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.data-table th {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: 600;
+    color: var(--heading-color);
+}
+
+.data-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* 表格容器样式 */
+.table-container {
+    background-color: var(--card-background-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px var(--shadow-color);
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+    margin-bottom: 24px;
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>容器靶标 - 网络安全攻防训练平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+
+        <!-- 工具栏 -->
+        <div class="user-management-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索容器靶标...">
+                </div>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">全部状态</option>
+                    <option value="running">运行中</option>
+                    <option value="stopped">已停止</option>
+                    <option value="error">错误</option>
+                </select>
+                <select id="imageFilter" class="filter-select">
+                    <option value="">全部镜像</option>
+                    <option value="nginx">Nginx</option>
+                    <option value="apache">Apache</option>
+                    <option value="mysql">MySQL</option>
+                    <option value="redis">Redis</option>
+                </select>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" id="addContainerBtn">
+                    <i class="fas fa-plus"></i> 创建容器
+                </button>
+                <button class="btn btn-secondary" id="exportContainersBtn">
+                    <i class="fas fa-download"></i> 导出
+                </button>
+            </div>
+        </div>
+
+        <!-- 容器列表 -->
+        <div class="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>容器信息</th>
+                        <th>镜像</th>
+                        <th>端口映射</th>
+                        <th>状态</th>
+                        <th>IP地址</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="containerTableBody">
+                    <!-- 容器数据将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <span>显示 <span id="startItem">1</span> 到 <span id="endItem">10</span> 条，共 <span id="totalItems">0</span> 条记录</span>
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-numbers" id="paginationNumbers">
+                    <!-- 页码将通过JavaScript动态生成 -->
+                </div>
+                <button class="pagination-btn" id="nextPage">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 添加容器模态框 -->
+    <div id="addContainerModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>创建容器靶标</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="addContainerForm">
+                <div class="form-group">
+                    <label for="containerName">容器名称</label>
+                    <input type="text" id="containerName" name="containerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="containerImage">镜像</label>
+                    <select id="containerImage" name="containerImage" required>
+                        <option value="">请选择镜像</option>
+                        <option value="nginx:latest">nginx:latest</option>
+                        <option value="apache:2.4">apache:2.4</option>
+                        <option value="mysql:8.0">mysql:8.0</option>
+                        <option value="redis:6.2">redis:6.2</option>
+                        <option value="dvwa:latest">dvwa:latest</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="containerPort">端口映射</label>
+                    <input type="text" id="containerPort" name="containerPort" placeholder="例如: 8080:80" required>
+                </div>
+                <div class="form-group">
+                    <label for="containerEnv">环境变量</label>
+                    <textarea id="containerEnv" name="containerEnv" rows="3" placeholder="例如: MYSQL_ROOT_PASSWORD=123456"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="containerDescription">描述</label>
+                    <textarea id="containerDescription" name="containerDescription" rows="3" placeholder="请输入容器描述..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddContainerModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">创建容器</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/container-targets.js') }}"></script>
+</body>
+</html>

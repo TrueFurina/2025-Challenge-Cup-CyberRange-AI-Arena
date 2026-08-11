@@ -1,0 +1,166 @@
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 20px;
+}
+
+header h1 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+header h1 .fa-shield {
+    margin-right: 10px;
+    color: #27ae60;
+}
+
+header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    display: flex;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.search-bar input {
+    border: none;
+    padding: 10px;
+    width: 300px;
+    outline: none;
+}
+
+.search-bar button {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 0 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.search-bar button:hover {
+    background-color: #2980b9;
+}
+
+.add-btn {
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+    background-color: #27ae60;
+}
+
+.defense-table-container {
+    overflow-x: auto;
+}
+
+.defense-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.defense-table th, .defense-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.defense-table thead {
+    background-color: #f2f2f2;
+}
+
+.defense-table th {
+    font-weight: bold;
+    color: #333;
+}
+
+.defense-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.actions button {
+    border: none;
+    padding: 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-right: 5px;
+    color: white;
+    font-size: 14px;
+}
+
+.edit-btn {
+    background-color: #f39c12;
+}
+
+.edit-btn:hover {
+    background-color: #e67e22;
+}
+
+.delete-btn {
+    background-color: #e74c3c;
+}
+
+.delete-btn:hover {
+    background-color: #c0392b;
+}
+
+.pagination {
+    text-align: center;
+}
+
+.pagination a {
+    color: #3498db;
+    padding: 8px 16px;
+    text-decoration: none;
+    border: 1px solid #ddd;
+    margin: 0 4px;
+    border-radius: 5px;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.pagination a.active, .pagination a:hover {
+    background-color: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.pagination span {
+    padding: 8px 16px;
+}

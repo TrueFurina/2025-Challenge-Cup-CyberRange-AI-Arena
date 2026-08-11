@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验中心 - 靶场管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/device-tables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/training-scenarios.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/experiment-competition.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 仪表盘 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-content">
+                    <h3 id="completed-experiments">0</h3>
+                    <p>已完成实验</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                <div class="stat-content">
+                    <h3 id="ongoing-experiments">0</h3>
+                    <p>进行中实验</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                <div class="stat-content">
+                    <h3 id="total-credits">0</h3>
+                    <p>累计学分</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-content">
+                    <h3 id="average-score">0</h3>
+                    <p>平均得分</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="filter-left">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索实验名称、类型...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="typeFilter">
+                            <option value="">所有类型</option>
+                            <option value="web-security">Web安全</option>
+                            <option value="system-security">系统安全</option>
+                            <option value="network-security">网络安全</option>
+                            <option value="reverse-engineering">逆向工程</option>
+                        </select>
+                        <select id="difficultyFilter">
+                            <option value="">所有难度</option>
+                            <option value="easy">简单</option>
+                            <option value="medium">中等</option>
+                            <option value="hard">困难</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary" id="createExperimentBtn">
+                        <i class="fas fa-plus"></i>
+                        创建实验
+                    </button>
+                </div>
+            </div>
+
+            <!-- 实验卡片网格 -->
+            <div class="card-grid" id="card-grid">
+                <!-- 动态生成的实验卡片模板 -->
+                <template id="experiment-card-template">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">{{title}}</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-description">{{description}}</p>
+                            <div class="card-meta">
+                                <span><i class="fas fa-tag"></i> 类型: {{type}}</span>
+                                <span><i class="fas fa-fire"></i> 难度: {{difficulty}}</span>
+                            </div>
+                            <div class="card-tags">
+                                {{tags}}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <span class="participants"><i class="fas fa-users"></i> {{participants}} 人参与</span>
+                            <button class="details-btn">查看详情</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- 分页信息 -->
+            <div class="pagination-info">
+                <span>显示第 <span id="startItem">1</span> 到 <span id="endItem">10</span> 项，共 <span id="totalItems">0</span> 项</span>
+            </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='scripts/experiment-center.js') }}"></script>
+</body>
+</html>

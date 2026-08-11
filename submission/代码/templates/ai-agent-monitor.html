@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Agent 决策监控</title>
+  <style>
+    :root {
+      --bg: #0a1128; --panel: #111c33; --ink: #e8ecf3; --muted: #7a8bb0;
+      --accent: #00ff9d; --accent-2: #00b3ff; --line: #233454;
+      --bad: #ff5d5d; --warn: #ffb454;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink); background: radial-gradient(circle at 15% -10%, rgba(0,179,255,0.18), transparent 40%), linear-gradient(180deg, #0d1730 0%, var(--bg) 60%); min-height: 100vh; }
+    .shell { max-width: 1100px; margin: 0 auto; padding: 28px 20px 40px; }
+    h1 { font-size: 30px; margin-bottom: 6px; color: #fff; }
+    .tag { display: inline-block; padding: 6px 10px; border-radius: 999px; background: rgba(0,255,157,0.10); color: var(--accent); font-size: 12px; font-weight: 700; border: 1px solid rgba(0,255,157,0.25); }
+    .lede { color: var(--muted); line-height: 1.7; }
+    .card { background: linear-gradient(180deg, var(--panel) 0%, #0e1830 100%); border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+    .btn { display: inline-block; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 600; border: 1px solid var(--line); color: var(--ink); background: #1a2744; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #06281a; border-color: var(--accent); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px; }
+    th { color: var(--muted); font-size: 12px; text-transform: uppercase; }
+    .agent-row-attack { background: rgba(255,93,93,0.06); }
+    .agent-row-defense { background: rgba(0,255,157,0.06); }
+    .source-llm { color: var(--accent); font-weight: 700; }
+    .source-rules { color: var(--warn); font-weight: 700; }
+    .status { color: var(--warn); margin-top: 10px; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="card">
+    <span class="tag">Agent Monitor</span>
+    <h1>AI Agent 决策监控</h1>
+    <p class="lede">实时查看攻击/防御 Agent 的决策来源（LLM 推理 or 规则兜底）、对抗状态与会话列表。</p>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="refreshAll()">🔄 刷新监控</button>
+      <button class="btn" onclick="evaluateCurrent()">📊 演练评估</button>
+      <a class="btn" href="/ai-arena">⚔️ 前往对抗大屏</a>
+      <a class="btn" href="/">返回首页</a>
+    </div>
+    <div id="statusBar" class="status">加载中...</div>
+  </div>
+  <div class="card">
+    <h2>演练评估报告</h2>
+    <div id="evaluationView"><p class="lede">选择会话后点击"演练评估"，生成量化评估报告（攻击成功率/防御响应/威胁分布）。</p></div>
+  </div>
+  <div class="card">
+    <h2>AI 能力状态</h2>
+    <div id="aiStatus">-</div>
+  </div>
+  <div class="card">
+    <h2>对抗会话列表</h2>
+    <table>
+      <thead><tr><th>会话 ID</th><th>状态</th><th>当前回合</th><th>操作</th></tr></thead>
+      <tbody id="sessionTable"><tr><td colspan="4" class="lede">暂无会话</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<script>
+async function api(url) {
+  const resp = await fetch(url);
+  return resp.json();
+}
+
+async function refreshAll() {
+  const st = document.getElementById('statusBar');
+  st.textContent = '刷新中...';
+  try {
+    const status = await api('/api/ai/status');
+    document.getElementById('aiStatus').innerHTML =
+      `AI 引擎: <span class="${status.ai_enabled ? 'source-llm' : 'source-rules'}">${status.ai_enabled ? '已启用（LLM）' : '未配置 Key（规则兜底）'}</span> | ` +
+      `最大回合数: ${status.max_rounds} | 活动会话: ${status.arena_sessions}`;
+
+    const sessions = await api('/api/ai/sessions');
+    const tbody = document.getElementById('sessionTable');
+    if (!sessions.sessions.length) {
+      tbody.innerHTML = '<tr><td colspan="4" class="lede">暂无会话</td></tr>';
+    } else {
+      tbody.innerHTML = sessions.sessions.map(s =>
+        `<tr>
+          <td>${esc(s.id)}</td>
+          <td>${esc(s.status)}</td>
+          <td>${s.current_round}</td>
+          <td><button class="btn" onclick="viewSession('${s.id}')">查看</button></td>
+        </tr>`
+      ).join('');
+    }
+    st.textContent = '刷新完成';
+  } catch (e) {
+    st.textContent = '刷新失败: ' + e;
+  }
+}
+
+async function viewSession(id) {
+  const data = await api(`/api/ai/session/${id}`);
+  if (data.error) { alert(data.error); return; }
+  let html = '';
+  for (const r of data.rounds) {
+    const a = r.attack_decision || {};
+    const d = r.defense_decision || {};
+    html += `<tr class="agent-row-attack">
+      <td>${esc(a.technique || '-')}</td>
+      <td><span class="${a.source === 'llm' ? 'source-llm' : 'source-rules'}">${esc(a.source || '?')}</span></td>
+      <td>${esc(a.risk_level || '-')}</td>
+      <td rowspan="2">第 ${r.round} 轮</td>
+    </tr>
+    <tr class="agent-row-defense">
+      <td>${esc((d.actions || [])[0]?.action || '-')}</td>
+      <td><span class="${d.source === 'llm' ? 'source-llm' : 'source-rules'}">${esc(d.source || '?')}</span></td>
+      <td>${esc(d.threat_level || '-')}</td>
+    </tr>`;
+  }
+  document.getElementById('sessionTable').innerHTML =
+    `<thead><tr><th>攻击技术</th><th>攻击来源</th><th>风险</th><th>回合</th></tr></thead><tbody>${html}</tbody>`;
+  // 记录当前会话供评估
+  window._currentSessionId = id;
+}
+
+// 阶段 3 C2：演练评估
+async function evaluateCurrent() {
+  const id = window._currentSessionId;
+  if (!id) { alert('请先在会话列表选择一个会话'); return; }
+  const st = document.getElementById('statusBar');
+  st.textContent = '生成评估报告...';
+  const data = await api(`/api/ai/session/${id}/evaluate`);
+  if (data.error) { st.textContent = '评估失败: ' + data.error; return; }
+  renderEvaluation(data);
+  st.textContent = `评估完成: ${data.verdict}（${data.total_rounds} 轮）`;
+}
+
+function renderEvaluation(e) {
+  const box = document.getElementById('evaluationView');
+  const threatRows = Object.entries(e.threat_distribution || {}).map(([lvl, cnt]) =>
+    `<div class="mode-bar">
+      <div class="mode-bar-label"><span>威胁等级 ${esc(lvl)}</span><span>${cnt} 轮</span></div>
+      <div class="mode-bar-track"><div class="mode-bar-fill" style="width:${Math.min(100, cnt / e.total_rounds * 100)}%"></div></div>
+    </div>`
+  ).join('') || '<p class="lede">无威胁分布数据</p>';
+  box.innerHTML = `
+    <div class="stat"><strong>${e.total_rounds}</strong>总回合数</div>
+    <div class="stat"><strong>${e.attack_success_rate}</strong>攻击成功率</div>
+    <div class="stat"><strong>${e.defense_success_rate}</strong>防御成功率</div>
+    <div class="stat"><strong>${e.avg_defense_actions}</strong>平均防御动作</div>
+    <div class="stat"><strong>${esc(e.verdict)}</strong>综合判定</div>
+    <h3>威胁等级分布</h3>
+    ${threatRows}
+    <div class="toolbar" style="margin-top: 10px;">
+      <button class="btn" onclick="exportEvaluation()">导出评估 JSON</button>
+    </div>`;
+  window._currentEvaluation = e;
+}
+
+function exportEvaluation() {
+  const e = window._currentEvaluation;
+  if (!e) { alert('尚无评估数据'); return; }
+  const blob = new Blob([JSON.stringify(e, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `evaluation-${e.session_id}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+refreshAll();
+</script>
+</body>
+</html>

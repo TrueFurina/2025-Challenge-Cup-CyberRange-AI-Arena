@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>权限管理 - 网络安全攻防训练平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+
+        <!-- 权限管理工具栏 -->
+        <div class="user-management-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索权限..." id="permissionSearchInput">
+                </div>
+                <div class="filter-dropdown">
+                    <select id="moduleFilter">
+                        <option value="all">所有模块</option>
+                        <option value="user">用户管理</option>
+                        <option value="target">靶标管理</option>
+                        <option value="training">训练场景</option>
+                        <option value="system">系统管理</option>
+                    </select>
+                </div>
+                <div class="filter-dropdown">
+                    <select id="permissionTypeFilter">
+                        <option value="all">所有类型</option>
+                        <option value="read">查看</option>
+                        <option value="write">编辑</option>
+                        <option value="delete">删除</option>
+                        <option value="admin">管理</option>
+                    </select>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn-primary" onclick="openAddPermissionModal()">
+                    <i class="fas fa-plus"></i>
+                    添加权限
+                </button>
+                <button class="btn-secondary" onclick="exportPermissions()">
+                    <i class="fas fa-download"></i>
+                    导出
+                </button>
+            </div>
+        </div>
+
+        <!-- 权限树形结构 -->
+        <div class="permission-tree-container">
+            <div class="permission-module">
+                <div class="module-header" onclick="toggleModule('user-module')">
+                    <i class="fas fa-chevron-down module-arrow"></i>
+                    <i class="fas fa-users module-icon"></i>
+                    <span class="module-name">用户管理</span>
+                    <span class="permission-count">(8个权限)</span>
+                </div>
+                <div class="module-permissions" id="user-module">
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-eye permission-icon read"></i>
+                            <div class="permission-details">
+                                <h4>查看用户列表</h4>
+                                <p>user.list.view</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type read">查看</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('user.list.view')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('user.list.view')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-plus permission-icon write"></i>
+                            <div class="permission-details">
+                                <h4>创建用户</h4>
+                                <p>user.create</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type write">编辑</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('user.create')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('user.create')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-edit permission-icon write"></i>
+                            <div class="permission-details">
+                                <h4>编辑用户信息</h4>
+                                <p>user.edit</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type write">编辑</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('user.edit')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('user.edit')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-trash permission-icon delete"></i>
+                            <div class="permission-details">
+                                <h4>删除用户</h4>
+                                <p>user.delete</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type delete">删除</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('user.delete')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('user.delete')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="permission-module">
+                <div class="module-header" onclick="toggleModule('target-module')">
+                    <i class="fas fa-chevron-down module-arrow"></i>
+                    <i class="fas fa-bullseye module-icon"></i>
+                    <span class="module-name">靶标管理</span>
+                    <span class="permission-count">(6个权限)</span>
+                </div>
+                <div class="module-permissions" id="target-module">
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-eye permission-icon read"></i>
+                            <div class="permission-details">
+                                <h4>查看靶标列表</h4>
+                                <p>target.list.view</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type read">查看</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('target.list.view')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('target.list.view')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-plus permission-icon write"></i>
+                            <div class="permission-details">
+                                <h4>创建靶标</h4>
+                                <p>target.create</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type write">编辑</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('target.create')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('target.create')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="permission-module">
+                <div class="module-header" onclick="toggleModule('training-module')">
+                    <i class="fas fa-chevron-down module-arrow"></i>
+                    <i class="fas fa-graduation-cap module-icon"></i>
+                    <span class="module-name">训练场景管理</span>
+                    <span class="permission-count">(10个权限)</span>
+                </div>
+                <div class="module-permissions" id="training-module">
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-eye permission-icon read"></i>
+                            <div class="permission-details">
+                                <h4>查看训练场景</h4>
+                                <p>training.list.view</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type read">查看</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('training.list.view')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('training.list.view')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-plus permission-icon write"></i>
+                            <div class="permission-details">
+                                <h4>创建训练场景</h4>
+                                <p>training.create</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type write">编辑</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('training.create')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('training.create')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="permission-module">
+                <div class="module-header" onclick="toggleModule('system-module')">
+                    <i class="fas fa-chevron-down module-arrow"></i>
+                    <i class="fas fa-cog module-icon"></i>
+                    <span class="module-name">系统管理</span>
+                    <span class="permission-count">(5个权限)</span>
+                </div>
+                <div class="module-permissions" id="system-module">
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-cog permission-icon admin"></i>
+                            <div class="permission-details">
+                                <h4>系统配置</h4>
+                                <p>system.config</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type admin">管理</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('system.config')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('system.config')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="permission-item">
+                        <div class="permission-info">
+                            <i class="fas fa-chart-bar permission-icon read"></i>
+                            <div class="permission-details">
+                                <h4>查看系统日志</h4>
+                                <p>system.logs.view</p>
+                            </div>
+                        </div>
+                        <div class="permission-actions">
+                            <span class="permission-type read">查看</span>
+                            <button class="btn-icon" title="编辑" onclick="editPermission('system.logs.view')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon danger" title="删除" onclick="deletePermission('system.logs.view')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 添加权限模态框 -->
+    <div id="addPermissionModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加新权限</h3>
+                <button class="modal-close" onclick="closeAddPermissionModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="addPermissionForm">
+                <div class="form-group">
+                    <label for="permissionName">权限名称 *</label>
+                    <input type="text" id="permissionName" name="permissionName" required>
+                </div>
+                <div class="form-group">
+                    <label for="permissionCode">权限代码 *</label>
+                    <input type="text" id="permissionCode" name="permissionCode" required placeholder="例如: user.create">
+                </div>
+                <div class="form-group">
+                    <label for="permissionModule">所属模块</label>
+                    <select id="permissionModule" name="permissionModule">
+                        <option value="user">用户管理</option>
+                        <option value="target">靶标管理</option>
+                        <option value="training">训练场景</option>
+                        <option value="system">系统管理</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="permissionType">权限类型</label>
+                    <select id="permissionType" name="permissionType">
+                        <option value="read">查看</option>
+                        <option value="write">编辑</option>
+                        <option value="delete">删除</option>
+                        <option value="admin">管理</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="permissionDescription">权限描述</label>
+                    <textarea id="permissionDescription" name="permissionDescription" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeAddPermissionModal()">取消</button>
+                    <button type="submit" class="btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="components/sidebar.js"></script>
+    <script src="scripts/permission-management.js"></script>
+    <script src="{{ url_for('static', filename='scripts/permission-management.js') }}"></script>
+</body>
+</html>

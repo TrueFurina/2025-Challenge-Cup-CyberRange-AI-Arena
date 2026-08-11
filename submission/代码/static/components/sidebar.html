@@ -1,0 +1,37 @@
+<!-- 侧边导航栏组件 -->
+<nav class="sidebar" style="margin: 0; padding: 0; border: none; outline: none; background-color: #2c3e50; color: #fff; box-sizing: border-box; width: 250px; position: absolute; top: 0; left: 0; z-index: 1001; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+    <ul class="sidebar-menu" style="padding-top: 10px;">
+        <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> 仪表板</a></li>
+        <li data-page="experiment-center"><a href="experiment-center.html"><i class="fas fa-flask"></i> 实验中心</a></li>
+        <li class="has-submenu" data-menu="user-management">
+            <a href="#" class="submenu-toggle"><i class="fas fa-users"></i> 用户管理 <i class="fas fa-chevron-down submenu-arrow"></i></a>
+            <ul class="submenu">
+                <li data-page="user-management"><a href="user-management.html"><i class="fas fa-user"></i> 用户管理</a></li>
+                <li data-page="role-management"><a href="role-management.html"><i class="fas fa-user-tag"></i> 角色管理</a></li>
+                <li data-page="permission-management"><a href="permission-management.html"><i class="fas fa-key"></i> 权限管理</a></li>
+            </ul>
+        </li>
+        <li class="has-submenu" data-menu="target-management">
+            <a href="#" class="submenu-toggle"><i class="fas fa-server"></i> 靶材管理 <i class="fas fa-chevron-down submenu-arrow"></i></a>
+            <ul class="submenu">
+                <li data-page="vm-targets"><a href="vm-targets.html"><i class="fas fa-desktop"></i> 虚拟机靶材</a></li>
+                <li data-page="container-targets"><a href="container-targets.html"><i class="fas fa-cube"></i> 容器靶标</a></li>
+                <li data-page="network-devices"><a href="network-devices.html"><i class="fas fa-network-wired"></i> 网络设备</a></li>
+                <li data-page="security-devices"><a href="security-devices.html"><i class="fas fa-shield-alt"></i> 安全设备</a></li>
+            </ul>
+        </li>
+        <li data-page="training-scenarios"><a href="training-scenarios.html"><i class="fas fa-graduation-cap"></i> 训练场景管理</a></li>
+        <li data-page="competition-center"><a href="competition-center.html"><i class="fas fa-trophy"></i> 竞赛中心</a></li>
+        <li class="has-submenu" data-menu="confrontation-management">
+            <a href="#" class="submenu-toggle"><i class="fas fa-chess"></i> 对抗管理 <i class="fas fa-chevron-down submenu-arrow"></i></a>
+            <ul class="submenu">
+                <li data-page="attack-library"><a href="attack-library.html"><i class="fas fa-sword"></i> 攻击决策库</a></li>
+                <li data-page="defense-library"><a href="defense-library.html"><i class="fas fa-shield"></i> 防御决策库</a></li>
+            </ul>
+        </li>
+        <li><a href="tool-library.html"><i class="fas fa-toolbox"></i> 工具库</a></li>
+        <li><a href="case-library.html"><i class="fas fa-folder-open"></i> 案例库</a></li>
+        <li><a href="vulnerability-library.html"><i class="fas fa-bug"></i> 漏洞库</a></li>
+        <li><a href="operations-management.html"><i class="fas fa-cogs"></i> 运维管理</a></li>
+    </ul>
+</nav>

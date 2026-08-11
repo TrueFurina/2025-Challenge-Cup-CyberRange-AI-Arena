@@ -1,0 +1,364 @@
+body {
+    background-color: #f5f5f5;
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 20px auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+header h1 {
+    color: #2c3e50;
+    font-size: 2em;
+    margin-bottom: 5px;
+}
+
+header h1 .fa-cogs {
+    margin-right: 10px;
+    color: #34495e;
+}
+
+header p {
+    color: #7f8c8d;
+    font-size: 1.1em;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #2c3e50;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+}
+
+.card h2 i {
+    margin-right: 10px;
+}
+
+/* System Status Card */
+.system-status .status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.system-status .status-item:last-child {
+    border-bottom: none;
+}
+
+.status-ok, .status-warning, .status-error {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.9em;
+}
+
+.status-ok {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-warning {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.status-error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+/* Quick Actions Card */
+.quick-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.quick-actions button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1em;
+    transition: background-color 0.2s;
+}
+
+.quick-actions button:hover {
+    background-color: #2980b9;
+}
+
+.quick-actions button i {
+    margin-right: 10px;
+}
+
+/* Logs Card */
+.logs .log-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.log-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    font-size: 0.9em;
+}
+
+.log-time {
+    color: #7f8c8d;
+    margin-right: 10px;
+    min-width: 130px;
+}
+
+.log-level {
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-right: 10px;
+    font-size: 0.8em;
+}
+
+.log-level.info {
+    background-color: #e3f2fd;
+    color: #1565c0;
+}
+
+.log-level.warn {
+    background-color: #fff3e0;
+    color: #ef6c00;
+}
+
+.log-level.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.log-message {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.view-all-logs {
+    display: block;
+    text-align: right;
+    color: #3498db;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.view-all-logs:hover {
+    text-decoration: underline;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 15px 0;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+    
+    .resource-usage .progress-bar {
+        height: 6px;
+    }
+    
+    .system-logs .log-entry {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .log-timestamp {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        padding: 12px;
+    }
+    
+    .card h2 {
+        font-size: 1.1rem;
+    }
+    
+    .action-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .status-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .metric-value {
+        font-size: 1.5rem;
+    }
+}
+
+/* 加载状态和错误状态 */
+.card.loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.card.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent
+    );
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.error-message {
+    color: #dc3545;
+    text-align: center;
+    padding: 20px;
+    font-style: italic;
+}
+
+.retry-button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.retry-button:hover {
+    background: #0056b3;
+}
+
+/* 无障碍支持 */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* 焦点可见性 */
+.action-btn:focus,
+.retry-button:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+}
+
+/* 高对比度模式 */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+    
+    .action-btn {
+        border: 2px solid #000;
+    }
+    
+    .progress-bar {
+        border: 1px solid #000;
+    }
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+    .card.loading::before {
+        animation: none;
+    }
+    
+    .progress-bar {
+        transition: none;
+    }
+}

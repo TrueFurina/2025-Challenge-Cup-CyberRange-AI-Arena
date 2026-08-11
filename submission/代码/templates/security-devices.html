@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全设备管理 - 靶场管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/device-tables.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="搜索设备名称、IP地址、类型...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="typeFilter">
+                            <option value="">所有类型</option>
+                            <option value="ids">入侵检测系统</option>
+                            <option value="ips">入侵防护系统</option>
+                            <option value="waf">Web应用防火墙</option>
+                            <option value="honeypot">蜜罐系统</option>
+                            <option value="antivirus">防病毒网关</option>
+                        </select>
+                        <select id="statusFilter">
+                            <option value="">所有状态</option>
+                            <option value="active">活跃</option>
+                            <option value="inactive">非活跃</option>
+                            <option value="alert">告警</option>
+                            <option value="maintenance">维护中</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary" id="addDeviceBtn">
+                        <i class="fas fa-plus"></i>
+                        添加设备
+                    </button>
+                </div>
+            </div>
+
+            <!-- 设备表格 -->
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" id="selectAll"></th>
+                            <th>设备信息</th>
+                            <th>类型</th>
+                            <th>IP地址</th>
+                            <th>状态</th>
+                            <th>威胁等级</th>
+                            <th>最后检测</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deviceTableBody">
+                        <!-- 动态生成的设备行 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 分页信息 -->
+            <div class="pagination-info">
+                <span>显示第 <span id="startItem">1</span> 到 <span id="endItem">10</span> 项，共 <span id="totalItems">0</span> 项</span>
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加安全设备模态框 -->
+    <div id="addDeviceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加安全设备</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="addDeviceForm">
+                <div class="form-group">
+                    <label for="deviceName">设备名称</label>
+                    <input type="text" id="deviceName" name="deviceName" required>
+                </div>
+                <div class="form-group">
+                    <label for="deviceType">设备类型</label>
+                    <select id="deviceType" name="deviceType" required>
+                        <option value="">请选择设备类型</option>
+                        <option value="ids">入侵检测系统</option>
+                        <option value="ips">入侵防护系统</option>
+                        <option value="waf">Web应用防火墙</option>
+                        <option value="honeypot">蜜罐系统</option>
+                        <option value="antivirus">防病毒网关</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="deviceVendor">厂商</label>
+                    <input type="text" id="deviceVendor" name="deviceVendor" required placeholder="如：Snort、Suricata、ModSecurity">
+                </div>
+                <div class="form-group">
+                    <label for="deviceIP">IP地址</label>
+                    <input type="text" id="deviceIP" name="deviceIP" required placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label for="devicePort">监听端口</label>
+                    <input type="text" id="devicePort" name="devicePort" placeholder="80,443,8080">
+                </div>
+                <div class="form-group">
+                    <label for="deviceLocation">部署位置</label>
+                    <input type="text" id="deviceLocation" name="deviceLocation" placeholder="DMZ区域、内网边界">
+                </div>
+                <div class="form-group">
+                    <label for="deviceDescription">设备描述</label>
+                    <textarea id="deviceDescription" name="deviceDescription" rows="3" placeholder="设备功能和配置说明"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddDeviceModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">添加设备</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/security-devices.js') }}"></script>
+</body>
+</html>

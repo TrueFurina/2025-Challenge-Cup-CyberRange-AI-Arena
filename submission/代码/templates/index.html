@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI靶场系统</title>
+    <link rel="preconnect" href="https://fonts.font.im">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.font.im/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ui-components.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI靶场系统</h1>
+            <p class="subtitle">人工智能安全实训平台</p>
+        </div>
+        
+        <div class="login-options">
+            <div class="login-card admin-card">
+                <div class="card-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 4L13.5 7H7V9H13.5L15 12L21 9ZM16 13C16 15.2 14.2 17 12 17S8 15.2 8 13H6C6 16.3 8.7 19 12 19S18 16.3 18 13H16Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h3>管理员登录</h3>
+                <p>系统管理、用户管理、课程配置</p>
+                <button onclick="location.href='{{ url_for('show_page', page_name='admin-login') }}';" class="login-btn admin-btn">
+
+                    进入管理后台
+                </button>
+            </div>
+            
+            <div class="login-card student-card">
+                <div class="card-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L1 9L12 15L21 10.09V17H23V9M5 13.18V17.18L12 21L19 17.18V13.18L12 17L5 13.18Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h3>学员登录</h3>
+                <p>参与实训、完成挑战、查看进度</p>
+                <button onclick="location.href='{{ url_for('show_page', page_name='student-login') }}';" class="login-btn student-btn">
+                    开始学习
+                </button>
+            </div>
+        </div>
+        
+        <div class="footer">
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='scripts/ui-utils.js') }}"></script>
+</body>
+</html>

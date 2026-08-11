@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>训练场景管理 - 靶场管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/device-tables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/training-scenarios.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 工具栏 -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索场景名称、类型、难度...">
+                </div>
+                <div class="filter-group">
+                    <select id="typeFilter">
+                        <option value="">所有类型</option>
+                        <option value="penetration">渗透测试</option>
+                        <option value="defense">防御演练</option>
+                        <option value="forensics">取证分析</option>
+                        <option value="ctf">CTF竞赛</option>
+                    </select>
+                    <select id="difficultyFilter">
+                        <option value="">所有难度</option>
+                        <option value="beginner">初级</option>
+                        <option value="intermediate">中级</option>
+                        <option value="advanced">高级</option>
+                        <option value="expert">专家</option>
+                    </select>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" id="addScenarioBtn">
+                    <i class="fas fa-plus"></i>
+                    创建场景
+                </button>
+            </div>
+        </div>
+
+        <!-- 场景表格 -->
+        <div class="table-container">
+            <table class="data-table" id="scenarioTable">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>场景信息</th>
+                        <th>类型</th>
+                        <th>难度</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>最后修改</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="scenarioTableBody">
+                    <!-- 动态生成的场景行 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页信息 -->
+        <div class="pagination-info">
+            <span>显示第 <span id="startItem">1</span> 到 <span id="endItem">10</span> 项，共 <span id="totalItems">0</span> 项</span>
+        </div>
+    </main>
+
+    <!-- 场景创建模式选择模态框 -->
+    <div id="scenarioModeModal" class="modal">
+        <div class="modal-content modal-md">
+            <div class="modal-header">
+                <h2>选择创建模式</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="mode-selection">
+                    <div class="mode-option" id="manualModeOption">
+                        <div class="mode-icon">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <div class="mode-content">
+                            <h3>手动创建场景</h3>
+                            <p>通过表单填写和拖拽设计，手动创建训练场景</p>
+                            <ul>
+                                <li>完全自定义场景参数</li>
+                                <li>可视化拓扑设计</li>
+                                <li>精确控制每个细节</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-primary mode-btn">选择此模式</button>
+                    </div>
+                    <div class="mode-option" id="aiModeOption">
+                        <div class="mode-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="mode-content">
+                            <h3>智能动态场景</h3>
+                            <p>通过AI聊天对话，智能解析需求并自动生成场景</p>
+                            <ul>
+                                <li>自然语言描述需求</li>
+                                <li>AI智能理解意图</li>
+                                <li>自动生成场景配置</li>
+                            </ul>
+                        </div>
+                        <button class="btn btn-success mode-btn">选择此模式</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加场景模态框 -->
+    <div id="addScenarioModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2>创建训练场景</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <!-- 步骤指示器 -->
+                <div class="step-indicator">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-title">基本信息</div>
+                    </div>
+                    <div class="step-connector"></div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-title">拓扑设计</div>
+                    </div>
+                </div>
+                
+                <!-- 步骤内容 -->
+                <div class="step-content">
+                    <!-- 步骤1：基本信息 -->
+                    <div class="step-pane active" id="step1">
+                        <form id="scenarioInfoForm">
+                            <div class="form-group">
+                                <label for="scenarioName">场景名称</label>
+                                    <input type="text" id="scenarioName" name="scenarioName">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="scenarioType">场景类型</label>
+                                    <select id="scenarioType" name="scenarioType">
+                                        <option value="">请选择类型</option>
+                                        <option value="penetration">渗透测试</option>
+                                        <option value="defense">防御演练</option>
+                                        <option value="forensics">取证分析</option>
+                                        <option value="ctf">CTF竞赛</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scenarioDifficulty">难度级别</label>
+                                    <select id="scenarioDifficulty" name="scenarioDifficulty">
+                                        <option value="">请选择难度</option>
+                                        <option value="beginner">初级</option>
+                                        <option value="intermediate">中级</option>
+                                        <option value="advanced">高级</option>
+                                        <option value="expert">专家</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="scenarioDescription">场景描述</label>
+                                    <textarea id="scenarioDescription" name="scenarioDescription" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="scenarioObjectives">训练目标</label>
+                                    <textarea id="scenarioObjectives" name="scenarioObjectives" rows="3"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="scenarioPrerequisites">前置条件</label>
+                                <textarea id="scenarioPrerequisites" name="scenarioPrerequisites" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="estimatedTime">预计完成时间（分钟）</label>
+                                <input type="number" id="estimatedTime" name="estimatedTime" min="10" max="480">
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <!-- 步骤2：拓扑设计 -->
+                    <div class="step-pane" id="step2">
+                        <!-- 连线规则面板 -->
+                        <div class="connection-rules-panel connection-rules-top">
+                            <div class="panel-header">
+                                <h4><i class="fas fa-link"></i> 连线规则</h4>
+                                <button type="button" class="toggle-rules-btn" id="toggleRulesBtn">
+                                    <i class="fas fa-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="panel-body" id="connectionRulesContent">
+                                <div class="rules-horizontal">
+                                    <div class="rule-group">
+                                        <span class="group-title">网络设备:</span>
+                                        <span class="device-rule"><i class="fas fa-network-wired"></i>路由器→交换机/防火墙/服务器/PC/攻击设备/靶标</span>
+                                        <span class="device-rule"><i class="fas fa-project-diagram"></i>交换机→路由器/防火墙/服务器/终端/攻击设备/靶标</span>
+                                        <span class="device-rule"><i class="fas fa-shield-alt"></i>防火墙→路由器/交换机/服务器/靶标</span>
+                                        <span class="device-rule"><i class="fas fa-wifi"></i>无线AP→路由器/交换机/PC/移动设备/IoT/攻击设备</span>
+                                    </div>
+                                    <div class="rule-group">
+                                        <span class="group-title">服务器:</span>
+                                        <span class="device-rule"><i class="fas fa-server"></i>Web服务器→网络设备/数据库/靶标</span>
+                                        <span class="device-rule"><i class="fas fa-database"></i>数据库→网络设备/Web服务器/靶标</span>
+                                    </div>
+                                    <div class="rule-group">
+                                        <span class="group-title">其他:</span>
+                                        <span class="device-rule"><i class="fas fa-skull"></i>攻击设备→网络设备/服务器/靶标</span>
+                                        <span class="device-rule"><i class="fas fa-bug"></i>漏洞靶标→所有设备类型</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="topology-container">
+                            <div class="topology-sidebar">
+                                <h3>靶标库</h3>
+                                <div class="target-category">
+                                    <h4>网络设备</h4>
+                                    <div class="target-list-draggable">
+                                        <div class="target-item-draggable" draggable="true" data-target-type="router" data-target-id="router1">
+                                            <i class="fas fa-network-wired"></i>
+                                            <span>路由器</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="switch" data-target-id="switch1">
+                                            <i class="fas fa-project-diagram"></i>
+                                            <span>交换机</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="firewall" data-target-id="firewall1">
+                                            <i class="fas fa-shield-alt"></i>
+                                            <span>防火墙</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="wireless-ap" data-target-id="ap1">
+                                            <i class="fas fa-wifi"></i>
+                                            <span>无线AP</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="load-balancer" data-target-id="lb1">
+                                            <i class="fas fa-random"></i>
+                                            <span>负载均衡器</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="target-category">
+                                    <h4>漏洞靶标</h4>
+                                    <div class="target-list-draggable">
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="sql-injection">
+                                            <i class="fas fa-bug"></i>
+                                            <span>SQL注入靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="xss">
+                                            <i class="fas fa-bug"></i>
+                                            <span>XSS跨站靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="rce">
+                                            <i class="fas fa-bug"></i>
+                                            <span>远程代码执行靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="file-upload">
+                                            <i class="fas fa-bug"></i>
+                                            <span>文件上传靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="csrf">
+                                            <i class="fas fa-bug"></i>
+                                            <span>CSRF靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="ssrf">
+                                            <i class="fas fa-bug"></i>
+                                            <span>SSRF靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="xxe">
+                                            <i class="fas fa-bug"></i>
+                                            <span>XXE靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="deserialization">
+                                            <i class="fas fa-bug"></i>
+                                            <span>反序列化靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="command-injection">
+                                            <i class="fas fa-bug"></i>
+                                            <span>命令注入靶标</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="vuln" data-target-id="path-traversal">
+                                            <i class="fas fa-bug"></i>
+                                            <span>路径遍历靶标</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="target-category">
+                                    <h4>攻击设备</h4>
+                                    <div class="target-list-draggable">
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="kali">
+                                            <i class="fas fa-skull"></i>
+                                            <span>Kali Linux (Nmap, Metasploit)</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="parrot">
+                                            <i class="fas fa-skull"></i>
+                                            <span>Parrot OS (Hydra, SQLmap)</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="blackarch">
+                                            <i class="fas fa-skull"></i>
+                                            <span>BlackArch (Burp Suite, Wireshark)</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="pentoo">
+                                            <i class="fas fa-skull"></i>
+                                            <span>Pentoo (Aircrack-ng, Kismet)</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="backbox">
+                                            <i class="fas fa-skull"></i>
+                                            <span>BackBox (OWASP ZAP, Nikto)</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="attack" data-target-id="deft">
+                                            <i class="fas fa-skull"></i>
+                                            <span>DEFT Linux (Autopsy, Volatility)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="target-category">
+                                    <h4>服务器</h4>
+                                    <div class="target-list-draggable">
+                                        <div class="target-item-draggable" draggable="true" data-target-type="webserver" data-target-id="webserver1">
+                                            <i class="fas fa-server"></i>
+                                            <span>Web服务器</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="database" data-target-id="database1">
+                                            <i class="fas fa-database"></i>
+                                            <span>数据库服务器</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="fileserver" data-target-id="fileserver1">
+                                            <i class="fas fa-folder"></i>
+                                            <span>文件服务器</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="target-category">
+                                    <h4>终端设备</h4>
+                                    <div class="target-list-draggable">
+                                        <div class="target-item-draggable" draggable="true" data-target-type="pc" data-target-id="pc1">
+                                            <i class="fas fa-desktop"></i>
+                                            <span>PC</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="iot" data-target-id="iot1">
+                                            <i class="fas fa-microchip"></i>
+                                            <span>IoT设备</span>
+                                        </div>
+                                        <div class="target-item-draggable" draggable="true" data-target-type="mobile" data-target-id="mobile1">
+                                            <i class="fas fa-mobile-alt"></i>
+                                            <span>移动设备</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="topology-canvas">
+                                <div class="topology-main">
+                                    <div id="topology-dropzone">
+                                        <div class="dropzone-placeholder">
+                                            <i class="fas fa-plus-circle"></i>
+                                            <p>拖拽靶标到此处创建拓扑</p>
+                                        </div>
+                                    </div>
+                                    <div class="topology-controls">
+                                        <button type="button" class="btn btn-sm btn-outline" id="clearTopologyBtn">
+                                            <i class="fas fa-trash"></i> 清空
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline" id="autoLayoutBtn">
+                                            <i class="fas fa-magic"></i> 自动布局
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- 节点属性面板 -->
+                                <div id="node-properties-panel" class="node-properties-panel" style="display: none;">
+                                    <div class="panel-header">
+                                        <h4>节点属性</h4>
+                                        <button type="button" class="close-panel-btn">&times;</button>
+                                    </div>
+                                    <div class="panel-body">
+                                        <div class="form-group">
+                                            <label for="node-name">名称</label>
+                                            <input type="text" id="node-name" class="form-control">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="node-ip">IP地址</label>
+                                            <input type="text" id="node-ip" class="form-control" placeholder="例如：192.168.1.1">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="node-description">描述</label>
+                                            <textarea id="node-description" class="form-control" rows="3"></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="node-os">操作系统</label>
+                                            <select id="node-os" class="form-control">
+                                                <option value="">请选择</option>
+                                                <option value="windows">Windows</option>
+                                                <option value="linux">Linux</option>
+                                                <option value="macos">macOS</option>
+                                                <option value="other">其他</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="node-services">开放服务</label>
+                                            <input type="text" id="node-services" class="form-control" placeholder="例如：HTTP, SSH, FTP">
+                                        </div>
+                                    </div>
+                                    <div class="panel-footer">
+                                        <button type="button" class="btn btn-primary" id="save-node-properties">保存</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelAddBtn">取消</button>
+                <button type="button" class="btn btn-secondary" id="prevStepBtn" style="display: none;">上一步</button>
+                <button type="button" class="btn btn-primary" id="nextStepBtn">下一步</button>
+                <button type="button" class="btn btn-success" id="createScenarioBtn" style="display: none;">创建场景</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI智能创建场景模态框 -->
+    <div id="aiScenarioModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2><i class="fas fa-robot"></i> AI智能场景创建</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="ai-chat-container">
+                    <div class="chat-header">
+                        <div class="ai-avatar">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="ai-info">
+                            <h4>AI场景助手</h4>
+                            <p>我将帮助您创建个性化的训练场景，请描述您的需求</p>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            <div class="message-avatar">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="message-content">
+                                <p>您好！我是AI场景助手。请告诉我您想要创建什么类型的训练场景？</p>
+                                <p>您可以描述：</p>
+                                <ul>
+                                    <li>场景类型（渗透测试、防御演练、取证分析等）</li>
+                                    <li>难度级别（初级、中级、高级、专家）</li>
+                                    <li>具体的训练目标和技能要求</li>
+                                    <li>需要的设备和环境配置</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-input-container">
+                        <div class="chat-input-wrapper">
+                            <textarea id="chatInput" placeholder="请描述您想要创建的训练场景..." rows="3"></textarea>
+                            <button id="sendMessageBtn" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <div class="chat-suggestions">
+                            <span class="suggestion-label">快速开始：</span>
+                            <button class="suggestion-btn" data-suggestion="我想创建一个Web渗透测试的初级场景">Web渗透测试</button>
+                            <button class="suggestion-btn" data-suggestion="帮我设计一个网络防御演练的中级场景">网络防御演练</button>
+                            <button class="suggestion-btn" data-suggestion="我需要一个数字取证分析的高级场景">数字取证分析</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="ai-generated-scenario" id="aiGeneratedScenario" style="display: none;">
+                    <h4><i class="fas fa-magic"></i> AI生成的场景配置</h4>
+                    <div class="scenario-preview" id="scenarioPreview">
+                        <!-- AI生成的场景内容将在这里显示 -->
+                    </div>
+                    <div class="scenario-actions">
+                        <button class="btn btn-success" id="acceptScenarioBtn">
+                            <i class="fas fa-check"></i> 接受并创建
+                        </button>
+                        <button class="btn btn-secondary" id="modifyScenarioBtn">
+                            <i class="fas fa-edit"></i> 继续优化
+                        </button>
+                        <button class="btn btn-outline" id="regenerateScenarioBtn">
+                            <i class="fas fa-redo"></i> 重新生成
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 场景详情模态框 -->
+    <div id="scenarioDetailModal" class="modal">
+        <div class="modal-content modal-lg">
+            <div class="modal-header">
+                <h2 id="detailTitle">场景详情</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="detail-container">
+                    <div class="detail-header">
+                        <div class="detail-title">
+                            <h3 id="detailName"></h3>
+                            <div class="detail-badges">
+                                <span id="detailType" class="scenario-type-badge"></span>
+                                <span id="detailDifficulty" class="difficulty-badge"></span>
+                                <span id="detailStatus" class="status-badge"></span>
+                            </div>
+                        </div>
+                        <div class="detail-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>创建于：<span id="detailCreated"></span></span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>预计时间：<span id="detailTime"></span>分钟</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-edit"></i>
+                                <span>最后修改：<span id="detailModified"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-content">
+                        <div class="detail-section">
+                            <h4>场景描述</h4>
+                            <p id="detailDescription"></p>
+                        </div>
+                        <div class="detail-section">
+                            <h4>训练目标</h4>
+                            <div id="detailObjectives"></div>
+                        </div>
+                        <div class="detail-section">
+                            <h4>前置条件</h4>
+                            <div id="detailPrerequisites"></div>
+                        </div>
+                        <div class="detail-section">
+                            <h4>包含靶标</h4>
+                            <div id="detailTargets" class="target-list"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="closeDetailBtn">关闭</button>
+                <button type="button" class="btn btn-primary" id="editScenarioBtn">编辑场景</button>
+                <button type="button" class="btn btn-success" id="deployScenarioBtn">部署场景</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='components/sidebar.js') }}"></script>
+    <!-- 引入模块化的JavaScript文件 -->
+    <script src="{{ url_for('static', filename='scripts/training-scenarios-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/training-scenarios-core.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/training-scenarios-form.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/training-scenarios-topology.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/training-scenarios-properties.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/ai-scenario-creator.js') }}"></script>
+    
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initUtils();
+            initTopology();
+            initNodePropertiesPanel();
+        });
+    </script>
+</body>
+</html>

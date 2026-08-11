@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>竞赛中心 - 靶场管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/device-tables.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/training-scenarios.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/experiment-competition.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+        <!-- 仪表盘 -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                <div class="stat-content">
+                    <h3 id="completed-competitions">0</h3>
+                    <p>竞赛总数</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-users"></i></div>
+                <div class="stat-content">
+                    <h3 id="ongoing-competitions">0</h3>
+                    <p>平均参与人数</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-award"></i></div>
+                <div class="stat-content">
+                    <h3 id="total-honors">0</h3>
+                    <p>获得荣誉</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                <div class="stat-content">
+                    <h3 id="best-rank">N/A</h3>
+                    <p>最高排名</p>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+        <!-- 工具栏 -->
+        <div class="toolbar">
+                            <div class="filter-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索竞赛名称、类型...">
+                </div>
+                <div class="filter-group">
+                    <select id="typeFilter">
+                        <option value="">所有类型</option>
+                        <option value="1">团队赛</option>
+                        <option value="2">个人赛</option>
+                        <option value="3">解题赛</option>
+                        <option value="4">攻防赛</option>
+                    </select>
+
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" id="createCompetitionBtn">
+                    <i class="fas fa-plus"></i>
+                    创建竞赛
+                </button>
+            </div>
+        </div>
+
+        <!-- 竞赛卡片网格 -->
+        <div class="card-grid" id="card-grid">
+            <!-- 动态生成的竞赛卡片模板 -->
+            <template id="competition-card-template">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">{{title}}</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-description">{{description}}</p>
+                        <div class="card-meta">
+                            <span><i class="fas fa-trophy"></i> 类型: {{type}}</span>
+                        </div>
+                        <div class="card-tags">
+                            {{tags}}
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <span class="participants"><i class="fas fa-users"></i> {{participants}} 人参与</span>
+                        <button class="details-btn">查看详情</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- 分页信息 -->
+        <div class="pagination-info">
+            <span>显示第 <span id="startItem">1</span> 到 <span id="endItem">10</span> 项，共 <span id="totalItems">0</span> 项</span>
+        </div>
+        </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='scripts/competition-center.js') }}"></script>
+</body>
+</html>

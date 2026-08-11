@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户体验演示 - AI靶场系统</title>
+    <link rel="preconnect" href="https://fonts.font.im">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.font.im/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ui-components.css') }}">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .demo-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .demo-section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .demo-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .demo-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-btn.primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .demo-btn.success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .demo-btn.warning {
+            background: #f39c12;
+            color: white;
+        }
+        
+        .demo-btn.danger {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .demo-form {
+            max-width: 400px;
+            margin: 20px 0;
+        }
+        
+        .demo-form .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .demo-form label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .demo-form input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .demo-form input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .skeleton-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .skeleton-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #eee;
+        }
+        
+        .device-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+        
+        .responsive-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .responsive-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        @media (max-width: 768px) {
+            .demo-container {
+                padding: 10px;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
+            
+            .demo-buttons {
+                flex-direction: column;
+            }
+            
+            .demo-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <div class="header">
+            <h1>🚀 用户体验增强演示</h1>
+            <p class="subtitle">展示新的UI组件、响应式设计和用户反馈机制</p>
+        </div>
+        
+        <!-- 通知系统演示 -->
+        <div class="demo-section">
+            <h2>📢 通知系统</h2>
+            <p>统一的通知系统，支持成功、错误、警告和信息提示</p>
+            <div class="demo-buttons">
+                <button class="demo-btn success" onclick="ui.showSuccess('操作成功完成！')">成功通知</button>
+                <button class="demo-btn danger" onclick="ui.showError('发生了一个错误')">错误通知</button>
+                <button class="demo-btn warning" onclick="ui.showWarning('这是一个警告信息')">警告通知</button>
+                <button class="demo-btn primary" onclick="ui.showInfo('这是一条信息提示')">信息通知</button>
+            </div>
+        </div>
+        
+        <!-- 加载状态演示 -->
+        <div class="demo-section">
+            <h2>⏳ 加载状态</h2>
+            <p>优雅的加载动画和状态管理</p>
+            <div class="demo-buttons">
+                <button class="demo-btn primary" onclick="demoGlobalLoading()">全局加载</button>
+                <button class="demo-btn primary" onclick="demoButtonLoading(this)">按钮加载</button>
+                <button class="demo-btn primary" onclick="demoSkeletonLoading()">骨架屏加载</button>
+            </div>
+            
+            <div class="skeleton-demo">
+                <div class="skeleton-card" id="skeleton-demo-1">
+                    <h3>示例卡片 1</h3>
+                    <p>这里是一些示例内容，用于演示骨架屏效果。</p>
+                </div>
+                <div class="skeleton-card" id="skeleton-demo-2">
+                    <h3>示例卡片 2</h3>
+                    <p>点击上面的"骨架屏加载"按钮查看效果。</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 表单验证演示 -->
+        <div class="demo-section">
+            <h2>📝 表单验证</h2>
+            <p>实时表单验证和错误提示</p>
+            <form class="demo-form" onsubmit="demoFormSubmit(event)">
+                <div class="form-group">
+                    <label for="demo-username">用户名</label>
+                    <input type="text" id="demo-username" name="username" placeholder="至少3个字符" required>
+                </div>
+                <div class="form-group">
+                    <label for="demo-email">邮箱</label>
+                    <input type="email" id="demo-email" name="email" placeholder="请输入有效邮箱" required>
+                </div>
+                <div class="form-group">
+                    <label for="demo-password">密码</label>
+                    <input type="password" id="demo-password" name="password" placeholder="至少6个字符" required>
+                </div>
+                <button type="submit" class="demo-btn primary">提交表单</button>
+            </form>
+        </div>
+        
+        <!-- 模态框演示 -->
+        <div class="demo-section">
+            <h2>🪟 模态框和确认对话框</h2>
+            <p>美观的模态框和确认对话框</p>
+            <div class="demo-buttons">
+                <button class="demo-btn primary" onclick="demoModal()">显示模态框</button>
+                <button class="demo-btn warning" onclick="demoConfirm()">确认对话框</button>
+            </div>
+        </div>
+        
+        <!-- 响应式设计演示 -->
+        <div class="demo-section">
+            <h2>📱 响应式设计</h2>
+            <p>自适应不同设备和屏幕尺寸</p>
+            <div class="device-info" id="device-info">
+                <div>设备类型: <span id="device-type">检测中...</span></div>
+                <div>屏幕宽度: <span id="screen-width">-</span>px</div>
+                <div>屏幕高度: <span id="screen-height">-</span>px</div>
+                <div>用户代理: <span id="user-agent">-</span></div>
+            </div>
+            
+            <div class="responsive-demo">
+                <div class="responsive-card">
+                    <h3>📱 移动端</h3>
+                    <p>≤ 768px</p>
+                </div>
+                <div class="responsive-card">
+                    <h3>💻 平板</h3>
+                    <p>769px - 1024px</p>
+                </div>
+                <div class="responsive-card">
+                    <h3>🖥️ 桌面</h3>
+                    <p>≥ 1025px</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 工具函数演示 -->
+        <div class="demo-section">
+            <h2>🛠️ 工具函数</h2>
+            <p>实用的工具函数和辅助功能</p>
+            <div class="demo-buttons">
+                <button class="demo-btn primary" onclick="demoCopyText()">复制文本</button>
+                <button class="demo-btn primary" onclick="demoScrollTo()">滚动到顶部</button>
+                <button class="demo-btn primary" onclick="demoFormatTime()">时间格式化</button>
+                <button class="demo-btn primary" onclick="demoFileSize()">文件大小格式化</button>
+            </div>
+            <div id="demo-results" style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; display: none;">
+                <h4>演示结果:</h4>
+                <div id="demo-output"></div>
+            </div>
+        </div>
+        
+        <!-- 网络状态演示 -->
+        <div class="demo-section">
+            <h2>🌐 网络状态监控</h2>
+            <p>自动检测网络连接状态</p>
+            <div class="device-info">
+                <div>网络状态: <span id="network-status">在线</span></div>
+                <div>连接类型: <span id="connection-type">-</span></div>
+                <div>页面可见性: <span id="page-visibility">可见</span></div>
+            </div>
+            <p><small>💡 提示: 尝试断开网络连接或切换到其他标签页查看效果</small></p>
+        </div>
+        
+        <div class="demo-section">
+            <div style="text-align: center;">
+                <a href="{{ url_for('index') }}" class="demo-btn primary">← 返回首页</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='scripts/ui-utils.js') }}"></script>
+    <script>
+        // 演示函数
+        function demoGlobalLoading() {
+            ui.showLoading('正在加载数据...');
+            setTimeout(() => {
+                ui.hideLoading();
+                ui.showSuccess('加载完成！');
+            }, 3000);
+        }
+        
+        function demoButtonLoading(button) {
+            ui.setButtonLoading(button, true);
+            setTimeout(() => {
+                ui.setButtonLoading(button, false);
+                ui.showSuccess('按钮操作完成！');
+            }, 2000);
+        }
+        
+        function demoSkeletonLoading() {
+            const card1 = document.getElementById('skeleton-demo-1');
+            const card2 = document.getElementById('skeleton-demo-2');
+            
+            ui.showSkeleton(card1, { rows: 3 });
+            ui.showSkeleton(card2, { avatar: true, rows: 2 });
+            
+            setTimeout(() => {
+                ui.hideSkeleton(card1, '<h3>加载完成！</h3><p>这是新加载的内容。</p>');
+                ui.hideSkeleton(card2, '<h3>数据更新</h3><p>骨架屏效果演示完成。</p>');
+            }, 2000);
+        }
+        
+        function demoFormSubmit(event) {
+            event.preventDefault();
+            const form = event.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
+            ui.setButtonLoading(submitBtn, true);
+            
+            // 模拟表单提交
+            setTimeout(() => {
+                ui.setButtonLoading(submitBtn, false);
+                ui.showSuccess('表单提交成功！');
+                form.reset();
+            }, 1500);
+        }
+        
+        function demoModal() {
+            const modalContent = `
+                <h3>这是一个演示模态框</h3>
+                <p>模态框可以用来显示重要信息、表单或其他内容。</p>
+                <p>支持自定义大小、背景点击关闭等功能。</p>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="demo-btn success" onclick="ui.showSuccess('模态框内操作成功！')">执行操作</button>
+                </div>
+            `;
+            
+            ui.createModal({
+                title: '演示模态框',
+                content: modalContent,
+                size: 'md'
+            });
+        }
+        
+        async function demoConfirm() {
+            const confirmed = await ui.confirm('确定要执行这个操作吗？', '确认操作');
+            if (confirmed) {
+                ui.showSuccess('用户确认了操作');
+            } else {
+                ui.showInfo('用户取消了操作');
+            }
+        }
+        
+        function demoCopyText() {
+            const text = '这是一段演示文本，已复制到剪贴板！';
+            ui.copyToClipboard(text);
+        }
+        
+        function demoScrollTo() {
+            ui.scrollToElement('body');
+        }
+        
+        function demoFormatTime() {
+            const now = new Date();
+            const pastTime = new Date(now.getTime() - 2 * 60 * 60 * 1000); // 2小时前
+            const formatted = ui.formatTime(pastTime);
+            showDemoResult(`时间格式化: ${formatted}`);
+        }
+        
+        function demoFileSize() {
+            const size = 1024 * 1024 * 2.5; // 2.5MB
+            const formatted = ui.formatFileSize(size);
+            showDemoResult(`文件大小格式化: ${formatted}`);
+        }
+        
+        function showDemoResult(text) {
+            const resultsDiv = document.getElementById('demo-results');
+            const outputDiv = document.getElementById('demo-output');
+            outputDiv.textContent = text;
+            resultsDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                resultsDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 设备信息更新
+        function updateDeviceInfo() {
+            const deviceType = window.deviceUtils.isMobile() ? '移动设备' : 
+                              window.deviceUtils.isTablet() ? '平板设备' : '桌面设备';
+            
+            document.getElementById('device-type').textContent = deviceType;
+            document.getElementById('screen-width').textContent = window.innerWidth;
+            document.getElementById('screen-height').textContent = window.innerHeight;
+            document.getElementById('user-agent').textContent = navigator.userAgent.substring(0, 50) + '...';
+        }
+        
+        // 网络状态监控
+        function updateNetworkStatus() {
+            const status = navigator.onLine ? '在线' : '离线';
+            document.getElementById('network-status').textContent = status;
+            
+            if ('connection' in navigator) {
+                const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+                if (connection) {
+                    document.getElementById('connection-type').textContent = connection.effectiveType || '未知';
+                }
+            }
+        }
+        
+        // 页面可见性监控
+        function updatePageVisibility() {
+            const visibility = document.visibilityState === 'visible' ? '可见' : '隐藏';
+            document.getElementById('page-visibility').textContent = visibility;
+        }
+        
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateDeviceInfo();
+            updateNetworkStatus();
+            updatePageVisibility();
+            
+            // 监听窗口大小变化
+            window.addEventListener('resize', ui.debounce(updateDeviceInfo, 250));
+            
+            // 监听网络状态变化
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            
+            // 监听页面可见性变化
+            document.addEventListener('visibilitychange', updatePageVisibility);
+            
+            // 表单实时验证
+            const inputs = document.querySelectorAll('.demo-form input');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateDemoInput(this);
+                });
+                
+                input.addEventListener('input', function() {
+                    clearDemoInputError(this);
+                });
+            });
+        });
+        
+        // 演示表单验证
+        function validateDemoInput(input) {
+            const value = input.value.trim();
+            let isValid = true;
+            let message = '';
+            
+            switch(input.name) {
+                case 'username':
+                    if (value.length < 3) {
+                        isValid = false;
+                        message = '用户名至少需要3个字符';
+                    }
+                    break;
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        isValid = false;
+                        message = '请输入有效的邮箱地址';
+                    }
+                    break;
+                case 'password':
+                    if (value.length < 6) {
+                        isValid = false;
+                        message = '密码至少需要6个字符';
+                    }
+                    break;
+            }
+            
+            if (!isValid) {
+                showDemoInputError(input, message);
+            } else {
+                clearDemoInputError(input);
+            }
+            
+            return isValid;
+        }
+        
+        function showDemoInputError(input, message) {
+            const formGroup = input.closest('.form-group');
+            formGroup.classList.add('error');
+            
+            let errorEl = formGroup.querySelector('.error-message');
+            if (!errorEl) {
+                errorEl = document.createElement('div');
+                errorEl.className = 'error-message';
+                formGroup.appendChild(errorEl);
+            }
+            errorEl.textContent = message;
+        }
+        
+        function clearDemoInputError(input) {
+            const formGroup = input.closest('.form-group');
+            formGroup.classList.remove('error');
+            
+            const errorEl = formGroup.querySelector('.error-message');
+            if (errorEl) {
+                errorEl.remove();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>案例库</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/case-library.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-folder-open"></i> 案例库</h1>
+            <p>管理和浏览所有安全事件案例</p>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索案例...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <button class="add-btn"><i class="fas fa-plus"></i> 添加新案例</button>
+        </div>
+
+        <div class="case-grid">
+            <!-- 示例案例 -->
+            <div class="case-card">
+                <h3>SolarWinds供应链攻击</h3>
+                <p>一次复杂的、由国家支持的供应链攻击，影响了全球数千个组织。</p>
+                <div class="tags">
+                    <span>供应链攻击</span>
+                    <span>APT</span>
+                </div>
+                <div class="details">
+                    <span><i class="far fa-calendar-alt"></i> 2020-12-13</span>
+                    <a href="#" class="read-more">查看详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            <div class="case-card">
+                <h3>WannaCry勒索软件攻击</h3>
+                <p>利用“永恒之蓝”漏洞在全球范围内传播的勒索软件攻击。</p>
+                <div class="tags">
+                    <span>勒索软件</span>
+                    <span>蠕虫</span>
+                </div>
+                <div class="details">
+                    <span><i class="far fa-calendar-alt"></i> 2017-05-12</span>
+                    <a href="#" class="read-more">查看详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination">
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学员注册 - AI靶场系统</title>
+    <link rel="preconnect" href="https://fonts.font.im">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.font.im/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ui-components.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 页面背景美化 */
+        body.student-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body.student-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            animation: float 20s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .register-container {
+               max-width: 800px;
+               margin: 0 auto;
+               padding: 60px 40px;
+               position: relative;
+               z-index: 1;
+           }
+        
+        /* 头部美化 */
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: slideDown 0.8s ease-out;
+        }
+        
+        .login-header .icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        .login-header .icon i {
+            font-size: 32px;
+            color: white;
+        }
+        
+        .login-header h1 {
+            color: white;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .login-header p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* 表单美化 */
+        .register-form {
+               background: rgba(255, 255, 255, 0.98);
+               padding: 80px;
+               border-radius: 50px;
+               box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.1);
+               backdrop-filter: blur(20px);
+               border: 1px solid rgba(255, 255, 255, 0.2);
+               animation: slideUp 0.8s ease-out 0.2s both;
+               margin: 0 auto;
+           }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .form-row {
+               display: flex;
+               gap: 40px;
+               margin-bottom: 30px;
+           }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        /* 步骤指示器样式 */
+        .form-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 50px;
+            padding: 0 20px;
+        }
+        
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e1e8ed;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+        
+        .step.active .step-number {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .step.completed .step-number {
+            background: #28a745;
+            color: white;
+        }
+        
+        .step-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+            text-align: center;
+            transition: color 0.3s ease;
+        }
+        
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: #e1e8ed;
+            margin: 0 20px;
+            position: relative;
+            top: -21px;
+        }
+        
+        .step.completed + .step-line {
+            background: #28a745;
+        }
+        
+        /* 表单内容区域 */
+        .form-content {
+            position: relative;
+            min-height: 400px;
+        }
+        
+        /* 简化表单样式 */
+        
+        .form-group {
+              margin-bottom: 35px;
+              position: relative;
+          }
+        
+        .form-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+        
+        .form-group label i {
+            color: #667eea;
+            font-size: 0.9rem;
+        }
+        
+        /* 简化输入框样式 */
+        
+        .form-group input {
+             width: 100%;
+             padding: 15px 20px;
+             border: 2px solid #e1e8ed;
+             border-radius: 10px;
+             font-size: 16px;
+             transition: all 0.3s ease;
+             background: #fafbfc;
+             box-sizing: border-box;
+             min-height: 50px;
+         }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .form-group input:valid {
+            border-color: #28a745;
+        }
+        
+        .form-group input.error {
+            border-color: #dc3545;
+            animation: shake 0.5s ease-in-out;
+        }
+        
+        /* 简化图标样式 */
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        
+        /* 简化验证消息 */
+        
+        /* 移除密码强度显示 */
+        
+        /* 简化验证码样式 */
+        .captcha-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .captcha-container input {
+            flex: 1;
+        }
+        
+        #captchaCanvas {
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .refresh-captcha {
+            background: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            color: #6c757d;
+        }
+        
+        /* 复选框美化 */
+        .checkbox-group {
+            margin: 25px 0;
+        }
+        
+        .custom-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.5;
+            position: relative;
+            padding-left: 30px;
+        }
+        
+        .custom-checkbox input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        .checkmark {
+            position: absolute;
+            left: 0;
+            top: 2px;
+            height: 18px;
+            width: 18px;
+            background-color: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 9px;
+            transition: all 0.3s ease;
+        }
+        
+        .custom-checkbox:hover .checkmark {
+            border-color: #667eea;
+            background-color: rgba(102, 126, 234, 0.1);
+        }
+        
+        .custom-checkbox input:checked ~ .checkmark {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+        
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .custom-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+        
+        .checkbox-text {
+            margin-left: 0;
+        }
+        
+        .checkbox-group a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        .checkbox-group a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        /* 按钮样式 */
+        .form-actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 50px;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 50px;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+            backdrop-filter: blur(10px);
+            transform: translateY(0);
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+            z-index: 0;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15), 0 4px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn:hover::after {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+            transition: all 0.1s ease;
+        }
+        
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4c93 100%);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4), 0 6px 15px rgba(118, 75, 162, 0.3);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(-1px);
+            transition: all 0.1s ease;
+        }
+        
+        .btn-primary i {
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+        
+        .btn-primary:hover i {
+            transform: translateX(3px);
+        }
+        
+        .btn-secondary {
+            background: rgba(248, 249, 250, 0.8);
+            color: #6c757d;
+            border: 1px solid rgba(225, 232, 237, 0.6);
+            flex: 0 0 auto;
+            width: 120px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(233, 236, 239, 0.9);
+            border-color: rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            flex: 0 0 auto;
+            width: 140px;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(135deg, #218838, #1ea085);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(40, 167, 69, 0.4), 0 6px 15px rgba(32, 201, 151, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.6;
+        }
+        
+        /* 提交按钮美化 */
+        .register-submit {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .register-submit::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .register-submit:hover::before {
+            left: 100%;
+        }
+        
+        .register-submit:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+        
+        .register-submit:active {
+            transform: translateY(-1px);
+        }
+        
+        .register-submit:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .register-submit:disabled::before {
+            display: none;
+        }
+        
+        .register-submit i {
+            margin-right: 8px;
+        }
+        
+        /* 登录链接美化 */
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e1e8ed;
+        }
+        
+        .login-link p {
+            color: #666;
+            font-size: 0.95rem;
+            margin: 0;
+        }
+        
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .login-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
+        /* 返回首页链接美化 */
+        .back-home {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-home a {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .back-home a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1600px) {
+            .register-container {
+                max-width: 1200px;
+                padding: 40px;
+            }
+            
+            .register-form {
+                padding: 70px;
+                max-width: 1000px;
+            }
+            
+            .form-row {
+                gap: 25px;
+            }
+            
+            .form-steps {
+                margin-bottom: 40px;
+            }
+            
+            .step-number {
+                width: 45px;
+                height: 45px;
+                font-size: 16px;
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            .register-container {
+                max-width: 1000px;
+                padding: 35px;
+            }
+            
+            .register-form {
+                padding: 60px;
+                max-width: 900px;
+            }
+            
+            .form-row {
+                gap: 20px;
+            }
+            
+            .form-group {
+                margin-bottom: 30px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+                margin-bottom: 25px;
+            }
+        }
+           
+           @media (max-width: 1200px) {
+               .register-container {
+                   max-width: 85%;
+                   padding: 50px 25px;
+               }
+               
+               .register-form {
+                   padding: 60px 50px;
+               }
+               
+               .form-steps {
+                   margin-bottom: 35px;
+                   padding: 0 10px;
+               }
+               
+               .step-number {
+                   width: 40px;
+                   height: 40px;
+                   font-size: 14px;
+               }
+               
+               .step-label {
+                   font-size: 13px;
+               }
+               
+               .step-line {
+                   margin: 0 15px;
+               }
+           }
+          
+          @media (max-width: 1024px) {
+              .register-container {
+                  max-width: 90%;
+                  padding: 40px 20px;
+              }
+              
+              .register-form {
+                  padding: 40px 35px;
+              }
+              
+              .form-row {
+                  flex-direction: column;
+                  gap: 0;
+              }
+              
+              .form-group {
+                  margin-bottom: 25px;
+              }
+              
+              .section-title {
+                  font-size: 1.2rem;
+                  margin-bottom: 20px;
+              }
+              
+              .form-actions {
+                  flex-direction: column;
+                  gap: 12px;
+              }
+              
+              .btn-secondary {
+                  flex: 1;
+              }
+          }
+         
+         @media (max-width: 768px) {
+             .register-container {
+                 max-width: 95%;
+                 padding: 30px 15px;
+             }
+             
+             .register-form {
+                 padding: 35px 25px;
+             }
+             
+             .form-row {
+                 flex-direction: column;
+                 gap: 0;
+             }
+             
+             .login-header h1 {
+                 font-size: 1.8rem;
+             }
+             
+             .captcha-container {
+                 flex-direction: column;
+                 align-items: stretch;
+                 gap: 15px;
+             }
+             
+             #captchaCanvas {
+                 align-self: center;
+                 margin-top: 10px;
+             }
+             
+             .form-steps {
+                 margin-bottom: 30px;
+                 padding: 0 5px;
+             }
+             
+             .step {
+                 flex: 1;
+             }
+             
+             .step-number {
+                 width: 35px;
+                 height: 35px;
+                 font-size: 12px;
+                 margin-bottom: 6px;
+             }
+             
+             .step-label {
+                 font-size: 11px;
+                 text-align: center;
+             }
+             
+             .step-line {
+                 margin: 0 8px;
+                 top: -18px;
+             }
+             
+             .section-title {
+                 font-size: 1.1rem;
+                 margin-bottom: 18px;
+             }
+             
+             .btn {
+                 padding: 14px 24px;
+                 font-size: 15px;
+                 min-height: 50px;
+             }
+             
+             .form-actions {
+                 flex-direction: column;
+                 gap: 12px;
+             }
+         }
+         
+         @media (max-width: 480px) {
+             .register-container {
+                 max-width: 100%;
+                 padding: 20px 10px;
+             }
+             
+             .register-form {
+                 padding: 25px 20px;
+                 border-radius: 20px;
+             }
+             
+             .login-header .icon {
+                 width: 60px;
+                 height: 60px;
+             }
+             
+             .login-header .icon i {
+                 font-size: 24px;
+             }
+             
+             .login-header h1 {
+                 font-size: 1.5rem;
+             }
+             
+             .form-group input {
+                 padding: 16px 18px;
+                 font-size: 15px;
+             }
+             
+             .register-submit {
+                 padding: 16px;
+                 font-size: 16px;
+             }
+             
+             .form-steps {
+                 margin-bottom: 25px;
+                 flex-wrap: wrap;
+                 gap: 10px;
+             }
+             
+             .step-line {
+                 display: none;
+             }
+             
+             .step {
+                 flex: 1;
+                 min-width: 80px;
+             }
+             
+             .step-number {
+                 width: 30px;
+                 height: 30px;
+                 font-size: 11px;
+                 margin-bottom: 4px;
+             }
+             
+             .step-label {
+                 font-size: 10px;
+             }
+             
+             .section-title {
+                 font-size: 1rem;
+                 margin-bottom: 15px;
+                 flex-direction: column;
+                 text-align: center;
+                 gap: 8px;
+             }
+             
+             .btn {
+                 padding: 12px 20px;
+                 font-size: 14px;
+                 min-height: 45px;
+             }
+             
+             .form-actions {
+                 gap: 10px;
+             }
+         }
+    </style>
+</head>
+<body class="student-login">
+    <div class="container">
+        <div class="register-container">
+            <!-- 美化的头部区域 -->
+            <div class="login-header">
+                <div class="icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <h1>学员注册</h1>
+                <p>加入我们的学习平台，开启知识之旅</p>
+            </div>
+            
+            <form class="register-form" id="registerForm" onsubmit="handleRegister(event)">
+                <!-- 步骤指示器 -->
+
+                
+                <!-- 简化表单内容 -->
+                <div class="form-content">
+                    <div class="form-group">
+                        <label for="username">
+                            <i class="fas fa-user"></i>
+                            用户名
+                        </label>
+                        <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            <i class="fas fa-envelope"></i>
+                            邮箱地址
+                        </label>
+                        <input type="email" id="email" name="email" placeholder="请输入邮箱地址" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">
+                            <i class="fas fa-lock"></i>
+                            密码
+                        </label>
+                        <input type="password" id="password" name="password" placeholder="请输入密码" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">
+                            <i class="fas fa-shield-alt"></i>
+                            确认密码
+                        </label>
+                        <input type="password" id="confirmPassword" name="confirm_password" placeholder="请再次输入密码" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="captcha">
+                            <i class="fas fa-shield-check"></i>
+                            验证码
+                        </label>
+                        <div class="captcha-container">
+                            <input type="text" id="captcha" name="captcha" placeholder="请输入验证码" required>
+                            <div class="captcha-image">
+                                <canvas id="captchaCanvas" width="120" height="40" onclick="generateCaptcha()"></canvas>
+                                <button type="button" class="refresh-captcha" onclick="generateCaptcha()">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" id="agreement" name="agreement" required>
+                            <span class="checkmark"></span>
+                            <span class="checkbox-text">
+                                我已阅读并同意 <a href="#" class="link-primary">用户协议</a> 和 <a href="#" class="link-primary">隐私政策</a>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- 注册按钮 -->
+                <div class="form-navigation">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-user-plus"></i>
+                        立即注册
+                    </button>
+                </div>
+                
+                <div class="login-link">
+                    <p>已有账号？ <a href="student-login.html" class="link-primary">立即登录</a></p>
+                </div>
+            </form>
+            
+            <div class="back-home">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> 返回首页</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let captchaText = '';
+        
+        // 简化表单验证
+        function validateForm() {
+            const inputs = document.querySelectorAll('input[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('error');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+            
+            // 密码匹配验证
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPassword').classList.add('error');
+                isValid = false;
+            }
+            
+            // 验证码验证
+            const captchaInput = document.getElementById('captcha').value;
+            if (captchaInput.toLowerCase() !== captchaText.toLowerCase()) {
+                document.getElementById('captcha').classList.add('error');
+                isValid = false;
+            }
+            
+            // 协议同意验证
+            const agreement = document.getElementById('agreement').checked;
+            if (!agreement) {
+                alert('请阅读并同意用户协议和隐私政策');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+
+        
+        function generateCaptcha() {
+            const canvas = document.getElementById('captchaCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 生成随机验证码
+            const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+            captchaText = '';
+            for (let i = 0; i < 4; i++) {
+                captchaText += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            // 设置背景
+            ctx.fillStyle = '#f8f9fa';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制干扰线
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = `hsl(${Math.random() * 360}, 50%, 70%)`;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+            
+            // 绘制验证码文字
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            for (let i = 0; i < captchaText.length; i++) {
+                ctx.fillStyle = `hsl(${Math.random() * 360}, 70%, 40%)`;
+                const x = 30 + i * 20;
+                const y = 20 + Math.random() * 10;
+                const angle = (Math.random() - 0.5) * 0.5;
+                
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.fillText(captchaText[i], 0, 0);
+                ctx.restore();
+            }
+            
+            // 添加干扰点
+            for (let i = 0; i < 20; i++) {
+                ctx.fillStyle = `hsl(${Math.random() * 360}, 50%, 60%)`;
+                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
+            }
+        }
+        
+        // 表单提交处理
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            if (!validateForm()) {
+                return false;
+            }
+            
+            const formData = new FormData(event.target);
+            const submitBtn = event.target.querySelector('button[type="submit"]');
+            
+            // 禁用提交按钮
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 注册中...';
+            
+            // 模拟提交过程
+            setTimeout(() => {
+                alert('注册成功！请登录您的账户。');
+                window.location.href = 'student-login.html';
+            }, 2000);
+            
+            return false;
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            generateCaptcha();
+        });
+    </script>
+</body>
+</html>

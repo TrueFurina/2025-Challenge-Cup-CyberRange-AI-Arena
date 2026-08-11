@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - AI靶场系统</title>
+    <link rel="preconnect" href="https://fonts.font.im">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.font.im/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ui-components.css') }}">
+</head>
+<body class="admin-login">
+    <div class="container">
+        <div class="login-container">
+            <div class="login-header">
+                <div class="icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 4L13.5 7H7V9H13.5L15 12L21 9ZM16 13C16 15.2 14.2 17 12 17S8 15.2 8 13H6C6 16.3 8.7 19 12 19S18 16.3 18 13H16Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <h2>管理员登录</h2>
+                <p>欢迎回来，请登录管理后台</p>
+            </div>
+            
+            <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+                <div class="form-group">
+                    <label for="adminUsername">管理员账号</label>
+                    <input type="text" id="adminUsername" name="username" placeholder="请输入管理员账号" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminPassword">密码</label>
+                    <input type="password" id="adminPassword" name="password" placeholder="请输入密码" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adminCode">验证码</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" id="adminCode" name="code" placeholder="请输入验证码" required style="flex: 1;">
+                        <canvas id="adminCaptcha" width="120" height="40" style="border: 1px solid #ddd; border-radius: 5px; cursor: pointer;" onclick="generateAdminCaptcha()"></canvas>
+                    </div>
+                </div>
+                
+                <div class="remember-forgot">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span>记住我</span>
+                    </label>
+                    <a href="#" class="forgot-password">忘记密码？</a>
+                </div>
+                
+                <button type="submit" class="login-submit">登录管理后台</button>
+            </form>
+            
+            <div class="back-home">
+                <a href="{{ url_for('index') }}">← 返回首页</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='scripts/ui-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/admin-login.js') }}"></script>
+</body>
+</html>

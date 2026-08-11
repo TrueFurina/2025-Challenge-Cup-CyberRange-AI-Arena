@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>课程学习 - 网络安全学习平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/course-learning.css') }}">
+    <link href="https://fonts.font.im/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="course-learning">
+        <div class="container">
+            <!-- 页面头部 -->
+            <div class="page-header">
+                <div class="header-content">
+                    <h1>📚 课程学习</h1>
+                    <p>系统化学习网络安全知识，提升专业技能</p>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="enrolledCount">12</span>
+                        <span class="stat-label">已报名</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="completedCount">8</span>
+                        <span class="stat-label">已完成</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="studyHours">156</span>
+                        <span class="stat-label">学习时长(h)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 筛选和搜索区域 -->
+            <div class="filter-section">
+                <div class="filter-left">
+                    <div class="filter-group">
+                        <label for="categoryFilter">课程分类:</label>
+                        <select id="categoryFilter" class="filter-select">
+                            <option value="">全部分类</option>
+                            <option value="基础理论">基础理论</option>
+                            <option value="渗透测试">渗透测试</option>
+                            <option value="防御技术">防御技术</option>
+                            <option value="取证分析">取证分析</option>
+                            <option value="恶意软件">恶意软件分析</option>
+                            <option value="密码学">密码学</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="levelFilter">难度等级:</label>
+                        <select id="levelFilter" class="filter-select">
+                            <option value="">全部等级</option>
+                            <option value="beginner">初级</option>
+                            <option value="intermediate">中级</option>
+                            <option value="advanced">高级</option>
+                            <option value="expert">专家</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="statusFilter">学习状态:</label>
+                        <select id="statusFilter" class="filter-select">
+                            <option value="">全部状态</option>
+                            <option value="not-started">未开始</option>
+                            <option value="in-progress">学习中</option>
+                            <option value="completed">已完成</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="搜索课程名称、讲师或关键词...">
+                    <button id="searchBtn" class="search-btn">🔍</button>
+                </div>
+            </div>
+
+            <!-- 推荐课程轮播 -->
+            <div class="featured-section">
+                <h2>🌟 推荐课程</h2>
+                <div class="featured-carousel">
+                    <div class="carousel-container">
+                        <div class="featured-course">
+                            <div class="featured-image">🛡️</div>
+                            <div class="featured-content">
+                                <h3>高级渗透测试实战</h3>
+                                <p>深入学习企业级渗透测试技术，包括内网渗透、权限提升、后渗透等高级技术</p>
+                                <div class="featured-meta">
+                                    <span class="instructor">👨‍🏫 张安全</span>
+                                    <span class="rating">⭐ 4.9 (1,234)</span>
+                                    <span class="students">👥 5,678人学习</span>
+                                </div>
+                                <button class="enroll-btn">立即报名</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 课程网格 -->
+            <div class="courses-section">
+                <div class="section-header">
+                    <h2>📖 全部课程</h2>
+                    <div class="view-toggle">
+                        <button class="toggle-btn active" data-view="grid">网格视图</button>
+                        <button class="toggle-btn" data-view="list">列表视图</button>
+                    </div>
+                </div>
+                <div id="coursesGrid" class="courses-grid">
+                    <!-- 课程卡片将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/course-learning.js') }}"></script>
+</body>
+</html>

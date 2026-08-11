@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景测试 - AI靶场系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/scenario-test.css') }}">
+</head>
+<body class="scenario-test">
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1>场景测试</h1>
+                <p>选择测试场景，检验您的网络安全技能水平</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="completedCount">12</span>
+                    <span class="stat-label">已完成</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="inProgressCount">8</span>
+                    <span class="stat-label">进行中</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="passRate">85%</span>
+                    <span class="stat-label">通过率</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 筛选和搜索 -->
+        <div class="filter-section">
+            <div class="filter-left">
+                <div class="filter-group">
+                    <label>难度等级：</label>
+                    <select class="filter-select" id="difficultyFilter">
+                        <option value="">全部</option>
+                        <option value="beginner">初级</option>
+                        <option value="intermediate">中级</option>
+                        <option value="advanced">高级</option>
+                        <option value="expert">专家</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>测试类型：</label>
+                    <select class="filter-select" id="typeFilter">
+                        <option value="">全部</option>
+                        <option value="penetration">渗透测试</option>
+                        <option value="defense">防御演练</option>
+                        <option value="forensics">取证分析</option>
+                        <option value="malware">恶意软件分析</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>状态：</label>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="">全部</option>
+                        <option value="available">可测试</option>
+                        <option value="completed">已完成</option>
+                        <option value="locked">未解锁</option>
+                    </select>
+                </div>
+            </div>
+            <div class="filter-right">
+                <div class="search-box">
+                    <input type="text" placeholder="搜索测试场景..." id="searchInput">
+                    <button class="search-btn" id="searchBtn">🔍</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 测试场景列表 -->
+        <div class="scenarios-grid" id="scenariosGrid">
+            <!-- 渗透测试场景 -->
+            <div class="scenario-card" data-difficulty="intermediate" data-type="penetration" data-status="available">
+                <div class="card-header">
+                    <div class="scenario-icon">🎯</div>
+                    <div class="difficulty-badge intermediate">中级</div>
+                </div>
+                <div class="card-content">
+                    <h3>Web应用渗透测试</h3>
+                    <p>针对存在多种漏洞的Web应用进行全面的渗透测试，包括SQL注入、XSS、CSRF等常见漏洞的发现和利用。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>预计时长：2小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：150</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👥</span>
+                            <span>参与人数：1,234</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="progress-info">
+                        <span class="progress-label">完成进度：</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                    <button class="start-btn">开始测试</button>
+                </div>
+            </div>
+
+            <!-- 防御演练场景 -->
+            <div class="scenario-card" data-difficulty="advanced" data-type="defense" data-status="available">
+                <div class="card-header">
+                    <div class="scenario-icon">🛡️</div>
+                    <div class="difficulty-badge advanced">高级</div>
+                </div>
+                <div class="card-content">
+                    <h3>APT攻击防御演练</h3>
+                    <p>模拟高级持续性威胁攻击场景，要求学员识别攻击行为、分析攻击路径并制定有效的防御策略。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>预计时长：4小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：300</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👥</span>
+                            <span>参与人数：567</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="progress-info">
+                        <span class="progress-label">完成进度：</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 65%"></div>
+                        </div>
+                        <span class="progress-text">65%</span>
+                    </div>
+                    <button class="continue-btn">继续测试</button>
+                </div>
+            </div>
+
+            <!-- 取证分析场景 -->
+            <div class="scenario-card" data-difficulty="expert" data-type="forensics" data-status="completed">
+                <div class="card-header">
+                    <div class="scenario-icon">🔍</div>
+                    <div class="difficulty-badge expert">专家</div>
+                    <div class="completed-badge">已完成</div>
+                </div>
+                <div class="card-content">
+                    <h3>数字取证分析挑战</h3>
+                    <p>分析被攻击系统的数字证据，重建攻击时间线，识别攻击者使用的工具和技术。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>预计时长：6小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：500</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👥</span>
+                            <span>参与人数：234</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="completion-info">
+                        <span class="completion-score">得分：92/100</span>
+                        <span class="completion-time">用时：5小时30分</span>
+                    </div>
+                    <button class="review-btn">查看报告</button>
+                </div>
+            </div>
+
+            <!-- 恶意软件分析场景 -->
+            <div class="scenario-card" data-difficulty="beginner" data-type="malware" data-status="locked">
+                <div class="card-header">
+                    <div class="scenario-icon">🦠</div>
+                    <div class="difficulty-badge beginner">初级</div>
+                    <div class="locked-badge">🔒</div>
+                </div>
+                <div class="card-content">
+                    <h3>恶意软件静态分析</h3>
+                    <p>学习使用静态分析工具分析恶意软件样本，识别恶意行为和攻击技术。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>预计时长：1.5小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：100</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📋</span>
+                            <span>前置要求：完成基础课程</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="lock-info">
+                        <span class="lock-text">需要完成前置课程才能解锁</span>
+                    </div>
+                    <button class="locked-btn" disabled>未解锁</button>
+                </div>
+            </div>
+
+            <!-- 网络安全竞赛场景 -->
+            <div class="scenario-card" data-difficulty="advanced" data-type="competition" data-status="available">
+                <div class="card-header">
+                    <div class="scenario-icon">🏆</div>
+                    <div class="difficulty-badge advanced">高级</div>
+                    <div class="hot-badge">🔥 热门</div>
+                </div>
+                <div class="card-content">
+                    <h3>CTF综合挑战赛</h3>
+                    <p>综合性网络安全竞赛，包含Web安全、二进制分析、密码学、取证等多个方向的挑战题目。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>比赛时长：24小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：1000</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">📅</span>
+                            <span>截止时间：3天后</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="competition-info">
+                        <span class="participants">已报名：89人</span>
+                        <span class="ranking">当前排名：未参与</span>
+                    </div>
+                    <button class="join-btn">立即参赛</button>
+                </div>
+            </div>
+
+            <!-- 实战演练场景 -->
+            <div class="scenario-card" data-difficulty="intermediate" data-type="practical" data-status="available">
+                <div class="card-header">
+                    <div class="scenario-icon">⚔️</div>
+                    <div class="difficulty-badge intermediate">中级</div>
+                </div>
+                <div class="card-content">
+                    <h3>企业网络渗透实战</h3>
+                    <p>模拟真实企业网络环境，进行全面的渗透测试，从信息收集到权限提升的完整攻击链。</p>
+                    <div class="scenario-meta">
+                        <div class="meta-item">
+                            <span class="meta-icon">⏱️</span>
+                            <span>预计时长：8小时</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">🏆</span>
+                            <span>奖励积分：400</span>
+                        </div>
+                        <div class="meta-item">
+                            <span class="meta-icon">👥</span>
+                            <span>参与人数：456</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="progress-info">
+                        <span class="progress-label">完成进度：</span>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 0%"></div>
+                        </div>
+                        <span class="progress-text">0%</span>
+                    </div>
+                    <button class="start-btn">开始测试</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scenario-test.js') }}"></script>
+</body>
+</html>

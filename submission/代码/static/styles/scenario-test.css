@@ -1,0 +1,565 @@
+/* 场景测试页面样式 */
+
+/* 页面整体布局 */
+.scenario-test {
+    background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+    min-height: 100vh;
+    padding: 0;
+}
+
+.scenario-test .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* 页面头部 */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-background-color);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+}
+
+.header-content h1 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0 0 8px 0;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.header-content p {
+    font-size: 16px;
+    color: #64748b;
+    margin: 0;
+    font-weight: 500;
+}
+
+.header-stats {
+    display: flex;
+    gap: 32px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 16px 24px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--border-color);
+}
+
+.stat-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: #667eea;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* 筛选和搜索区域 */
+.filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--card-background-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+}
+
+.filter-left {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.filter-select {
+    padding: 8px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    font-size: 14px;
+    color: #374151;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 120px;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.search-box:focus-within {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#searchInput {
+    padding: 12px 16px;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    width: 300px;
+    background: transparent;
+}
+
+.search-btn {
+    padding: 12px 16px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+/* 场景卡片网格 */
+.scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+}
+
+/* 场景卡片 */
+.scenario-card {
+    background: var(--card-background-color);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow-color);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+}
+
+.scenario-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.scenario-icon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.difficulty-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.difficulty-badge.beginner {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.difficulty-badge.intermediate {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.difficulty-badge.advanced {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.difficulty-badge.expert {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.completed-badge {
+    background: #dcfce7;
+    color: #166534;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.locked-badge {
+    font-size: 20px;
+    opacity: 0.6;
+}
+
+.hot-badge {
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card-content {
+    flex: 1;
+    margin-bottom: 20px;
+}
+
+.card-content h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    margin: 0 0 12px 0;
+    line-height: 1.3;
+}
+
+.card-content p {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+}
+
+.scenario-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.meta-icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.card-footer {
+    border-top: 1px solid #f3f4f6;
+    padding-top: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+/* 进度信息 */
+.progress-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #f3f4f6;
+    border-radius: 3px;
+    overflow: hidden;
+    min-width: 60px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 12px;
+    color: #667eea;
+    font-weight: 600;
+    min-width: 30px;
+}
+
+/* 完成信息 */
+.completion-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.completion-score {
+    font-size: 14px;
+    font-weight: 600;
+    color: #059669;
+}
+
+.completion-time {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+/* 锁定信息 */
+.lock-info {
+    flex: 1;
+}
+
+.lock-text {
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* 竞赛信息 */
+.competition-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+}
+
+.participants {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.ranking {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+/* 按钮样式 */
+.start-btn,
+.continue-btn,
+.review-btn,
+.join-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.start-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.start-btn:hover {
+    background: linear-gradient(135deg, #5a67d8, #6b46c1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.continue-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+}
+
+.continue-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.review-btn {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: white;
+}
+
+.review-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.join-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.join-btn:hover {
+    background: linear-gradient(135deg, #d97706, #b45309);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.locked-btn {
+    padding: 10px 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #9ca3af;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: not-allowed;
+    white-space: nowrap;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+    .scenarios-grid {
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .scenario-test .container {
+        padding: 16px;
+        gap: 16px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        gap: 20px;
+        padding: 24px;
+        text-align: center;
+    }
+    
+    .header-stats {
+        gap: 16px;
+    }
+    
+    .filter-section {
+        flex-direction: column;
+        gap: 16px;
+        padding: 20px;
+    }
+    
+    .filter-left {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+    
+    .filter-group {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .filter-select {
+        min-width: 150px;
+    }
+    
+    #searchInput {
+        width: 250px;
+    }
+    
+    .scenarios-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .card-footer {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+    
+    .progress-info {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-content h1 {
+        font-size: 24px;
+    }
+    
+    .stat-item {
+        padding: 12px 16px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    #searchInput {
+        width: 200px;
+    }
+    
+    .scenario-card {
+        padding: 20px;
+    }
+}

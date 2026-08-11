@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>场景详情 - 网络安全学习平台</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/scenario-detail.css') }}">
+    <link href="https://fonts.font.im/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="scenario-detail">
+        <div class="container">
+            <!-- 返回按钮 -->
+            <div class="back-nav">
+                <button class="back-btn" onclick="goBack()">← 返回场景列表</button>
+            </div>
+
+            <!-- 场景基本信息 -->
+            <div class="scenario-header">
+                <div class="scenario-icon">🌐</div>
+                <div class="scenario-info">
+                    <h1 id="scenarioTitle" class="scenario-title">Web应用渗透测试</h1>
+                    <div class="scenario-meta">
+                        <span class="difficulty-badge intermediate">中级</span>
+                        <span class="type-badge">渗透测试</span>
+                        <span class="status-badge available">可开始</span>
+                    </div>
+                    <p class="scenario-description" id="scenarioDescription">
+                        针对Web应用程序进行全面的安全渗透测试，包括SQL注入、XSS、CSRF等常见漏洞的发现与利用。
+                    </p>
+                    <div class="scenario-stats">
+                        <div class="stat-item duration-info">
+                            <span class="stat-label">预计时长</span>
+                            <span class="stat-value">2小时</span>
+                        </div>
+                        <div class="stat-item points-info">
+                            <span class="stat-label">奖励积分</span>
+                            <span class="stat-value">150分</span>
+                        </div>
+                        <div class="stat-item participants-info">
+                            <span class="stat-label">参与人数</span>
+                            <span class="stat-value">1,247人</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">通过率</span>
+                            <span class="stat-value">78%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 标签页导航 -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" data-tab="overview">场景概览</button>
+                <button class="tab-btn" data-tab="topology">网络拓扑</button>
+                <button class="tab-btn" data-tab="ai-assistant">AI辅助测试</button>
+                <button class="tab-btn" data-tab="learning">学习资料</button>
+            </div>
+
+            <!-- 场景概览 -->
+            <div class="tab-content active" id="overview-tab">
+                <div class="overview-grid">
+                    <div class="overview-card">
+                        <h3>🎯 学习目标</h3>
+                        <ul class="objectives-list">
+                            <li>掌握Web应用安全测试的基本流程</li>
+                            <li>学习常见Web漏洞的识别和利用方法</li>
+                            <li>了解渗透测试工具的使用技巧</li>
+                            <li>培养安全测试的思维模式</li>
+                        </ul>
+                    </div>
+                    <div class="overview-card">
+                        <h3>🔧 涉及技术</h3>
+                        <div class="tech-tags">
+                            <span class="tech-tag">SQL注入</span>
+                            <span class="tech-tag">XSS攻击</span>
+                            <span class="tech-tag">CSRF</span>
+                            <span class="tech-tag">文件上传</span>
+                            <span class="tech-tag">权限提升</span>
+                            <span class="tech-tag">Burp Suite</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 网络拓扑图 -->
+                <div class="topology-section">
+                    <h3>🌐 网络拓扑结构</h3>
+                    <div class="topology-diagram">
+                        <div class="topology-container">
+                            <!-- 外网区域 -->
+                            <div class="network-zone internet">
+                                <h4>Internet</h4>
+                                <div class="device attacker">
+                                    <div class="device-icon">💻</div>
+                                    <div class="device-label">攻击者</div>
+                                    <div class="device-ip">外网</div>
+                                </div>
+                            </div>
+
+                            <!-- DMZ区域 -->
+                            <div class="network-zone dmz">
+                                <h4>DMZ区域</h4>
+                                <div class="device firewall">
+                                    <div class="device-icon">🛡️</div>
+                                    <div class="device-label">防火墙</div>
+                                    <div class="device-ip">192.168.1.1</div>
+                                </div>
+                                <div class="device web-server">
+                                    <div class="device-icon">🌐</div>
+                                    <div class="device-label">Web服务器</div>
+                                    <div class="device-ip">192.168.1.100</div>
+                                    <div class="device-ports">80, 443</div>
+                                </div>
+                            </div>
+
+                            <!-- 内网区域 -->
+                            <div class="network-zone internal">
+                                <h4>内网区域 (192.168.2.0/24)</h4>
+                                <div class="device db-server">
+                                    <div class="device-icon">🗄️</div>
+                                    <div class="device-label">数据库服务器</div>
+                                    <div class="device-ip">192.168.2.10</div>
+                                    <div class="device-ports">3306</div>
+                                </div>
+                                <div class="device file-server">
+                                    <div class="device-icon">📁</div>
+                                    <div class="device-label">文件服务器</div>
+                                    <div class="device-ip">192.168.2.20</div>
+                                    <div class="device-ports">445, 139</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="topology-info">
+                        <div class="info-card">
+                            <h4>🎯 目标系统信息</h4>
+                            <div class="system-info">
+                                <div class="info-item">
+                                    <span class="info-label">Web服务器:</span>
+                                    <span class="info-value">Apache 2.4.49 + PHP 7.4.3</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">数据库:</span>
+                                    <span class="info-value">MySQL 5.7.33</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">操作系统:</span>
+                                    <span class="info-value">Ubuntu 20.04 LTS</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">应用程序:</span>
+                                    <span class="info-value">自定义CMS系统 v2.5</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>🔓 已知漏洞</h4>
+                            <div class="vulnerability-list">
+                                <div class="vuln-item">
+                                    <span class="vuln-id">CVE-2021-45046</span>
+                                    <span class="vuln-type">SQL注入</span>
+                                    <span class="vuln-severity high">高危</span>
+                                </div>
+                                <div class="vuln-item">
+                                    <span class="vuln-id">CVE-2021-44228</span>
+                                    <span class="vuln-type">远程代码执行</span>
+                                    <span class="vuln-severity critical">严重</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="start-scenario-btn" onclick="startScenario()">开始场景测试</button>
+                    <button class="practice-btn" onclick="enterPracticeMode()">练习模式</button>
+                </div>
+            </div>
+
+            <!-- 网络拓扑 -->
+            <div class="tab-content" id="topology-tab">
+                <div class="topology-section">
+                    <h3>🌐 网络拓扑结构</h3>
+                    <div class="topology-diagram">
+                        <div class="topology-container">
+                            <!-- 外网区域 -->
+                            <div class="network-zone internet">
+                                <h4>Internet</h4>
+                                <div class="device attacker">
+                                    <div class="device-icon">💻</div>
+                                    <div class="device-label">攻击者</div>
+                                    <div class="device-ip">外网</div>
+                                </div>
+                            </div>
+
+                            <!-- DMZ区域 -->
+                            <div class="network-zone dmz">
+                                <h4>DMZ区域</h4>
+                                <div class="device firewall">
+                                    <div class="device-icon">🛡️</div>
+                                    <div class="device-label">防火墙</div>
+                                    <div class="device-ip">192.168.1.1</div>
+                                </div>
+                                <div class="device web-server">
+                                    <div class="device-icon">🌐</div>
+                                    <div class="device-label">Web服务器</div>
+                                    <div class="device-ip">192.168.1.100</div>
+                                    <div class="device-ports">80, 443</div>
+                                </div>
+                            </div>
+
+                            <!-- 内网区域 -->
+                            <div class="network-zone internal">
+                                <h4>内网区域 (192.168.2.0/24)</h4>
+                                <div class="device db-server">
+                                    <div class="device-icon">🗄️</div>
+                                    <div class="device-label">数据库服务器</div>
+                                    <div class="device-ip">192.168.2.10</div>
+                                    <div class="device-ports">3306</div>
+                                </div>
+                                <div class="device file-server">
+                                    <div class="device-icon">📁</div>
+                                    <div class="device-label">文件服务器</div>
+                                    <div class="device-ip">192.168.2.20</div>
+                                    <div class="device-ports">445, 139</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="topology-info">
+                        <div class="info-card">
+                            <h4>🎯 目标系统信息</h4>
+                            <div class="system-info">
+                                <div class="info-item">
+                                    <span class="info-label">Web服务器:</span>
+                                    <span class="info-value">Apache 2.4.49 + PHP 7.4.3</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">数据库:</span>
+                                    <span class="info-value">MySQL 5.7.33</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">操作系统:</span>
+                                    <span class="info-value">Ubuntu 20.04 LTS</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">应用程序:</span>
+                                    <span class="info-value">自定义CMS系统 v2.5</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="info-card">
+                            <h4>🔓 已知漏洞</h4>
+                            <div class="vulnerability-list">
+                                <div class="vuln-item">
+                                    <span class="vuln-id">CVE-2021-45046</span>
+                                    <span class="vuln-type">SQL注入</span>
+                                    <span class="vuln-severity high">高危</span>
+                                </div>
+                                <div class="vuln-item">
+                                    <span class="vuln-id">CVE-2021-44228</span>
+                                    <span class="vuln-type">远程代码执行</span>
+                                    <span class="vuln-severity critical">严重</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI辅助测试 -->
+            <div class="tab-content" id="ai-assistant-tab">
+                <div class="ai-assistant-section">
+                    <h3>🤖 AI辅助测试</h3>
+                    <p class="ai-description">使用AI技术辅助进行渗透测试，提供智能化的测试策略和路径规划。</p>
+                    
+                    <div class="test-mode-selection">
+                        <h4>选择测试模式</h4>
+                        <div class="mode-cards">
+                            <div class="mode-card" data-mode="whitebox">
+                                <div class="mode-icon">📋</div>
+                                <h5>白盒测试</h5>
+                                <p>已知系统架构和源代码，进行全面的安全测试</p>
+                                <ul>
+                                    <li>✓ 源代码审计</li>
+                                    <li>✓ 架构分析</li>
+                                    <li>✓ 配置检查</li>
+                                    <li>✓ 逻辑漏洞挖掘</li>
+                                </ul>
+                                <button class="select-mode-btn">选择白盒测试</button>
+                            </div>
+                            
+                            <div class="mode-card" data-mode="blackbox">
+                                <div class="mode-icon">🔍</div>
+                                <h5>黑盒测试</h5>
+                                <p>模拟外部攻击者视角，无内部信息的渗透测试</p>
+                                <ul>
+                                    <li>✓ 信息收集</li>
+                                    <li>✓ 端口扫描</li>
+                                    <li>✓ 漏洞扫描</li>
+                                    <li>✓ 渗透利用</li>
+                                </ul>
+                                <button class="select-mode-btn">选择黑盒测试</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 白盒测试界面 -->
+                    <div class="test-interface hidden" id="whitebox-interface">
+                        <div class="test-header">
+                            <h4>🔬 白盒测试 - AI辅助分析</h4>
+                            <button class="back-to-selection" onclick="backToModeSelection()">← 返回模式选择</button>
+                        </div>
+                        
+                        <!-- 步骤导航 -->
+                        <div class="step-navigation">
+                            <div class="step-item active" data-step="1">
+                                <div class="step-number">1</div>
+                                <div class="step-title">输入目标信息</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="2">
+                                <div class="step-number">2</div>
+                                <div class="step-title">AI分析处理</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="3">
+                                <div class="step-number">3</div>
+                                <div class="step-title">自动化测试</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="4">
+                                <div class="step-number">4</div>
+                                <div class="step-title">策略调整</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="5">
+                                <div class="step-number">5</div>
+                                <div class="step-title">生成报告</div>
+                            </div>
+                        </div>
+
+                        <!-- 步骤内容 -->
+                        <div class="step-content">
+                            <!-- 步骤1：输入目标信息 -->
+                            <div class="step-panel active" id="step-1">
+                                <h5>步骤1：输入目标系统信息</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>网络拓扑描述</label>
+                                        <textarea id="topology-input" placeholder="请描述目标网络拓扑结构...">目标网络包含一个Web服务器(192.168.1.100)，位于DMZ区域，通过防火墙与内网(192.168.2.0/24)隔离。内网包含一台数据库服务器(192.168.2.10)和一台文件服务器(192.168.2.20)。</textarea>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>漏洞类型</label>
+                                            <select id="vuln-type">
+                                                <option value="sql-injection">SQL注入漏洞</option>
+                                                <option value="xss">跨站脚本攻击(XSS)</option>
+                                                <option value="file-upload">文件上传漏洞</option>
+                                                <option value="rce">远程代码执行</option>
+                                                <option value="ssrf">服务器端请求伪造</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>CVE编号</label>
+                                            <input type="text" id="cve-id" value="CVE-2021-45046">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>系统配置信息</label>
+                                        <textarea id="system-config" placeholder="请输入系统配置信息...">Web服务器：Apache 2.4.49 + PHP 7.4.3 + MySQL 5.7.33\n操作系统：Ubuntu 20.04 LTS\n应用程序：自定义CMS系统 v2.5\n安全措施：开启防火墙，未安装WAF，默认数据库配置</textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>攻击目标</label>
+                                        <textarea id="attack-goal" placeholder="请描述攻击目标...">获取数据库中的用户表信息，包括管理员账号和密码哈希，并尝试提升权限获取服务器shell访问权限。</textarea>
+                                    </div>
+                                </div>
+                                <div class="step-actions">
+                                    <button class="next-step-btn" onclick="nextStep()">下一步</button>
+                                </div>
+                            </div>
+
+                            <!-- 步骤2：AI分析处理 -->
+                            <div class="step-panel" id="step-2">
+                                <h5>步骤2：AI分析处理</h5>
+                                <div class="analysis-container">
+                                    <div class="analysis-status">
+                                        <div class="status-indicator processing">
+                                            <div class="spinner"></div>
+                                            <span>AI正在分析目标系统...</span>
+                                        </div>
+                                    </div>
+                                    <div class="analysis-results hidden">
+                                        <div class="result-card">
+                                            <h6>🎯 攻击路径分析</h6>
+                                            <div class="attack-path-preview">
+                                                <div class="path-step">1. 信息收集与端口扫描</div>
+                                                <div class="path-step">2. Web应用漏洞扫描</div>
+                                                <div class="path-step">3. SQL注入漏洞利用</div>
+                                                <div class="path-step">4. 数据库信息获取</div>
+                                                <div class="path-step">5. 权限提升尝试</div>
+                                            </div>
+                                        </div>
+                                        <div class="result-card">
+                                            <h6>⚠️ 风险评估</h6>
+                                            <div class="risk-items">
+                                                <div class="risk-item high">高风险：SQL注入可导致数据泄露</div>
+                                                <div class="risk-item medium">中风险：弱密码可能被暴力破解</div>
+                                                <div class="risk-item low">低风险：信息泄露风险</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step-actions">
+                                    <button class="prev-step-btn" onclick="prevStep()">上一步</button>
+                                    <button class="next-step-btn" onclick="nextStep()" disabled>下一步</button>
+                                </div>
+                            </div>
+
+                            <!-- 步骤3：自动化测试 -->
+                            <div class="step-panel" id="step-3">
+                                <h5>步骤3：AI自动化测试执行</h5>
+                                <div class="test-execution">
+                                    <div class="execution-status">
+                                        <div class="status-header">
+                                            <span class="status-label">测试状态:</span>
+                                            <span class="status-value failed">执行失败</span>
+                                        </div>
+                                    </div>
+                                    <div class="execution-log">
+                                        <div class="log-header">执行日志</div>
+                                        <div class="log-content">
+                                            <div class="log-line info">[INFO] 开始执行自动攻击...</div>
+                                            <div class="log-line info">[INFO] 目标: http://192.168.1.100/login.php</div>
+                                            <div class="log-line info">[INFO] 漏洞类型: SQL注入</div>
+                                            <div class="log-line warning">[WARNING] 检测到WAF防护</div>
+                                            <div class="log-line error">[ERROR] 注入失败，返回403 Forbidden</div>
+                                            <div class="log-line error">[ERROR] 攻击路径执行失败，需要人工干预</div>
+                                        </div>
+                                    </div>
+                                    <div class="failure-analysis">
+                                        <h6>失败原因分析</h6>
+                                        <p>目标系统可能启用了Web应用防火墙(WAF)，简单的SQL注入payload被拦截。建议调整攻击策略，使用更高级的绕过技术。</p>
+                                    </div>
+                                </div>
+                                <div class="step-actions">
+                                    <button class="prev-step-btn" onclick="prevStep()">上一步</button>
+                                    <button class="next-step-btn" onclick="nextStep()">调整策略</button>
+                                </div>
+                            </div>
+
+                            <!-- 步骤4：策略调整 -->
+                            <div class="step-panel" id="step-4">
+                                <h5>步骤4：攻击策略调整</h5>
+                                <div class="strategy-adjustment">
+                                    <div class="current-strategy">
+                                        <h6>当前攻击路径</h6>
+                                        <div class="attack-steps" id="attack-steps">
+                                            <!-- 攻击步骤将通过JavaScript动态生成 -->
+                                        </div>
+                                        <button class="add-step-btn" onclick="addAttackStep()">+ 添加步骤</button>
+                                    </div>
+                                    <div class="strategy-suggestions">
+                                        <h6>AI建议的改进策略</h6>
+                                        <div class="suggestion-list">
+                                            <div class="suggestion-item">
+                                                <div class="suggestion-title">使用编码绕过WAF</div>
+                                                <div class="suggestion-desc">尝试URL编码、十六进制编码等方式绕过WAF检测</div>
+                                                <button class="apply-suggestion" onclick="applySuggestion(1)">应用建议</button>
+                                            </div>
+                                            <div class="suggestion-item">
+                                                <div class="suggestion-title">分块传输绕过</div>
+                                                <div class="suggestion-desc">使用HTTP分块传输编码来绕过WAF规则</div>
+                                                <button class="apply-suggestion" onclick="applySuggestion(2)">应用建议</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step-actions">
+                                    <button class="prev-step-btn" onclick="prevStep()">上一步</button>
+                                    <button class="retry-test-btn" onclick="retryTest()">重新测试</button>
+                                    <button class="next-step-btn" onclick="nextStep()" disabled>下一步</button>
+                                </div>
+                            </div>
+
+                            <!-- 步骤5：生成报告 -->
+                            <div class="step-panel" id="step-5">
+                                <h5>步骤5：AI智能测试报告</h5>
+                                
+                                <!-- AI生成的智能报告容器 -->
+                                <div class="test-report">
+                                    <!-- 报告内容将通过JavaScript动态生成 -->
+                                    <div class="report-placeholder">
+                                        <div class="placeholder-icon">📊</div>
+                                        <h6>正在生成AI智能测试报告...</h6>
+                                        <p>请稍候，AI正在分析测试结果并生成详细报告</p>
+                                        <div class="loading-spinner">
+                                            <div class="spinner"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 白盒测试报告内容 -->
+                                    <div class="whitebox-report hidden">
+                                        <h3>🔬 白盒测试报告</h3>
+                                        
+                                        <!-- 测试信息 -->
+                                        <div class="report-section">
+                                            <h4>📋 测试信息</h4>
+                                            <div class="info-grid">
+                                                <div class="info-item">
+                                                    <div class="info-label">测试目标</div>
+                                                    <div class="info-value" id="wb-target">-</div>
+                                                </div>
+                                                <div class="info-item">
+                                                    <div class="info-label">漏洞类型</div>
+                                                    <div class="info-value" id="wb-vuln-type">-</div>
+                                                </div>
+                                                <div class="info-item">
+                                                    <div class="info-label">CVE编号</div>
+                                                    <div class="info-value" id="wb-cve-id">-</div>
+                                                </div>
+                                                <div class="info-item">
+                                                    <div class="info-label">测试时间</div>
+                                                    <div class="info-value" id="wb-test-date">-</div>
+                                                </div>
+                                                <div class="info-item">
+                                                    <div class="info-label">测试持续时间</div>
+                                                    <div class="info-value" id="wb-duration">-</div>
+                                                </div>
+                                                <div class="info-item">
+                                                    <div class="info-label">测试类型</div>
+                                                    <div class="info-value">白盒测试</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 执行摘要 -->
+                                        <div class="report-section">
+                                            <h4>📊 执行摘要</h4>
+                                            <div class="summary-stats">
+                                                <div class="stat-card">
+                                                    <div class="stat-number" id="wb-total-steps">0</div>
+                                                    <div class="stat-label">总测试步骤</div>
+                                                </div>
+                                                <div class="stat-card">
+                                                    <div class="stat-number" id="wb-successful-steps">0</div>
+                                                    <div class="stat-label">成功步骤</div>
+                                                </div>
+                                                <div class="stat-card">
+                                                    <div class="stat-number" id="wb-failed-steps">0</div>
+                                                    <div class="stat-label">失败步骤</div>
+                                                </div>
+                                                <div class="stat-card">
+                                                    <div class="stat-number" id="wb-success-rate">0%</div>
+                                                    <div class="stat-label">成功率</div>
+                                                </div>
+                                                <div class="stat-card risk-high">
+                                                    <div class="stat-number" id="wb-vulnerabilities">0</div>
+                                                    <div class="stat-label">发现漏洞</div>
+                                                </div>
+                                                <div class="stat-card risk-medium">
+                                                    <div class="stat-number" id="wb-risk-score">0</div>
+                                                    <div class="stat-label">风险评分</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 发现的漏洞 -->
+                                        <div class="report-section">
+                                            <h4>🚨 发现的漏洞</h4>
+                                            <div id="wb-vulnerabilities-list">
+                                                <!-- 漏洞列表将通过JavaScript动态生成 -->
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 修复建议 -->
+                                        <div class="report-section">
+                                            <h4>🛠️ 修复建议</h4>
+                                            <div id="wb-recommendations-list">
+                                                <!-- 修复建议将通过JavaScript动态生成 -->
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 报告操作 -->
+                                        <div class="report-actions">
+                                            <button class="action-btn download-btn" onclick="downloadWhiteboxReport()">
+                                                <span>📄</span> 下载报告
+                                            </button>
+                                            <button class="action-btn share-btn" onclick="shareWhiteboxReport()">
+                                                <span>🔗</span> 分享报告
+                                            </button>
+                                            <button class="action-btn new-test-btn" onclick="startNewWhiteboxTest()">
+                                                <span>🔄</span> 开始新测试
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="step-actions">
+                                    <button class="prev-step-btn" onclick="prevStep()">上一步</button>
+                                    <button class="finish-test-btn" onclick="finishTest()">完成测试</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 黑盒测试界面 -->
+                    <div class="test-interface hidden" id="blackbox-interface">
+                        <div class="test-header">
+                            <h4>🔍 黑盒测试 - 自动化渗透</h4>
+                            <button class="back-to-selection" onclick="backToModeSelection()">← 返回模式选择</button>
+                        </div>
+                        
+                        <!-- 黑盒测试步骤导航 -->
+                        <div class="step-navigation">
+                            <div class="step-item active" data-step="1">
+                                <div class="step-number">1</div>
+                                <div class="step-title">目标识别</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="2">
+                                <div class="step-number">2</div>
+                                <div class="step-title">信息收集</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="3">
+                                <div class="step-number">3</div>
+                                <div class="step-title">漏洞扫描</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="4">
+                                <div class="step-number">4</div>
+                                <div class="step-title">渗透测试</div>
+                            </div>
+                            <div class="step-line"></div>
+                            <div class="step-item" data-step="5">
+                                <div class="step-number">5</div>
+                                <div class="step-title">生成报告</div>
+                            </div>
+                        </div>
+
+                        <!-- 黑盒测试内容 -->
+                        <div class="blackbox-content">
+                            <!-- 步骤1：目标识别 -->
+                            <div class="blackbox-step active" id="blackbox-step-1">
+                                <h5>步骤1：目标识别与配置</h5>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label>目标URL/IP地址</label>
+                                        <input type="text" id="target-url" placeholder="请输入目标URL或IP地址" value="http://192.168.1.100">
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label>端口范围</label>
+                                            <input type="text" id="port-range" placeholder="如：1-1000" value="1-1000">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>扫描类型</label>
+                                            <select id="scan-type">
+                                                <option value="comprehensive">全面扫描</option>
+                                                <option value="quick">快速扫描</option>
+                                                <option value="stealth">隐蔽扫描</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="step-actions">
+                                    <button class="btn-primary" onclick="startBlackboxTest()">开始黑盒测试</button>
+                                </div>
+                            </div>
+
+                            <!-- 步骤2-5：测试进度显示 -->
+                            <div class="blackbox-step hidden" id="blackbox-step-progress">
+                                <h5>黑盒测试进行中...</h5>
+                                <div class="test-progress">
+                                    <div class="progress-item">
+                                        <div class="progress-icon">🎯</div>
+                                        <div class="progress-content">
+                                            <h6>目标识别</h6>
+                                            <div class="progress-bar"><div class="progress-fill" style="width: 100%"></div></div>
+                                            <p class="progress-status">已完成</p>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-icon">📡</div>
+                                        <div class="progress-content">
+                                            <h6>信息收集</h6>
+                                            <div class="progress-bar"><div class="progress-fill" id="info-gathering-progress" style="width: 0%"></div></div>
+                                            <p class="progress-status" id="info-gathering-status">准备中...</p>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-icon">🔍</div>
+                                        <div class="progress-content">
+                                            <h6>漏洞扫描</h6>
+                                            <div class="progress-bar"><div class="progress-fill" id="vuln-scan-progress" style="width: 0%"></div></div>
+                                            <p class="progress-status" id="vuln-scan-status">等待中...</p>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-icon">⚡</div>
+                                        <div class="progress-content">
+                                            <h6>渗透测试</h6>
+                                            <div class="progress-bar"><div class="progress-fill" id="penetration-progress" style="width: 0%"></div></div>
+                                            <p class="progress-status" id="penetration-status">等待中...</p>
+                                        </div>
+                                    </div>
+                                    <div class="progress-item">
+                                        <div class="progress-icon">📊</div>
+                                        <div class="progress-content">
+                                            <h6>生成报告</h6>
+                                            <div class="progress-bar"><div class="progress-fill" id="report-progress" style="width: 0%"></div></div>
+                                            <p class="progress-status" id="report-status">等待中...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="test-logs">
+                                    <h6>测试日志</h6>
+                                    <div class="log-container" id="blackbox-logs">
+                                        <div class="log-entry">[INFO] 黑盒测试初始化完成</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+            
+            <!-- 黑盒测试报告步骤 -->
+            <div id="blackbox-step-report" class="blackbox-step hidden">
+                <div class="blackbox-report">
+                    <h3>🎯 黑盒测试报告</h3>
+                    
+                    <!-- 测试信息 -->
+                    <div class="report-section">
+                        <h4>📋 测试信息</h4>
+                        <div id="blackbox-test-info" class="test-info-container">
+                            <!-- 动态填充测试信息 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 执行摘要 -->
+                    <div class="report-section">
+                        <h4>📊 执行摘要</h4>
+                        <div id="blackbox-execution-summary" class="execution-summary-container">
+                            <!-- 动态填充执行摘要 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 发现的漏洞 -->
+                    <div class="report-section">
+                        <h4>🔍 发现的漏洞</h4>
+                        <div id="blackbox-vulnerabilities" class="vulnerabilities-container">
+                            <!-- 动态填充漏洞信息 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 修复建议 -->
+                    <div class="report-section">
+                        <h4>💡 修复建议</h4>
+                        <div id="blackbox-recommendations" class="recommendations-container">
+                            <!-- 动态填充修复建议 -->
+                        </div>
+                    </div>
+                    
+                    <!-- 报告操作 -->
+                    <div class="report-actions">
+                        <button class="action-btn download-btn" onclick="downloadBlackboxReport()">
+                            <i class="fas fa-download"></i> 下载报告
+                        </button>
+                        <button class="action-btn share-btn" onclick="shareBlackboxReport()">
+                            <i class="fas fa-share"></i> 分享报告
+                        </button>
+                        <button class="action-btn new-test-btn" onclick="startNewBlackboxTest()">
+                            <i class="fas fa-plus"></i> 新建测试
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学习资料 -->
+            <div class="tab-content" id="learning-tab">
+                <div class="learning-section">
+                    <h3>📚 学习资料</h3>
+                    <div class="learning-grid">
+                        <div class="learning-card">
+                            <div class="learning-icon">📖</div>
+                            <h4>理论知识</h4>
+                            <ul>
+                                <li><a href="#">Web应用安全基础</a></li>
+                                <li><a href="#">SQL注入攻击原理</a></li>
+                                <li><a href="#">XSS攻击与防护</a></li>
+                                <li><a href="#">CSRF攻击机制</a></li>
+                            </ul>
+                        </div>
+                        <div class="learning-card">
+                            <div class="learning-icon">🛠️</div>
+                            <h4>工具使用</h4>
+                            <ul>
+                                <li><a href="#">Burp Suite使用指南</a></li>
+                                <li><a href="#">SQLMap工具教程</a></li>
+                                <li><a href="#">Nmap扫描技术</a></li>
+                                <li><a href="#">Metasploit框架</a></li>
+                            </ul>
+                        </div>
+                        <div class="learning-card">
+                            <div class="learning-icon">🎥</div>
+                            <h4>视频教程</h4>
+                            <ul>
+                                <li><a href="#">Web渗透测试实战</a></li>
+                                <li><a href="#">漏洞挖掘技巧</a></li>
+                                <li><a href="#">安全测试流程</a></li>
+                                <li><a href="#">报告编写规范</a></li>
+                            </ul>
+                        </div>
+                        <div class="learning-card">
+                            <div class="learning-icon">📝</div>
+                            <h4>实践案例</h4>
+                            <ul>
+                                <li><a href="#">电商网站渗透案例</a></li>
+                                <li><a href="#">企业OA系统测试</a></li>
+                                <li><a href="#">移动应用安全测试</a></li>
+                                <li><a href="#">API接口安全测试</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/scenario-detail.js') }}"></script>
+</body>
+</html>

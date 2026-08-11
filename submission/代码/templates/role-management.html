@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色管理 - 网络安全攻防训练平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 16px;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+        /* 权限选择区域使用与表单一致的视觉密度 */
+        .permission-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(120px, 1fr));
+            gap: 8px 12px;
+            align-items: center;
+        }
+        .permission-checkboxes label {
+            font-size: 12px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+
+        <!-- 角色管理工具栏 -->
+        <div class="user-management-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="搜索角色..." id="roleSearchInput">
+                </div>
+                <div class="filter-dropdown">
+                    <select id="roleStatusFilter">
+                        <option value="all">所有状态</option>
+                        <option value="active">启用</option>
+                        <option value="inactive">禁用</option>
+                    </select>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn-primary" onclick="openAddRoleModal()">
+                    <i class="fas fa-plus"></i>
+                    添加角色
+                </button>
+                <button class="btn-secondary" onclick="exportRoles()">
+                    <i class="fas fa-download"></i>
+                    导出
+                </button>
+            </div>
+        </div>
+
+        <!-- 角色表格 -->
+        <div class="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th width="40">
+                            <input type="checkbox" id="selectAllRoles">
+                        </th>
+                        <th>角色名称</th>
+                        <th>角色描述</th>
+                        <th>权限数量</th>
+                        <th>用户数量</th>
+                        <th>状态</th>
+                        <th>创建时间</th>
+                        <th>更新时间</th>
+                        <th width="120">操作</th>
+                    </tr>
+                </thead>
+                <tbody id="roleTableBody">
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="role-checkbox" data-role-id="1">
+                        </td>
+                        <td>
+                            <div class="role-info-cell">
+                                <div class="role-icon">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div class="role-details">
+                                    <h4>超级管理员</h4>
+                                    <p>系统最高权限角色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>拥有系统所有权限，可以管理所有功能模块</td>
+                        <td><span class="permission-count">25</span></td>
+                        <td><span class="user-count">2</span></td>
+                        <td>
+                            <span class="status-badge active">启用</span>
+                        </td>
+                        <td>2024-01-15 10:30:00</td>
+                        <td>2024-01-20 14:25:00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="编辑" onclick="editRole(1)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon" title="权限设置" onclick="setPermissions(1)">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn-icon danger" title="删除" onclick="deleteRole(1)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="role-checkbox" data-role-id="2">
+                        </td>
+                        <td>
+                            <div class="role-info-cell">
+                                <div class="role-icon">
+                                    <i class="fas fa-chalkboard-teacher"></i>
+                                </div>
+                                <div class="role-details">
+                                    <h4>教师</h4>
+                                    <p>教学管理角色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>可以创建和管理训练场景，查看学生学习进度</td>
+                        <td><span class="permission-count">15</span></td>
+                        <td><span class="user-count">8</span></td>
+                        <td>
+                            <span class="status-badge active">启用</span>
+                        </td>
+                        <td>2024-01-15 10:30:00</td>
+                        <td>2024-01-18 09:15:00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="编辑" onclick="editRole(2)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon" title="权限设置" onclick="setPermissions(2)">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn-icon danger" title="删除" onclick="deleteRole(2)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="role-checkbox" data-role-id="3">
+                        </td>
+                        <td>
+                            <div class="role-info-cell">
+                                <div class="role-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="role-details">
+                                    <h4>学生</h4>
+                                    <p>学习者角色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>可以参与训练场景，查看个人学习记录</td>
+                        <td><span class="permission-count">8</span></td>
+                        <td><span class="user-count">156</span></td>
+                        <td>
+                            <span class="status-badge active">启用</span>
+                        </td>
+                        <td>2024-01-15 10:30:00</td>
+                        <td>2024-01-16 16:45:00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="编辑" onclick="editRole(3)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon" title="权限设置" onclick="setPermissions(3)">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn-icon danger" title="删除" onclick="deleteRole(3)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="checkbox" class="role-checkbox" data-role-id="4">
+                        </td>
+                        <td>
+                            <div class="role-info-cell">
+                                <div class="role-icon">
+                                    <i class="fas fa-eye"></i>
+                                </div>
+                                <div class="role-details">
+                                    <h4>观察员</h4>
+                                    <p>只读权限角色</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>只能查看系统信息，无法进行任何修改操作</td>
+                        <td><span class="permission-count">3</span></td>
+                        <td><span class="user-count">5</span></td>
+                        <td>
+                            <span class="status-badge active">启用</span>
+                        </td>
+                        <td>2024-01-16 14:20:00</td>
+                        <td>2024-01-16 14:20:00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn-icon" title="编辑" onclick="editRole(4)">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn-icon" title="权限设置" onclick="setPermissions(4)">
+                                    <i class="fas fa-key"></i>
+                                </button>
+                                <button class="btn-icon danger" title="删除" onclick="deleteRole(4)">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <div class="pagination-info"><span></span></div>
+            <div class="pagination-controls" id="paginationControls"></div>
+        </div>
+    </main>
+
+    <!-- 添加角色模态框 -->
+    <div id="addRoleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加新角色</h2>
+                <button class="modal-close" onclick="closeAddRoleModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+            <form id="addRoleForm">
+                <div class="form-group">
+                    <label for="roleName">角色名称 *</label>
+                    <input type="text" id="roleName" name="roleName" required>
+                </div>
+                <div class="form-group">
+                    <label for="roleDescription">角色描述</label>
+                    <textarea id="roleDescription" name="roleDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="roleStatus">状态</label>
+                    <select id="roleStatus" name="roleStatus">
+                        <option value="active">启用</option>
+                        <option value="inactive">禁用</option>
+                    </select>
+                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                    <button type="button" class="btn-secondary" onclick="closeAddRoleModal()">取消</button>
+                <button type="submit" class="btn-primary" form="addRoleForm">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑角色模态框 -->
+    <div id="editRoleModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>编辑角色</h2>
+                <button class="modal-close" onclick="closeEditRoleModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="editRoleForm">
+                    <div class="form-group">
+                        <label for="editRoleName">角色名称 *</label>
+                        <input type="text" id="editRoleName" name="editRoleName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRoleDescription">角色描述</label>
+                        <textarea id="editRoleDescription" name="editRoleDescription" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="editRoleStatus">状态</label>
+                        <select id="editRoleStatus" name="editRoleStatus">
+                            <option value="active">启用</option>
+                            <option value="inactive">禁用</option>
+                        </select>
+                </div>
+            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closeEditRoleModal()">取消</button>
+                <button type="submit" class="btn-primary" form="editRoleForm">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 权限设置模态框 -->
+    <div id="permissionsModal" class="modal">
+        <div class="modal-content" style="max-width: 720px;">
+            <div class="modal-header">
+                <h2>设置权限</h2>
+                <button class="modal-close" onclick="closePermissionsModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div id="permissionCheckboxes" class="permission-checkboxes"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" onclick="closePermissionsModal()">取消</button>
+                <button type="button" class="btn-primary" onclick="submitPermissions()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="components/sidebar.js"></script>
+    <script src="{{ url_for('static', filename='scripts/role-management.js') }}"></script>
+</body>
+</html>

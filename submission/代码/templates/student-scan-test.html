@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>扫描测试 - AI靶场系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/student-scan-test.css') }}">
+</head>
+<body class="student-scan-test">
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1>🔍 扫描测试中心</h1>
+                <p>配置扫描任务，查看扫描结果，进行渗透测试演示</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" id="newScanBtn">
+                    <span class="btn-icon">➕</span>
+                    新建扫描任务
+                </button>
+            </div>
+        </div>
+
+        <!-- 功能导航 -->
+        <div class="function-nav">
+            <div class="nav-item active" data-tab="scan-config">
+                <div class="nav-icon">⚙️</div>
+                <div class="nav-text">扫描配置</div>
+            </div>
+            <div class="nav-item" data-tab="scan-results">
+                <div class="nav-icon">📊</div>
+                <div class="nav-text">扫描结果</div>
+            </div>
+            <div class="nav-item" data-tab="penetration-demo">
+                <div class="nav-icon">🎯</div>
+                <div class="nav-text">渗透演示</div>
+            </div>
+        </div>
+
+        <!-- 扫描配置模块 -->
+        <div class="tab-content active" id="scan-config">
+            <div class="config-section">
+                <div class="section-header">
+                    <h2>🎯 扫描目标配置</h2>
+                    <p>指定扫描目标并创建扫描任务</p>
+                </div>
+                
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="targetUrl">目标URL</label>
+                        <input type="text" id="targetUrl" placeholder="请输入目标URL，如：http://example.com" value="http://testphp.vulnweb.com">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="scanType">扫描类型</label>
+                            <select id="scanType">
+                                <option value="comprehensive">综合扫描</option>
+                                <option value="vulnerability">漏洞扫描</option>
+                                <option value="directory">目录扫描</option>
+                                <option value="port">端口扫描</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="scanDepth">扫描深度</label>
+                            <select id="scanDepth">
+                                <option value="1">浅层扫描 (深度1)</option>
+                                <option value="2" selected>中等扫描 (深度2)</option>
+                                <option value="3">深度扫描 (深度3)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="scanEngine">扫描引擎</label>
+                        <div class="engine-options">
+                            <label class="engine-option">
+                                <input type="checkbox" name="engine" value="nmap" checked>
+                                <span class="engine-name">Nmap</span>
+                                <span class="engine-desc">网络发现和端口扫描</span>
+                            </label>
+                            <label class="engine-option">
+                                <input type="checkbox" name="engine" value="nikto" checked>
+                                <span class="engine-name">Nikto</span>
+                                <span class="engine-desc">Web服务器漏洞扫描</span>
+                            </label>
+                            <label class="engine-option">
+                                <input type="checkbox" name="engine" value="dirb">
+                                <span class="engine-name">Dirb</span>
+                                <span class="engine-desc">目录和文件暴力破解</span>
+                            </label>
+                            <label class="engine-option">
+                                <input type="checkbox" name="engine" value="sqlmap">
+                                <span class="engine-name">SQLMap</span>
+                                <span class="engine-desc">SQL注入检测和利用</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn-secondary" id="previewBtn">预览配置</button>
+                        <button class="btn-primary" id="startScanBtn">
+                            <span class="btn-icon">🚀</span>
+                            开始扫描
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 扫描结果模块 -->
+        <div class="tab-content" id="scan-results">
+            <div class="results-section">
+                <div class="section-header">
+                    <h2>📊 扫描结果分析</h2>
+                    <p>查看漏洞扫描策略、引擎状态和详细结果</p>
+                </div>
+                
+                <!-- 扫描状态概览 -->
+                <div class="scan-overview">
+                    <div class="overview-card">
+                        <div class="card-icon">🎯</div>
+                        <div class="card-content">
+                            <div class="card-title">扫描目标</div>
+                            <div class="card-value" id="scanTarget">http://testphp.vulnweb.com</div>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon">⏱️</div>
+                        <div class="card-content">
+                            <div class="card-title">扫描时长</div>
+                            <div class="card-value" id="scanDuration">00:05:32</div>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon">🔍</div>
+                        <div class="card-content">
+                            <div class="card-title">发现漏洞</div>
+                            <div class="card-value" id="vulnerabilityCount">7</div>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon">📁</div>
+                        <div class="card-content">
+                            <div class="card-title">发现目录</div>
+                            <div class="card-value" id="directoryCount">15</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 引擎状态 -->
+                <div class="engine-status">
+                    <h3>🔧 扫描引擎状态</h3>
+                    <div class="engine-list">
+                        <div class="engine-item">
+                            <div class="engine-info">
+                                <span class="engine-name">Nmap</span>
+                                <span class="engine-version">v7.94</span>
+                            </div>
+                            <div class="engine-status-badge completed">已完成</div>
+                            <div class="engine-progress">100%</div>
+                        </div>
+                        <div class="engine-item">
+                            <div class="engine-info">
+                                <span class="engine-name">Nikto</span>
+                                <span class="engine-version">v2.5.0</span>
+                            </div>
+                            <div class="engine-status-badge completed">已完成</div>
+                            <div class="engine-progress">100%</div>
+                        </div>
+                        <div class="engine-item">
+                            <div class="engine-info">
+                                <span class="engine-name">Dirb</span>
+                                <span class="engine-version">v2.22</span>
+                            </div>
+                            <div class="engine-status-badge running">运行中</div>
+                            <div class="engine-progress">75%</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- URL列表 -->
+                <div class="url-list">
+                    <h3>🌐 发现的URL列表</h3>
+                    <div class="url-items">
+                        <div class="url-item">
+                            <div class="url-info">
+                                <span class="url-path">/admin/</span>
+                                <span class="url-status status-200">200</span>
+                            </div>
+                            <div class="url-details">管理员后台入口</div>
+                        </div>
+                        <div class="url-item">
+                            <div class="url-info">
+                                <span class="url-path">/login.php</span>
+                                <span class="url-status status-200">200</span>
+                            </div>
+                            <div class="url-details">用户登录页面</div>
+                        </div>
+                        <div class="url-item">
+                            <div class="url-info">
+                                <span class="url-path">/config/</span>
+                                <span class="url-status status-403">403</span>
+                            </div>
+                            <div class="url-details">配置文件目录（禁止访问）</div>
+                        </div>
+                        <div class="url-item">
+                            <div class="url-info">
+                                <span class="url-path">/backup/</span>
+                                <span class="url-status status-200">200</span>
+                            </div>
+                            <div class="url-details">备份文件目录</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 子目录列表 -->
+                <div class="directory-list">
+                    <h3>📁 目标地址子目录</h3>
+                    <div class="directory-tree">
+                        <div class="directory-item">
+                            <div class="dir-icon">📁</div>
+                            <div class="dir-name">/admin/</div>
+                            <div class="dir-files">3 files</div>
+                        </div>
+                        <div class="directory-item subdirectory">
+                            <div class="dir-icon">📄</div>
+                            <div class="dir-name">index.php</div>
+                            <div class="dir-size">2.3KB</div>
+                        </div>
+                        <div class="directory-item subdirectory">
+                            <div class="dir-icon">📄</div>
+                            <div class="dir-name">config.php</div>
+                            <div class="dir-size">1.8KB</div>
+                        </div>
+                        <div class="directory-item">
+                            <div class="dir-icon">📁</div>
+                            <div class="dir-name">/uploads/</div>
+                            <div class="dir-files">12 files</div>
+                        </div>
+                        <div class="directory-item">
+                            <div class="dir-icon">📁</div>
+                            <div class="dir-name">/includes/</div>
+                            <div class="dir-files">8 files</div>
+                        </div>
+                        <div class="directory-item">
+                            <div class="dir-icon">📁</div>
+                            <div class="dir-name">/css/</div>
+                            <div class="dir-files">5 files</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 渗透测试演示模块 -->
+        <div class="tab-content" id="penetration-demo">
+            <div class="demo-section">
+                <div class="section-header">
+                    <h2>🎯 渗透测试演示</h2>
+                    <p>通过简单交互演示渗透测试过程并获取目标shell</p>
+                </div>
+                
+                <!-- 渗透步骤 -->
+                <div class="penetration-steps">
+                    <div class="step-item active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>目标识别</h4>
+                            <p>扫描目标系统，识别开放端口和服务</p>
+                        </div>
+                        <div class="step-status completed">✓</div>
+                    </div>
+                    <div class="step-item" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>漏洞发现</h4>
+                            <p>分析发现的服务，寻找潜在安全漏洞</p>
+                        </div>
+                        <div class="step-status">○</div>
+                    </div>
+                    <div class="step-item" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>漏洞利用</h4>
+                            <p>利用发现的漏洞获取系统访问权限</p>
+                        </div>
+                        <div class="step-status">○</div>
+                    </div>
+                    <div class="step-item" data-step="4">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>权限提升</h4>
+                            <p>提升权限并获取目标系统shell</p>
+                        </div>
+                        <div class="step-status">○</div>
+                    </div>
+                    <div class="step-item" data-step="5">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h4>安全设备绕过</h4>
+                            <p>检测并绕过蜜罐等安全防护设备</p>
+                        </div>
+                        <div class="step-status">○</div>
+                    </div>
+                </div>
+                
+                <!-- 交互式终端 -->
+                <div class="terminal-container">
+                    <div class="terminal-header">
+                        <div class="terminal-title">🖥️ 渗透测试终端</div>
+                        <div class="terminal-controls">
+                            <span class="control-btn close">●</span>
+                            <span class="control-btn minimize">●</span>
+                            <span class="control-btn maximize">●</span>
+                        </div>
+                    </div>
+                    <div class="terminal-body" id="terminal">
+                        <div class="terminal-line">
+                            <span class="prompt">kali@kali:~$</span>
+                            <span class="command">nmap -sV 192.168.1.100</span>
+                        </div>
+                        <div class="terminal-output">
+                            <div>Starting Nmap 7.94 ( https://nmap.org )</div>
+                            <div>Nmap scan report for 192.168.1.100</div>
+                            <div>Host is up (0.001s latency).</div>
+                            <div>PORT     STATE SERVICE VERSION</div>
+                            <div>22/tcp   open  ssh     OpenSSH 7.4</div>
+                            <div>80/tcp   open  http    Apache httpd 2.4.6</div>
+                            <div>3306/tcp open  mysql   MySQL 5.7.26</div>
+                        </div>
+                        <div class="terminal-line current">
+                            <span class="prompt">kali@kali:~$</span>
+                            <span class="cursor">|</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="demo-actions">
+                    <button class="btn-secondary" id="resetDemoBtn">重置演示</button>
+                    <button class="btn-primary" id="nextStepBtn">
+                        <span class="btn-icon">▶️</span>
+                        下一步
+                    </button>
+                    <button class="btn-success" id="getShellBtn" style="display: none;">
+                        <span class="btn-icon">🎯</span>
+                        获取Shell
+                    </button>
+                    <button class="btn-warning" id="bypassSecurityBtn" style="display: none;">
+                        <span class="btn-icon">🛡️</span>
+                        绕过安全设备
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 扫描进度模态框 -->
+    <div class="modal" id="scanProgressModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🚀 扫描进行中</h3>
+            </div>
+            <div class="modal-body">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="scanProgress"></div>
+                    </div>
+                    <div class="progress-text" id="scanProgressText">0%</div>
+                </div>
+                <div class="scan-logs" id="scanLogs">
+                    <div class="log-item">正在初始化扫描引擎...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="cancelScanBtn">取消扫描</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/student-scan-test.js') }}"></script>
+</body>
+</html>

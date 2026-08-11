@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>攻击决策库</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/attack-library.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-sword"></i> 攻击决策库</h1>
+            <p>管理和浏览所有攻击技术和策略</p>
+        </header>
+
+        <div class="toolbar">
+            <div class="search-bar">
+                <input type="text" placeholder="搜索攻击技术...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+            <button class="add-btn"><i class="fas fa-plus"></i> 添加新技术</button>
+        </div>
+
+        <div class="attack-table-container">
+            <table class="attack-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>描述</th>
+                        <th>CWE ID</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be loaded dynamically -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="pagination">
+            <a href="#" class="active">1</a>
+            <a href="#">2</a>
+            <a href="#">3</a>
+            <span>...</span>
+            <a href="#">10</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/attacks')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('.attack-table tbody');
+                    tbody.innerHTML = ''; // Clear existing data
+                    data.forEach(attack => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${attack.id}</td>
+                            <td>${attack.name}</td>
+                            <td>${attack.description}</td>
+                            <td>${attack.cwe_id}</td>
+                            <td class="actions">
+                                <button class="edit-btn"><i class="fas fa-edit"></i></button>
+                                <button class="delete-btn"><i class="fas fa-trash"></i></button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                });
+        });
+    </script>
+</body>
+</html>

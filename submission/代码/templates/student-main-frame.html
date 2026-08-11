@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI靶场系统 - 学员端</title>
+    <link rel="preconnect" href="https://fonts.font.im">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.font.im/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/student-frame.css') }}">
+</head>
+<body class="student-frame">
+    <div class="app-container">
+        <!-- 顶部导航栏 -->
+        <header class="top-header">
+            <div class="header-left">
+                <div class="logo">
+                    <span class="logo-icon">🎯</span>
+                    <span class="logo-text">AI靶场系统</span>
+                    <span class="user-type">学员端</span>
+                </div>
+            </div>
+            <div class="header-center">
+                <nav class="main-nav">
+                    <a href="#" class="nav-item active" data-page="personal-center">
+                        <span class="nav-icon">👤</span>
+                        <span class="nav-text">个人中心</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="scenario-test">
+                        <span class="nav-icon">🔬</span>
+                        <span class="nav-text">场景测试</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="course-learning">
+                        <span class="nav-icon">📚</span>
+                        <span class="nav-text">课程学习</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="experiment-center">
+                        <span class="nav-icon">⚡</span>
+                        <span class="nav-text">实验练习</span>
+                    </a>
+                    <a href="student-scan-test.html" class="nav-item" data-page="scan-test">
+                        <span class="nav-icon">🔍</span>
+                        <span class="nav-text">扫描测试</span>
+                    </a>
+                    <a href="#" class="nav-item" data-page="competition-center">
+                        <span class="nav-icon">🏆</span>
+                        <span class="nav-text">竞赛中心</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="header-right">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <span>学</span>
+                    </div>
+                    <div class="user-details">
+                        <div class="user-name">学员用户</div>
+                        <div class="user-level">初级学员</div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="action-btn" title="通知">
+                        <span class="icon">🔔</span>
+                        <span class="badge">3</span>
+                    </button>
+                    <button class="action-btn" title="设置">
+                        <span class="icon">⚙️</span>
+                    </button>
+                    <button class="action-btn logout-btn" title="退出登录">
+                        <span class="icon">🚪</span>
+                        <span class="btn-text">退出</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <div class="content-wrapper">
+                <iframe id="content-frame" src="{{ url_for('show_page', page_name='personal-center.html') }}" frameborder="0"></iframe>
+            </div>
+        </main>
+
+        <!-- 底部状态栏 -->
+        <footer class="bottom-footer">
+            <div class="footer-left">
+                <span class="status-indicator online"></span>
+                <span class="status-text">在线学习中</span>
+            </div>
+            <div class="footer-center">
+                <div class="progress-info">
+                    <span class="progress-label">今日学习进度：</span>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 65%"></div>
+                    </div>
+                    <span class="progress-text">65%</span>
+                </div>
+            </div>
+            <div class="footer-right">
+                <span class="time-info">学习时长：2小时30分钟</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/student-frame.js') }}"></script>
+</body>
+</html>

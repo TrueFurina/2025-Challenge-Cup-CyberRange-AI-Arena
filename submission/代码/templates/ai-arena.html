@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI 攻防对抗大屏</title>
+  <style>
+    :root {
+      --bg: #0a1128; --panel: #111c33; --ink: #e8ecf3; --muted: #7a8bb0;
+      --accent: #00ff9d; --accent-2: #00b3ff; --line: #233454;
+      --bad: #ff5d5d; --warn: #ffb454;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; color: var(--ink); background: radial-gradient(circle at 15% -10%, rgba(0,179,255,0.18), transparent 40%), radial-gradient(circle at 90% 110%, rgba(0,255,157,0.12), transparent 35%), linear-gradient(180deg, #0d1730 0%, var(--bg) 60%); min-height: 100vh; }
+    .shell { max-width: 1200px; margin: 0 auto; padding: 28px 20px 40px; }
+    h1 { font-size: 30px; margin-bottom: 6px; color: #fff; }
+    .tag { display: inline-block; padding: 6px 10px; border-radius: 999px; background: rgba(0,255,157,0.10); color: var(--accent); font-size: 12px; font-weight: 700; border: 1px solid rgba(0,255,157,0.25); }
+    .lede { color: var(--muted); line-height: 1.7; }
+    .card { background: linear-gradient(180deg, var(--panel) 0%, #0e1830 100%); border: 1px solid var(--line); border-radius: 18px; padding: 20px; margin-bottom: 16px; }
+    .toolbar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+    .btn { display: inline-block; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 600; border: 1px solid var(--line); color: var(--ink); background: #1a2744; cursor: pointer; }
+    .btn-primary { background: var(--accent); color: #06281a; border-color: var(--accent); }
+    .stat { border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; background: rgba(0,179,255,0.05); margin: 4px; display: inline-block; }
+    .stat strong { color: var(--accent); font-size: 18px; }
+    .round { border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; background: rgba(0,0,0,0.15); }
+    .round h3 { margin: 0 0 8px; color: var(--accent-2); }
+    .attack-box, .defense-box { padding: 10px 12px; border-radius: 10px; margin: 6px 0; }
+    .attack-box { background: rgba(255,93,93,0.10); border-left: 4px solid var(--bad); }
+    .defense-box { background: rgba(0,255,157,0.08); border-left: 4px solid var(--accent); }
+    .verdict { font-weight: 700; padding: 4px 10px; border-radius: 999px; display: inline-block; }
+    .verdict-win { background: rgba(255,93,93,0.15); color: var(--bad); }
+    .verdict-def { background: rgba(0,255,157,0.15); color: var(--accent); }
+    pre { background: #161a20; color: #e8ecf3; padding: 12px; border-radius: 10px; font-size: 12px; overflow: auto; max-height: 240px; }
+    .status { color: var(--warn); }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <div class="card">
+    <span class="tag">AI Agent Arena</span>
+    <h1>AI 攻防对抗推演大屏</h1>
+    <p class="lede">攻击 Agent 与防御 Agent 回合制对抗：攻击方基于漏洞库规划攻击路径，防御方制定响应策略。AI 决策过程实时展示。</p>
+    <div class="toolbar">
+      <button class="btn btn-primary" onclick="startArena()">⚔️ 启动攻防对抗</button>
+      <button class="btn" onclick="runOneRound()">▶️ 执行一轮</button>
+      <button class="btn" onclick="runAll()">⏩ 一键执行全部</button>
+      <button class="btn" onclick="refreshStatus()">🔄 刷新状态</button>
+      <button class="btn" onclick="generateScenario()">🌐 动态生成场景</button>
+      <a class="btn" href="/">返回首页</a>
+    </div>
+    <div id="statusBar" class="status" style="margin-top: 10px;">就绪</div>
+  </div>
+  <div class="card">
+    <h2>动态场景拓扑</h2>
+    <div id="scenarioView"><p class="lede">点击"动态生成场景"，基于漏洞库自动构建网络拓扑。</p></div>
+  </div>
+  <div class="card">
+    <h2>对抗进程</h2>
+    <div id="rounds"><p class="lede">尚未开始对抗。点击"启动攻防对抗"创建会话。</p></div>
+  </div>
+</div>
+<script>
+let sessionId = null;
+
+async function api(url, method = 'GET', body = null) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const resp = await fetch(url, opts);
+  return resp.json();
+}
+
+function setStatus(msg) {
+  document.getElementById('statusBar').textContent = msg;
+}
+
+async function startArena() {
+  setStatus('创建对抗会话...');
+  const data = await api('/api/ai/session', 'POST', {});
+  sessionId = data.session_id;
+  setStatus(`会话已创建: ${sessionId} | 知识库: 攻击 ${data.knowledge_counts.attacks} / 漏洞 ${data.knowledge_counts.vulnerabilities} / 防御 ${data.knowledge_counts.defenses} | AI ${data.ai_enabled === false ? '' : '（自动）'}`);
+  document.getElementById('rounds').innerHTML = '<p class="lede">会话已创建，点击"执行一轮"或"一键执行全部"。</p>';
+}
+
+async function runOneRound() {
+  if (!sessionId) { await startArena(); }
+  setStatus('执行一轮对抗（AI 决策中...）');
+  const data = await api(`/api/ai/session/${sessionId}/round`, 'POST');
+  if (data.error) { setStatus('错误: ' + data.error); return; }
+  renderRound(data.round);
+  setStatus(`第 ${data.current_round}/${data.max_rounds} 轮完成 | 会话状态: ${data.status}`);
+}
+
+async function runAll() {
+  if (!sessionId) { await startArena(); }
+  setStatus('一键执行全部回合（AI 决策中...）');
+  const data = await api(`/api/ai/session/${sessionId}/run`, 'POST');
+  if (data.error) { setStatus('错误: ' + data.error); return; }
+  document.getElementById('rounds').innerHTML = '';
+  for (const r of data.rounds) renderRound(r);
+  setStatus(`全部 ${data.current_round} 轮完成 | 会话状态: ${data.status}`);
+}
+
+async function refreshStatus() {
+  if (!sessionId) { setStatus('尚无会话，先启动攻防对抗'); return; }
+  const data = await api(`/api/ai/session/${sessionId}`);
+  if (data.error) { setStatus('错误: ' + data.error); return; }
+  document.getElementById('rounds').innerHTML = '';
+  for (const r of data.rounds) renderRound(r);
+  setStatus(`已刷新: ${data.current_round}/${data.max_rounds} 轮 | 状态: ${data.status}`);
+}
+
+// 阶段 3 C1：动态场景生成
+async function generateScenario() {
+  setStatus('生成动态场景（基于漏洞库构建拓扑）...');
+  const data = await api('/api/ai/scenario/generate', 'POST', {});
+  if (data.error) { setStatus('错误: ' + data.error); return; }
+  renderScenario(data);
+  setStatus(`场景已生成: ${data.total_hosts} 台主机 / ${data.total_vulnerabilities} 个漏洞（${data.scenario_id}）`);
+}
+
+function renderScenario(scn) {
+  const box = document.getElementById('scenarioView');
+  const cards = scn.hosts.map(h => {
+    const sevClass = h.severity === 'critical' ? 'verdict-win' : (h.severity === 'high' ? 'source-rules' : '');
+    const vulns = (h.vulnerabilities || []).map(v => `<li>${esc(v)}</li>`).join('') || '<li>无已知漏洞</li>';
+    return `
+      <div class="round" style="display:inline-block; width: calc(33% - 16px); vertical-align: top; margin: 8px;">
+        <h3>🖥️ ${esc(h.name)}</h3>
+        <div class="attack-box" style="border-left-color: var(--accent-2);">
+          <strong>${esc(h.os)}</strong> | ${esc(h.ip)}<br>
+          <span>服务: ${esc((h.services || []).join(', '))}</span>
+          <div class="meta">威胁等级: <span class="${sevClass}">${esc(h.severity)}</span></div>
+        </div>
+        <div class="defense-box">
+          <strong>已知漏洞</strong>
+          <ul style="margin: 4px 0 0;">${vulns}</ul>
+        </div>
+      </div>`;
+  }).join('');
+  box.innerHTML = cards || '<p class="lede">场景为空</p>';
+}
+
+function renderRound(r) {
+  const box = document.getElementById('rounds');
+  const attack = r.attack_decision || {};
+  const defense = r.defense_decision || {};
+  const result = r.result || {};
+  const verdict = result.attack_won
+    ? '<span class="verdict verdict-win">攻击得手</span>'
+    : '<span class="verdict verdict-def">防御成功</span>';
+  const attackSteps = (attack.steps || []).map(s =>
+    `<li><strong>${esc(s.technique)}</strong> → ${esc(s.target)}（置信度 ${s.confidence}）：${esc(s.rationale)}</li>`
+  ).join('');
+  const defenseActions = (defense.actions || []).map(a =>
+    `<li><strong>${esc(a.action)}</strong>（优先级 ${a.priority}）：${esc(a.rationale)}</li>`
+  ).join('');
+  const div = document.createElement('div');
+  div.className = 'round';
+  div.innerHTML = `
+    <h3>第 ${r.round} 轮 ${verdict}</h3>
+    <div class="attack-box">
+      <strong>⚔️ 攻击 Agent</strong>（${esc(attack.source || 'rules')}）
+      <p>${esc(attack.summary || '')}</p>
+      <ul>${attackSteps || '<li>无攻击步骤</li>'}</ul>
+    </div>
+    <div class="defense-box">
+      <strong>🛡️ 防御 Agent</strong>（${esc(defense.source || 'rules')}）
+      <p>${esc(defense.summary || '')}</p>
+      <ul>${defenseActions || '<li>无响应动作</li>'}</ul>
+    </div>
+  `;
+  box.appendChild(div);
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>

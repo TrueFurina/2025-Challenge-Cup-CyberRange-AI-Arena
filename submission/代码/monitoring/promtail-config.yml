@@ -1,0 +1,97 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Flask应用日志
+  - job_name: flask-app
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: flask-app
+          __path__: /var/log/app/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="flask-app"}'
+          stages:
+            - regex:
+                expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>\w+) (?P<message>.*)'
+            - labels:
+                level:
+            - timestamp:
+                source: timestamp
+                format: '2006-01-02 15:04:05'
+
+  # 系统日志
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: system
+          __path__: /var/log/app/system.log
+    pipeline_stages:
+      - match:
+          selector: '{job="system"}'
+          stages:
+            - json:
+                expressions:
+                  timestamp: timestamp
+                  level: level
+                  component: component
+                  message: message
+            - labels:
+                level:
+                component:
+            - timestamp:
+                source: timestamp
+                format: RFC3339
+
+  # 错误日志
+  - job_name: error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: error
+          __path__: /var/log/app/error.log
+    pipeline_stages:
+      - match:
+          selector: '{job="error"}'
+          stages:
+            - regex:
+                expression: '(?P<timestamp>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (?P<level>ERROR|CRITICAL) (?P<module>\w+) (?P<message>.*)'
+            - labels:
+                level:
+                module:
+            - timestamp:
+                source: timestamp
+                format: '2006-01-02 15:04:05'
+
+  # 访问日志
+  - job_name: access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: access
+          __path__: /var/log/app/access.log
+    pipeline_stages:
+      - match:
+          selector: '{job="access"}'
+          stages:
+            - regex:
+                expression: '(?P<ip>\d+\.\d+\.\d+\.\d+) - - \[(?P<timestamp>[^\]]+)\] "(?P<method>\w+) (?P<path>[^"]+) HTTP/[^"]+" (?P<status>\d+) (?P<size>\d+)'
+            - labels:
+                method:
+                status:
+            - timestamp:
+                source: timestamp
+                format: '02/Jan/2006:15:04:05 -0700'

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运维管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/operations-management.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ui-components.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+        .progress-success { background-color: #28a745; }
+        .progress-warning { background-color: #ffc107; }
+        .progress-danger { background-color: #dc3545; }
+        .metric-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+        .notification.show {
+            transform: translateX(0);
+        }
+        .notification-success { background-color: #28a745; }
+        .notification-error { background-color: #dc3545; }
+        .notification-info { background-color: #17a2b8; }
+        .status-ok { color: #28a745; }
+        .status-warning { color: #ffc107; }
+        .status-error { color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-cogs"></i> 运维管理</h1>
+            <p>监控系统状态、管理日志和执行维护任务</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card system-status">
+                <h2><i class="fas fa-heartbeat"></i> 系统状态</h2>
+                <div class="status-item">
+                    <span>Web服务器</span>
+                    <span class="status status-ok">运行中</span>
+                </div>
+                <div class="status-item">
+                    <span>数据库服务</span>
+                    <span class="status status-ok">运行中</span>
+                </div>
+                <div class="status-item">
+                    <span>靶场环境</span>
+                    <span class="status status-warning">部分降级</span>
+                </div>
+                
+                <!-- 资源使用率 -->
+                <div class="resource-usage" style="margin-top: 20px;">
+                    <h3>资源使用率</h3>
+                    <div class="metric-item">
+                        <span>CPU使用率</span>
+                        <span id="cpu-percent">0%</span>
+                    </div>
+                    <div class="progress-bar" id="cpu-usage">
+                        <div class="progress-fill progress-success" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <span>内存使用率</span>
+                        <span id="memory-percent">0%</span>
+                    </div>
+                    <div class="progress-bar" id="memory-usage">
+                        <div class="progress-fill progress-success" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <span>磁盘使用率</span>
+                        <span id="disk-percent">0%</span>
+                    </div>
+                    <div class="progress-bar" id="disk-usage">
+                        <div class="progress-fill progress-success" style="width: 0%"></div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <span>系统运行时间</span>
+                        <span id="system-uptime">0分钟</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card quick-actions">
+                <h2><i class="fas fa-bolt"></i> 快速操作</h2>
+                <button data-action="restart"><i class="fas fa-sync-alt"></i> 重启所有服务</button>
+                <button data-action="backup"><i class="fas fa-database"></i> 备份数据库</button>
+                <button data-action="cleanup"><i class="fas fa-trash-alt"></i> 清理临时文件</button>
+                <button class="refresh-btn"><i class="fas fa-refresh"></i> 刷新数据</button>
+            </div>
+
+            <div class="card logs">
+                <h2><i class="fas fa-clipboard-list"></i> 最新日志</h2>
+                <div class="log-list">
+                    <div class="log-item">
+                        <span class="log-time">2023-10-27 10:30:15</span>
+                        <span class="log-level info">INFO</span>
+                        <span class="log-message">用户 'admin' 登录成功</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-time">2023-10-27 10:29:50</span>
+                        <span class="log-level warn">WARN</span>
+                        <span class="log-message">数据库连接池即将耗尽</span>
+                    </div>
+                    <div class="log-item">
+                        <span class="log-time">2023-10-27 10:28:05</span>
+                        <span class="log-level error">ERROR</span>
+                        <span class="log-message">无法连接到靶机 'web-server-01'</span>
+                    </div>
+                </div>
+                <a href="#" class="view-all-logs">查看所有日志 <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="{{ url_for('static', filename='scripts/ui-utils.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/operations-management.js') }}"></script>
+</body>
+</html>

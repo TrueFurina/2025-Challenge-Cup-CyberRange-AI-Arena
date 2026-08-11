@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网络安全实训平台 - 管理系统</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/admin-dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="{{ url_for('static', filename='components/sidebar.js') }}"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        html, body, .main-layout, .content-container {
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar-container {
+            background-color: transparent;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        .main-layout {
+            position: relative;
+            flex: 1;
+            overflow: hidden;
+            width: 100%;
+            height: calc(100vh - 60px); /* 减去顶部导航栏的高度 */
+            background-color: #f5f5f5;
+        }
+        
+        .sidebar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 250px;
+            height: 100%;
+            background: transparent;
+            box-shadow: none;
+            z-index: 1000;
+            overflow: visible;
+            margin: 0;
+            padding: 0;
+            border: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+        
+        .content-container {
+            position: absolute;
+            top: 0;
+            left: 250px; /* 与侧边栏宽度相同 */
+            right: 0;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            border: none;
+            outline: none;
+            background-color: #f5f5f5;
+            box-sizing: border-box;
+            border-left: none;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 顶部导航栏样式 */
+        .top-nav {
+            height: 60px;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            position: relative;
+            z-index: 1001;
+            width: 100%;
+        }
+        
+        .nav-left .logo {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+            width: 100%;
+        }
+        
+        .nav-left .logo i {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .nav-left {
+            flex: 1;
+        }
+        
+        .nav-right .user-menu {
+            display: flex;
+            align-items: center;
+            color: white;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .user-avatar {
+            margin-right: 8px;
+        }
+        
+        .user-avatar i {
+            font-size: 24px;
+        }
+        
+        .username {
+            margin-right: 8px;
+            font-weight: 500;
+        }
+        
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            min-width: 160px;
+            display: none;
+            z-index: 1002;
+        }
+        
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .dropdown-menu a:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .dropdown-menu a i {
+            margin-right: 8px;
+            width: 16px;
+        }
+        
+        .dropdown:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .header-container {
+            height: 40px;
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: none;
+        }
+        
+        .header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .iframe-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            flex: 1;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        
+        .content-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #f5f5f5;
+            display: block;
+            overflow: auto;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>网络安全攻防训练平台</span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <div class="user-menu">
+                <div class="user-avatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <span class="username">管理员</span>
+                <div class="dropdown">
+                    <i class="fas fa-chevron-down"></i>
+                    <div class="dropdown-menu">
+                        <a href="#"><i class="fas fa-user"></i> 个人资料</a>
+                        <a href="#"><i class="fas fa-cog"></i> 设置</a>
+                        <a href="admin-login.html"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="main-layout" style="border: none; margin: 0; padding: 0; overflow: hidden;">
+        <!-- 侧边栏容器 -->
+        <div class="sidebar-container" style="margin: 0; padding: 0; border: none; font-size: 12px; background-color: #f5f5f5;">
+            <div id="sidebar-container" style="margin: 0; padding: 0; border: none; width: 250px; position: relative; z-index: 1001; background-color: #f5f5f5;"></div>
+        </div>
+        
+        <!-- 内容区域 -->
+        <div class="content-container" style="margin: 0; padding: 0; font-size: 12px; border: none; outline: none; background-color: #f5f5f5;">
+            <!-- 页面标题栏 -->
+            <div class="header-container">
+                <div class="header-title" id="page-title">仪表板</div>
+            </div>
+            
+            <!-- iframe内容区域 -->
+            <div class="iframe-container">
+                <iframe id="content-iframe" class="content-iframe" src="admin-dashboard.html"></iframe>
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="components/sidebar.js"></script>
+    <script>
+        // 确保sidebar容器存在
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!document.querySelector('#sidebar-container')) {
+                console.error('Sidebar container not found!');
+            }
+        });
+        
+        // 页面标题映射
+        const pageTitles = {
+            'admin-dashboard': '仪表板',
+            'user-management': '用户管理',
+            'role-management': '角色管理',
+            'permission-management': '权限管理',
+            'vm-targets': '虚拟机靶材',
+            'container-targets': '容器靶标',
+            'network-devices': '网络设备',
+            'security-devices': '安全设备'
+        };
+        
+        // iframe加载管理
+        const frameManager = {
+            loadPage: function(pageUrl) {
+                const contentFrame = document.getElementById('content-iframe');
+                if (contentFrame) {
+                    // 确保URL是相对于模板根目录的
+                    const newUrl = `/${pageUrl.replace('.html', '')}`;
+                    contentFrame.src = newUrl;
+                }
+            }
+        };
+
+        // 将 frameManager 附加到 window 对象，使其全局可用
+        window.frameManager = frameManager;
+
+        // 初始化侧边栏
+        document.addEventListener('DOMContentLoaded', () => {
+            window.sidebarManager = new SidebarManager();
+        });
+    </script>
+</body>
+</html>

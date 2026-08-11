@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>虚拟机靶材 - 网络安全攻防训练平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/user-management.css') }}">
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .main-content {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        .page-header {
+            margin-top: 0;
+            padding-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 主内容区域 -->
+    <main class="main-content">
+
+        <!-- 工具栏 -->
+        <div class="user-management-toolbar">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="搜索虚拟机靶材...">
+                </div>
+                <select id="statusFilter" class="filter-select">
+                    <option value="">全部状态</option>
+                    <option value="running">运行中</option>
+                    <option value="stopped">已停止</option>
+                    <option value="error">错误</option>
+                </select>
+                <select id="osFilter" class="filter-select">
+                    <option value="">全部系统</option>
+                    <option value="windows">Windows</option>
+                    <option value="linux">Linux</option>
+                    <option value="ubuntu">Ubuntu</option>
+                </select>
+            </div>
+            <div class="toolbar-right">
+                <button class="btn btn-primary" id="addVmBtn">
+                    <i class="fas fa-plus"></i> 添加虚拟机
+                </button>
+                <button class="btn btn-secondary" id="exportVmsBtn">
+                    <i class="fas fa-download"></i> 导出
+                </button>
+            </div>
+        </div>
+
+        <!-- 虚拟机列表 -->
+        <div class="user-table-container">
+            <table class="user-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="selectAll"></th>
+                        <th>虚拟机信息</th>
+                        <th>操作系统</th>
+                        <th>配置</th>
+                        <th>状态</th>
+                        <th>IP地址</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="vmTableBody">
+                    <!-- 虚拟机数据将通过JavaScript动态生成 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分页控件 -->
+        <div class="pagination-container">
+            <div class="pagination-info">
+                <span>显示 <span id="startItem">1</span> 到 <span id="endItem">10</span> 条，共 <span id="totalItems">0</span> 条记录</span>
+            </div>
+            <div class="pagination-controls">
+                <button class="pagination-btn" id="prevPage" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div class="pagination-numbers" id="paginationNumbers">
+                    <!-- 页码将通过JavaScript动态生成 -->
+                </div>
+                <button class="pagination-btn" id="nextPage">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- 添加虚拟机模态框 -->
+    <div id="addVmModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>添加虚拟机靶材</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="addVmForm">
+                <div class="form-group">
+                    <label for="vmName">虚拟机名称</label>
+                    <input type="text" id="vmName" name="vmName" required>
+                </div>
+                <div class="form-group">
+                    <label for="vmOs">操作系统</label>
+                    <select id="vmOs" name="vmOs" required>
+                        <option value="">请选择操作系统</option>
+                        <option value="windows">Windows Server 2019</option>
+                        <option value="linux">CentOS 7</option>
+                        <option value="ubuntu">Ubuntu 20.04</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vmCpu">CPU核心数</label>
+                    <select id="vmCpu" name="vmCpu" required>
+                        <option value="1">1核</option>
+                        <option value="2">2核</option>
+                        <option value="4">4核</option>
+                        <option value="8">8核</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vmMemory">内存大小</label>
+                    <select id="vmMemory" name="vmMemory" required>
+                        <option value="1">1GB</option>
+                        <option value="2">2GB</option>
+                        <option value="4">4GB</option>
+                        <option value="8">8GB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vmDisk">磁盘大小</label>
+                    <select id="vmDisk" name="vmDisk" required>
+                        <option value="20">20GB</option>
+                        <option value="40">40GB</option>
+                        <option value="80">80GB</option>
+                        <option value="120">120GB</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="vmDescription">描述</label>
+                    <textarea id="vmDescription" name="vmDescription" rows="3" placeholder="请输入虚拟机描述..."></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAddVmModal()">取消</button>
+                    <button type="submit" class="btn btn-primary">创建虚拟机</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='components/sidebar.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts/vm-targets.js') }}"></script>
+</body>
+</html>
