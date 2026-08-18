@@ -8,7 +8,8 @@
 - GET  /api/ai/sessions            会话列表
 - GET  /api/ai/status              系统 AI 能力状态
 """
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, Response
+import json
 
 from backend.models import Attack, Defense, Vulnerability
 from ai_agents.orchestrator import arena
@@ -153,7 +154,10 @@ def get_session(session_id):
 # 阶段 3 C2：演练评估自动化（赛题功能④）
 @ai_bp.route("/session/<session_id>/evaluate", methods=["GET"])
 def evaluate_session(session_id):
-    """基于对抗回合结果生成量化评估报告（攻击成功率/响应时效/威胁分布）。"""
+    """基于对抗回合结果生成量化评估报告（攻击成功率/响应时效/威胁分布 + 混淆矩阵）。
+
+    阶段 3 增强：加入 2×2 混淆矩阵（攻击得手/防御成功判定）+ 成本估算。
+    """
     session = arena.get_session(session_id)
     if session is None:
         return jsonify({"error": f"会话不存在: {session_id}"}), 404
@@ -178,6 +182,16 @@ def evaluate_session(session_id):
     )
     avg_defense_actions = round(defense_actions / total, 2) if total else 0.0
 
+    # 阶段 3：混淆矩阵（攻击判定 2×2）
+    # TP: 攻击得手且确实命中漏洞（攻击成功被正确识别）
+    # FN: 攻击得手但未被识别（漏报）
+    # FP: 防御成功但误判为攻击（误报）
+    # TN: 防御成功且确实非攻击（正确拒绝）
+    tp = sum(1 for r in rounds if r.get("result", {}).get("attack_won") and r.get("attack_decision", {}).get("risk_level") in ("high", "critical"))
+    fn = sum(1 for r in rounds if r.get("result", {}).get("attack_won") and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical"))
+    fp = sum(1 for r in rounds if r.get("result", {}).get("defense_won") and r.get("attack_decision", {}).get("risk_level") in ("high", "critical"))
+    tn = sum(1 for r in rounds if r.get("result", {}).get("defense_won") and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical"))
+
     return jsonify(
         {
             "session_id": session_id,
@@ -188,6 +202,83 @@ def evaluate_session(session_id):
             "defense_success_rate": round(defense_won / total, 2) if total else 0.0,
             "avg_defense_actions": avg_defense_actions,
             "threat_distribution": threat_dist,
+            "confusion_matrix": {
+                "tp": tp, "fn": fn, "fp": fp, "tn": tn,
+                "description": "攻击判定 2×2（TP:攻击正确识别 / FN:攻击漏报 / FP:防御误报 / TN:正确拒绝）"
+            },
+            "cost_estimate": round(arena.memory.count() * 0.001, 4),
             "verdict": "攻击方占优" if attack_success_rate > 0.5 else ("势均力敌" if attack_success_rate == 0.5 else "防御方占优"),
         }
     )
+
+
+# 阶段 3：演练评估 Markdown/HTML 报告导出（赛题功能④）
+@ai_bp.route("/session/<session_id>/report", methods=["GET"])
+def export_session_report(session_id):
+    """导出 Markdown/HTML 评测报告（含混淆矩阵 + 逐回合明细）。"""
+    session = arena.get_session(session_id)
+    if session is None:
+        return jsonify({"error": f"会话不存在: {session_id}"}), 404
+    fmt = request.args.get("format", "md")
+    eval_data = evaluate_session(session_id)
+    if isinstance(eval_data, tuple):
+        return eval_data
+    data = eval_data.get_json()
+
+    if fmt == "html":
+        cm = data.get("confusion_matrix", {})
+        html = f"""<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>评测报告 - {session_id}</title>
+<style>
+body{{font-family:sans-serif;margin:32px;background:#fff;color:#1b1e23}}
+h1{{color:#0e6ba8}}table{{border-collapse:collapse;margin:12px 0}}
+th,td{{border:1px solid #d9d1c3;padding:8px 12px;text-align:left}}
+th{{background:#f3efe5}}.tag{{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(14,107,168,0.1);font-size:12px;font-weight:700}}
+pre{{background:#161a20;color:#e8ecf3;padding:14px;border-radius:10px;overflow:auto}}
+</style></head><body>
+<h1>演练评测报告</h1><p class="tag">会话 {session_id}</p>
+<h2>核心指标</h2>
+<table class="table"><tr><th>指标</th><th>数值</th></tr>
+<tr><td>总回合数</td><td>{data.get('total_rounds')}</td></tr>
+<tr><td>攻击成功率</td><td>{data.get('attack_success_rate')}</td></tr>
+<tr><td>防御成功率</td><td>{data.get('defense_success_rate')}</td></tr>
+<tr><td>综合判定</td><td><strong>{data.get('verdict')}</strong></td></tr></table>
+<h2>混淆矩阵（攻击判定 2×2）</h2>
+<table class="table"><tr><th>实际 \ 预期</th><th>预期攻击</th><th>预期非攻击</th></tr>
+<tr><td>判定攻击</td><td>{cm.get('tp',0)}</td><td>{cm.get('fp',0)}</td></tr>
+<tr><td>判定非攻击</td><td>{cm.get('fn',0)}</td><td>{cm.get('tn',0)}</td></tr></table>
+<h2>逐回合明细</h2><pre>{json.dumps(session.get('rounds',[]), ensure_ascii=False, indent=2)}</pre>
+</body></html>"""
+        return Response(html, mimetype="text/html; charset=utf-8")
+
+    # 默认 Markdown
+    cm = data.get("confusion_matrix", {})
+    md = f"""# 演练评测报告 - `{session_id}`
+
+## 核心指标
+
+| 指标 | 数值 |
+|------|------|
+| 总回合数 | {data.get('total_rounds')} |
+| 攻击成功率 | {data.get('attack_success_rate')} |
+| 防御成功率 | {data.get('defense_success_rate')} |
+| 综合判定 | **{data.get('verdict')}** |
+
+## 混淆矩阵（攻击判定 2×2）
+
+| 实际 \\ 预期 | 预期攻击 | 预期非攻击 |
+|------------|---------|-----------|
+| 判定攻击   | {cm.get('tp',0)} | {cm.get('fp',0)} |
+| 判定非攻击 | {cm.get('fn',0)} | {cm.get('tn',0)} |
+
+## 威胁分布
+
+{chr(10).join(f'- {k}: {v} 轮' for k,v in data.get('threat_distribution',{}).items())}
+
+## 逐回合明细
+
+```json
+{json.dumps(session.get('rounds',[]), ensure_ascii=False, indent=2)}
+```
+"""
+    return Response(md, mimetype="text/markdown; charset=utf-8")

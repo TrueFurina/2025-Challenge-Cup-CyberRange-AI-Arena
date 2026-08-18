@@ -1,0 +1,16 @@
+{
+  "event_id": "E1",
+  "scenario": "test",
+  "started_at": "2026-08-18T12:12:21.300759Z",
+  "finalized_at": "2026-08-18T12:12:21.300867Z",
+  "steps": [
+    {
+      "phase": "prefilter",
+      "timestamp": "2026-08-18T12:12:21.300764Z",
+      "decision": "AUTO_ESCALATE"
+    }
+  ],
+  "final_verdict": {
+    "risk_level": "critical"
+  }
+}

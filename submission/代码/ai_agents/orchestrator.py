@@ -15,6 +15,8 @@ from typing import Any, Optional
 
 from ai_agents.attack_agent import AttackAgent
 from ai_agents.defense_agent import DefenseAgent
+from memory import MemoryStore
+from ledger import LedgerStore
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,8 @@ class AgentArena:
     def __init__(self):
         self.attack_agent = AttackAgent()
         self.defense_agent = DefenseAgent()
+        self.memory = MemoryStore()
+        self.ledger = LedgerStore()
         self.sessions: dict[str, dict] = {}
 
     # ── 会话管理 ──────────────────────────────────────────

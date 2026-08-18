@@ -1,0 +1,1 @@
+{"event_id": "E1", "host": "H1", "process": "p.exe", "behavior": "test", "event_type": "x", "risk_level": "high", "confidence": "high", "is_false_positive": false, "timestamp": "2026-08-18T12:12:21.300263Z"}

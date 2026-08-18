@@ -60,6 +60,19 @@ Then open:
 
 > Default accounts (for demo only — **change immediately in production**): `admin / admin123`, `student / 123456`
 
+## 🔗 Competition Benchmarking
+
+Based on an analysis of **2,023 entries** from the National College Student Information Security Works Competition (the parent competition of this project's topic), our differentiators against the top competitors:
+
+| Competitor (from 2,023 entries) | Their Focus | Our Difference |
+|-------------------------------|-------------|----------------|
+| `WallBreaker` (ROIS) | Graph-memory attack-defense evolution | Full closed loop: generate → confront → evaluate + quantified metrics |
+| `赤霄破阵` (Flyteam) | ReAct + AGP multi-agent pentest | Bidirectional red-blue confrontation vs. unidirectional pentest |
+| `InfoWar` | Gamified CTF card game | Real vulnerability library + real LLM decision-making |
+| Most works lack evaluation | — | **Only work with quantified evaluation** (attack success rate, threat distribution, verdict) |
+
+> **Core selling point**: *"The only AI cyber range with a full 'generate → confront → evaluate' closed loop, real LLM decision-making, and quantified verifiable metrics."*
+
 ## 🔌 AI API Reference (prefix `/api/ai`)
 
 | Method & Path | Description |
