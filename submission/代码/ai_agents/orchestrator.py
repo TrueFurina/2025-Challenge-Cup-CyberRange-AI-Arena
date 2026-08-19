@@ -171,6 +171,29 @@ class AgentArena:
         session["rounds"].append(round_record)
         session["current_round"] = round_no
 
+        # 阶段 6：写入误报记忆（持久化本轮决策）
+        self.memory.append({
+            "event_id": session_id,
+            "host": target.get("host", ""),
+            "process": first_step.get("technique", ""),
+            "behavior": attack_plan.get("summary", ""),
+            "event_type": "攻击" if attack_won else "防御",
+            "risk_level": attack_plan.get("risk_level", "medium"),
+            "confidence": "high" if attack_plan.get("source") == "llm" else "medium",
+            "is_false_positive": defense_won,
+        })
+
+        # 阶段 8：记录审计账本
+        ledger_rec = self.ledger.begin(session_id, "攻防推演")
+        if ledger_rec:
+            ledger_rec.record_step("attack", technique=first_step.get("technique", ""), risk_level=attack_plan.get("risk_level", "medium"))
+            ledger_rec.record_step("defense", actions=len(defense_plan.get("actions", [])), threat_level=defense_plan.get("threat_level", "medium"))
+            ledger_rec.finalize({
+                "round": round_no,
+                "verdict": "攻击得手" if attack_won else "防御成功",
+                "risk_level": attack_plan.get("risk_level", "medium"),
+            })
+
         if round_no >= self.MAX_ROUNDS:
             session["status"] = "finished"
         else:

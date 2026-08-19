@@ -1,1 +1,3 @@
 {"event_id": "E1", "host": "H1", "process": "p.exe", "behavior": "test", "event_type": "x", "risk_level": "high", "confidence": "high", "is_false_positive": false, "timestamp": "2026-08-18T12:12:21.300263Z"}
+{"event_id": "73c6cda283dc", "host": "", "process": "Log4Shell", "behavior": "规则引擎兜底生成的攻击路径", "event_type": "攻击", "risk_level": "medium", "confidence": "medium", "is_false_positive": true, "timestamp": "2026-08-19T03:44:21.264154Z"}
+{"event_id": "73c6cda283dc", "host": "", "process": "Log4Shell", "behavior": "规则引擎兜底生成的攻击路径", "event_type": "攻击", "risk_level": "medium", "confidence": "medium", "is_false_positive": true, "timestamp": "2026-08-19T03:44:22.166509Z"}

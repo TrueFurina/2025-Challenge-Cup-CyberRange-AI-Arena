@@ -1,0 +1,25 @@
+{
+  "event_id": "73c6cda283dc",
+  "scenario": "攻防推演",
+  "started_at": "2026-08-19T03:44:22.175111Z",
+  "finalized_at": "2026-08-19T03:44:22.175363Z",
+  "steps": [
+    {
+      "phase": "attack",
+      "timestamp": "2026-08-19T03:44:22.175128Z",
+      "technique": "Log4Shell",
+      "risk_level": "medium"
+    },
+    {
+      "phase": "defense",
+      "timestamp": "2026-08-19T03:44:22.175137Z",
+      "actions": 3,
+      "threat_level": "medium"
+    }
+  ],
+  "final_verdict": {
+    "round": 2,
+    "verdict": "攻击得手",
+    "risk_level": "medium"
+  }
+}

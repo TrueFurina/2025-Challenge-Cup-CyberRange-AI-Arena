@@ -112,7 +112,7 @@ presentation/             # HTML slide deck
 
 ## 🤝 License
 
-[MIT](LICENSE) © Minjiang University Team
+[Source-Available · All Rights Reserved](LICENSE) © TrueFurina (闽江学院团队)
 
 ---
 
