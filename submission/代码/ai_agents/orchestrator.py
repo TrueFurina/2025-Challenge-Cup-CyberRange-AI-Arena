@@ -78,6 +78,14 @@ class AgentArena:
                 "vuln_density": vuln_density,
                 "defense_strength": defense_strength,
             },
+            # 阶段 3 迁移：实时态势数据 + 协调事件（agent_coordinator 独有能力）
+            "real_time_data": {
+                "attack_intensity": 0.0,
+                "defense_effectiveness": 0.0,
+                "threat_level": "low",
+                "security_level": "low",
+            },
+            "coordination_history": [],
         }
         self.sessions[session_id] = session
         return session
@@ -198,12 +206,21 @@ class AgentArena:
             session["status"] = "finished"
         else:
             session["status"] = "running"
+
+        # 阶段 3 迁移：每轮对抗后更新实时态势 + 动态调整策略（自适应防御决策）
+        try:
+            self._update_situation(session)
+            self._adjust_strategies(session)
+        except Exception as exc:  # noqa: BLE001 - 态势更新失败不影响对抗主链路
+            logger.warning("态势更新失败（已忽略）: %s", exc)
+
         return {
             "session_id": session_id,
             "round": round_record,
             "current_round": round_no,
             "max_rounds": self.MAX_ROUNDS,
             "status": session["status"],
+            "real_time_data": session["real_time_data"],
         }
 
     def run_all(self, session_id: str) -> dict:
@@ -220,6 +237,118 @@ class AgentArena:
             "current_round": session["current_round"],
             "status": session["status"],
         }
+
+    # ── 阶段 3 迁移：实时态势感知 + 动态策略调整 ──────────────
+    # 来源：programs/cyber_range_platform/src/ai_agents/agent_coordinator.py
+    # 适配：基于回合记录（rounds）计算态势，不依赖多 Agent 线程
+
+    def _calculate_attack_intensity(self, session: dict) -> float:
+        """计算攻击强度（0-100）：攻击成功率×0.6 + 攻陷率×0.4。"""
+        rounds = session.get("rounds", [])
+        total = len(rounds)
+        if not total:
+            return 0.0
+        attack_won = sum(1 for r in rounds if r.get("result", {}).get("attack_won"))
+        success_rate = attack_won / max(total, 1)
+        # 攻陷率近似：攻击得手的轮次占比（无真实系统列表，用攻击源覆盖近似）
+        sources = {r.get("attack_decision", {}).get("technique", "") for r in rounds}
+        compromise_rate = len(sources) / max(total, 1)
+        intensity = (success_rate * 0.6 + compromise_rate * 0.4) * 100
+        return min(intensity, 100.0)
+
+    def _calculate_defense_effectiveness(self, session: dict) -> float:
+        """计算防御效果（0-100）：防御成功率×100（无数据取 50）。"""
+        rounds = session.get("rounds", [])
+        total = len(rounds)
+        if not total:
+            return 50.0
+        defense_won = sum(1 for r in rounds if r.get("result", {}).get("defense_won"))
+        return min(defense_won / max(total, 1) * 100, 100.0)
+
+    @staticmethod
+    def _assess_threat_level(attack_intensity: float, defense_effectiveness: float) -> str:
+        """评估威胁等级：攻击强度 - 防御效果 → very_low/low/medium/high/critical。"""
+        threat_index = attack_intensity - defense_effectiveness
+        if threat_index < -20:
+            return "very_low"
+        if threat_index < 0:
+            return "low"
+        if threat_index < 20:
+            return "medium"
+        if threat_index < 40:
+            return "high"
+        return "critical"
+
+    def _calculate_security_level(self, session: dict) -> str:
+        """计算安全等级：基于攻击得手率与威胁数。"""
+        rounds = session.get("rounds", [])
+        total = len(rounds)
+        if not total:
+            return "low"
+        attack_won = sum(1 for r in rounds if r.get("result", {}).get("attack_won"))
+        compromise_rate = attack_won / max(total, 1)
+        if compromise_rate > 0.7:
+            return "critical"
+        if compromise_rate > 0.4:
+            return "high"
+        if compromise_rate > 0.2:
+            return "medium"
+        return "low"
+
+    def _update_situation(self, session: dict) -> None:
+        """更新实时态势数据（每轮对抗后调用）。"""
+        attack_intensity = self._calculate_attack_intensity(session)
+        defense_effectiveness = self._calculate_defense_effectiveness(session)
+        threat_level = self._assess_threat_level(attack_intensity, defense_effectiveness)
+        security_level = self._calculate_security_level(session)
+        session["real_time_data"].update({
+            "attack_intensity": round(attack_intensity, 2),
+            "defense_effectiveness": round(defense_effectiveness, 2),
+            "threat_level": threat_level,
+            "security_level": security_level,
+        })
+        # 协调事件记录（阈值 30s 简化为每轮记录一次关键状态变化）
+        self._record_coordination_event(session, "situation_analysis", {
+            "attack_intensity": round(attack_intensity, 2),
+            "defense_effectiveness": round(defense_effectiveness, 2),
+            "threat_level": threat_level,
+            "security_level": security_level,
+        })
+
+    def _record_coordination_event(self, session: dict, event_type: str, details: dict) -> None:
+        """记录协调事件到 coordination_history。"""
+        try:
+            session["coordination_history"].append({
+                "timestamp": time.time(),
+                "event_type": event_type,
+                "round": session["current_round"],
+                "details": details,
+            })
+        except Exception as exc:  # noqa: BLE001 - 记录失败不影响主链路
+            logger.warning("协调事件记录失败（已忽略）: %s", exc)
+
+    def _adjust_strategies(self, session: dict) -> None:
+        """动态调整策略（自适应防御决策核心）：
+        - 威胁 high/critical → 升级防御强度
+        - 威胁 very_low → 提示可增加攻击强度
+        """
+        threat_level = session["real_time_data"].get("threat_level", "low")
+        defense_strength = session["params"].get("defense_strength", "medium")
+
+        if threat_level in ("high", "critical") and defense_strength != "high":
+            session["params"]["defense_strength"] = "high"
+            self._record_coordination_event(session, "defense_escalated", {
+                "reason": f"threat_level={threat_level}",
+                "from": defense_strength,
+                "to": "high",
+            })
+        elif threat_level == "very_low" and defense_strength != "low":
+            session["params"]["defense_strength"] = "low"
+            self._record_coordination_event(session, "defense_relaxed", {
+                "reason": "threat_level=very_low",
+                "from": defense_strength,
+                "to": "low",
+            })
 
 
 # 全局单例（供 API 路由复用会话状态）

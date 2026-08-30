@@ -13,6 +13,7 @@ import json
 
 from backend.models import Attack, Defense, Vulnerability
 from ai_agents.orchestrator import arena
+from ai_agents.evaluation_analyzer import evaluation_analyzer
 
 ai_bp = Blueprint("ai", __name__)
 
@@ -282,3 +283,26 @@ pre{{background:#161a20;color:#e8ecf3;padding:14px;border-radius:10px;overflow:a
 ```
 """
     return Response(md, mimetype="text/markdown; charset=utf-8")
+
+
+# 阶段 3：演练深度评估分析（迁移自 programs 早期版 EvaluationAnalyzer）
+# 赛题功能④深化：技能画像 + 团队分析 + 改进建议 + 评分等级（A+/A/B/C/D）
+@ai_bp.route("/session/<session_id>/analyze", methods=["GET"])
+def analyze_session(session_id):
+    """深度评估：多维评分 + 技能画像 + 团队分析 + 改进建议 + 评分等级。
+
+    相比 /evaluate（基础统计），/analyze 提供：
+    - attack/defense/overall 三组 5 维度加权评分（含 grade）
+    - 红队/蓝队个人技能画像 + 团队技能画像
+    - 改进建议（按弱点生成，含优先级）
+    - 综合评分等级（A+/A/A-/B+/B/B-/C+/C/C-/D）
+    """
+    session = arena.get_session(session_id)
+    if session is None:
+        return jsonify({"error": f"会话不存在: {session_id}"}), 404
+    rounds = session.get("rounds", [])
+    if not rounds:
+        return jsonify({"error": "尚无对抗回合，请先执行至少一轮"}), 400
+
+    report = evaluation_analyzer.evaluate_session_rounds(session)
+    return jsonify(evaluation_analyzer.to_jsonable(report))

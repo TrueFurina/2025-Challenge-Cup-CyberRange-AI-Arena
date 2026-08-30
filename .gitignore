@@ -30,3 +30,6 @@ logs/
 .vscode/
 .DS_Store
 Thumbs.db
+
+# ── 旧版 PPT（从 backup 取出，非交付物） ──
+old-ppts/
