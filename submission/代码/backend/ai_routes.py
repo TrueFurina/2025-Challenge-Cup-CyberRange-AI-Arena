@@ -148,6 +148,9 @@ def get_session(session_id):
             "current_round": session["current_round"],
             "max_rounds": arena.MAX_ROUNDS,
             "rounds": session["rounds"],
+            # 阶段 3 迁移：实时态势数据（攻击强度/防御效果/威胁等级/安全等级）
+            "real_time_data": session.get("real_time_data", {}),
+            "coordination_history": session.get("coordination_history", []),
         }
     )
 
