@@ -33,3 +33,10 @@ Thumbs.db
 
 # ── 旧版 PPT（从 backup 取出，非交付物） ──
 old-ppts/
+
+# ── 测试产物（pytest 覆盖率，不进仓库） ──
+submission/代码/.coverage
+submission/代码/coverage.xml
+submission/代码/.pytest_cache/
+submission/代码/data/ledger/
+submission/代码/data/triage_history.jsonl
