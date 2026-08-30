@@ -1,0 +1,25 @@
+{
+  "event_id": "5eb0f54bcc78",
+  "scenario": "攻防推演",
+  "started_at": "2026-08-30T07:59:58.682882Z",
+  "finalized_at": "2026-08-30T07:59:58.682882Z",
+  "steps": [
+    {
+      "phase": "attack",
+      "timestamp": "2026-08-30T07:59:58.682882Z",
+      "technique": "弱口令爆破",
+      "risk_level": "medium"
+    },
+    {
+      "phase": "defense",
+      "timestamp": "2026-08-30T07:59:58.682882Z",
+      "actions": 5,
+      "threat_level": "medium"
+    }
+  ],
+  "final_verdict": {
+    "round": 5,
+    "verdict": "攻击得手",
+    "risk_level": "medium"
+  }
+}

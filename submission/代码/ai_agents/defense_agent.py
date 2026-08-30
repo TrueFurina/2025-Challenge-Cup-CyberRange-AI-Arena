@@ -3,10 +3,10 @@
 输入：检测到的攻击行为（攻击技术/威胁等级）
 输出：响应策略（检测/隔离/封禁/取证 + 理由）——fail-open：LLM 不可用时规则推荐
 """
+
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
 from ai_agents.client import ai_chat_json
 
@@ -64,10 +64,13 @@ class DefenseAgent:
         return self._heuristic_response(attack_info, defense_library)
 
     def _build_prompt(self, attack_info: dict, defense_library: list) -> str:
-        defenses = "\n".join(
-            f"- {d['name']}: {d.get('description', '')} (分类: {d.get('category', '无')})"
-            for d in defense_library[:10]
-        ) or "- 防御库为空"
+        defenses = (
+            "\n".join(
+                f"- {d['name']}: {d.get('description', '')} (分类: {d.get('category', '无')})"
+                for d in defense_library[:10]
+            )
+            or "- 防御库为空"
+        )
         return f"""请为以下检测到的攻击行为制定响应策略。
 
 ## 攻击行为
@@ -88,9 +91,18 @@ class DefenseAgent:
         """规则兜底：按威胁等级映射响应动作。"""
         level = attack_info.get("threat_level", "medium")
         level_map = {
-            "critical": [("立即隔离目标主机", "防止横向扩散"), ("保留内存与日志取证快照", "供后续溯源")],
-            "high": [("阻断攻击源 IP/账号", "切断攻击链"), ("升级至应急响应团队", "人工介入")],
-            "medium": [("加强监控与告警阈值", "持续观察"), ("核查相关日志", "确认影响范围")],
+            "critical": [
+                ("立即隔离目标主机", "防止横向扩散"),
+                ("保留内存与日志取证快照", "供后续溯源"),
+            ],
+            "high": [
+                ("阻断攻击源 IP/账号", "切断攻击链"),
+                ("升级至应急响应团队", "人工介入"),
+            ],
+            "medium": [
+                ("加强监控与告警阈值", "持续观察"),
+                ("核查相关日志", "确认影响范围"),
+            ],
             "low": [("记录并观察", "确认是否为误报"), ("更新规则库", "避免重复告警")],
         }
         actions = [
@@ -102,7 +114,9 @@ class DefenseAgent:
                 "expected_effect": "缓解当前威胁",
                 "priority": idx,
             }
-            for idx, (action, reason) in enumerate(level_map.get(level, level_map["medium"]), start=1)
+            for idx, (action, reason) in enumerate(
+                level_map.get(level, level_map["medium"]), start=1
+            )
         ]
         # 附加上防御库推荐（如果有）
         if defense_library:

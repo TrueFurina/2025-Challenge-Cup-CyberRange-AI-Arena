@@ -1,0 +1,25 @@
+{
+  "event_id": "0b874349d0c3",
+  "scenario": "攻防推演",
+  "started_at": "2026-08-30T07:58:10.356177Z",
+  "finalized_at": "2026-08-30T07:58:10.356177Z",
+  "steps": [
+    {
+      "phase": "attack",
+      "timestamp": "2026-08-30T07:58:10.356177Z",
+      "technique": "服务枚举与版本探测",
+      "risk_level": "medium"
+    },
+    {
+      "phase": "defense",
+      "timestamp": "2026-08-30T07:58:10.356177Z",
+      "actions": 3,
+      "threat_level": "medium"
+    }
+  ],
+  "final_verdict": {
+    "round": 5,
+    "verdict": "攻击得手",
+    "risk_level": "medium"
+  }
+}

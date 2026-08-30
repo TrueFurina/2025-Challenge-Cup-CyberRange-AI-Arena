@@ -1,0 +1,25 @@
+{
+  "event_id": "28a02431f2b3",
+  "scenario": "攻防推演",
+  "started_at": "2026-08-30T08:01:07.125553Z",
+  "finalized_at": "2026-08-30T08:01:07.126699Z",
+  "steps": [
+    {
+      "phase": "attack",
+      "timestamp": "2026-08-30T08:01:07.125553Z",
+      "technique": "端口扫描与指纹识别",
+      "risk_level": "medium"
+    },
+    {
+      "phase": "defense",
+      "timestamp": "2026-08-30T08:01:07.125553Z",
+      "actions": 2,
+      "threat_level": "medium"
+    }
+  ],
+  "final_verdict": {
+    "round": 5,
+    "verdict": "攻击得手",
+    "risk_level": "medium"
+  }
+}

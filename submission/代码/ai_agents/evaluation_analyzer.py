@@ -10,6 +10,7 @@
 
 赛题功能④「演练评估自动化」的深化实现。
 """
+
 from __future__ import annotations
 
 import json
@@ -59,21 +60,61 @@ class EvaluationAnalyzer:
         """初始化技能框架。"""
         return {
             "technical_skills": {
-                "network_security": ["firewall_management", "ids_ips", "network_monitoring"],
-                "system_security": ["os_hardening", "patch_management", "access_control"],
-                "application_security": ["secure_coding", "vulnerability_assessment", "penetration_testing"],
-                "incident_response": ["threat_hunting", "forensics", "malware_analysis"],
+                "network_security": [
+                    "firewall_management",
+                    "ids_ips",
+                    "network_monitoring",
+                ],
+                "system_security": [
+                    "os_hardening",
+                    "patch_management",
+                    "access_control",
+                ],
+                "application_security": [
+                    "secure_coding",
+                    "vulnerability_assessment",
+                    "penetration_testing",
+                ],
+                "incident_response": [
+                    "threat_hunting",
+                    "forensics",
+                    "malware_analysis",
+                ],
                 "cryptography": ["encryption", "pki", "secure_communications"],
             },
             "analytical_skills": {
-                "threat_analysis": ["threat_modeling", "risk_assessment", "intelligence_analysis"],
-                "data_analysis": ["log_analysis", "pattern_recognition", "statistical_analysis"],
-                "problem_solving": ["root_cause_analysis", "decision_making", "critical_thinking"],
+                "threat_analysis": [
+                    "threat_modeling",
+                    "risk_assessment",
+                    "intelligence_analysis",
+                ],
+                "data_analysis": [
+                    "log_analysis",
+                    "pattern_recognition",
+                    "statistical_analysis",
+                ],
+                "problem_solving": [
+                    "root_cause_analysis",
+                    "decision_making",
+                    "critical_thinking",
+                ],
             },
             "operational_skills": {
-                "communication": ["reporting", "presentation", "stakeholder_management"],
-                "project_management": ["planning", "coordination", "resource_management"],
-                "compliance": ["regulatory_knowledge", "audit_preparation", "policy_development"],
+                "communication": [
+                    "reporting",
+                    "presentation",
+                    "stakeholder_management",
+                ],
+                "project_management": [
+                    "planning",
+                    "coordination",
+                    "resource_management",
+                ],
+                "compliance": [
+                    "regulatory_knowledge",
+                    "audit_preparation",
+                    "policy_development",
+                ],
             },
         }
 
@@ -122,7 +163,9 @@ class EvaluationAnalyzer:
             "skill_profiles": skill_profiles,
             "improvement_suggestions": suggestions,
         }
-        logger.info("演练 %s 评估完成，综合得分 %.2f", exercise_id, comprehensive["total_score"])
+        logger.info(
+            "演练 %s 评估完成，综合得分 %.2f", exercise_id, comprehensive["total_score"]
+        )
         return report
 
     # ── 数据提取（submission 回合 → 评估输入） ──────────
@@ -131,9 +174,7 @@ class EvaluationAnalyzer:
         """从回合记录提取攻击评估数据。"""
         total = len(rounds)
         attack_won = sum(1 for r in rounds if r.get("result", {}).get("attack_won"))
-        techniques = [
-            r.get("attack_decision", {}).get("technique", "") for r in rounds
-        ]
+        techniques = [r.get("attack_decision", {}).get("technique", "") for r in rounds]
         distinct_techniques = len({t for t in techniques if t})
         return {
             "total_attacks": total,
@@ -160,7 +201,9 @@ class EvaluationAnalyzer:
         }
 
     # ── 各维度评分 ──────────────────────────────────────
-    def _evaluate_attack_performance(self, attack_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _evaluate_attack_performance(
+        self, attack_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """评估攻击表现（5 维度加权）。"""
         total = attack_data.get("total_attacks", 0)
         success_rate = attack_data.get("success_rate", 0.0)
@@ -185,7 +228,9 @@ class EvaluationAnalyzer:
             "weaknesses": [k for k, v in scores.items() if v < 60],
         }
 
-    def _evaluate_defense_performance(self, defense_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _evaluate_defense_performance(
+        self, defense_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """评估防御表现（5 维度加权）。"""
         total = defense_data.get("total_defenses", 0)
         success_rate = defense_data.get("success_rate", 0.0)
@@ -209,16 +254,25 @@ class EvaluationAnalyzer:
             "weaknesses": [k for k, v in scores.items() if v < 60],
         }
 
-    def _evaluate_overall_performance(self, rounds: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _evaluate_overall_performance(
+        self, rounds: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
         """评估整体表现（基于对抗结果 + 回合数）。"""
         total = len(rounds)
         if not total:
-            return {"scores": {}, "total_score": 0.0, "grade": "D",
-                    "strengths": [], "weaknesses": []}
+            return {
+                "scores": {},
+                "total_score": 0.0,
+                "grade": "D",
+                "strengths": [],
+                "weaknesses": [],
+            }
         attack_won = sum(1 for r in rounds if r.get("result", {}).get("attack_won"))
         scores = {
             "scenario_completion": 100.0,  # 全部回合执行完毕视为场景完成
-            "learning_objectives": min(attack_won / total * 100 + 50, 100) if total else 0.0,
+            "learning_objectives": (
+                min(attack_won / total * 100 + 50, 100) if total else 0.0
+            ),
             "teamwork": 75.0,
             "adaptability": min(100 - (total * 3), 100) if total else 0.0,
             "documentation": 85.0,
@@ -236,7 +290,9 @@ class EvaluationAnalyzer:
         }
 
     def _generate_comprehensive_evaluation(
-        self, attack_scores: Dict[str, Any], defense_scores: Dict[str, Any],
+        self,
+        attack_scores: Dict[str, Any],
+        defense_scores: Dict[str, Any],
         overall_scores: Dict[str, Any],
     ) -> Dict[str, Any]:
         """综合评估：攻击 40% + 防御 40% + 整体 20%。"""
@@ -260,24 +316,36 @@ class EvaluationAnalyzer:
         defense_data = exercise_data.get("defense_data", {})
 
         # 红队画像（攻击侧）
-        red_profile = self._analyze_individual_skills("red_team", {
-            "attack_success_rate": attack_data.get("success_rate", 0.5),
-            "overall_score": 0.0,
-        })
+        red_profile = self._analyze_individual_skills(
+            "red_team",
+            {
+                "attack_success_rate": attack_data.get("success_rate", 0.5),
+                "overall_score": 0.0,
+            },
+        )
         # 蓝队画像（防御侧）
-        blue_profile = self._analyze_individual_skills("blue_team", {
-            "defense_success_rate": defense_data.get("success_rate", 0.5),
-            "overall_score": 0.0,
-        })
+        blue_profile = self._analyze_individual_skills(
+            "blue_team",
+            {
+                "defense_success_rate": defense_data.get("success_rate", 0.5),
+                "overall_score": 0.0,
+            },
+        )
 
         profiles = {"red_team": red_profile, "blue_team": blue_profile}
         profiles["team"] = self._analyze_team_skills(profiles)
         return profiles
 
-    def _analyze_individual_skills(self, role: str, performance_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_individual_skills(
+        self, role: str, performance_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """分析个人技能（按角色确定技能重点）。"""
         if role == "red_team":
-            focus_skills = ["network_security", "penetration_testing", "threat_analysis"]
+            focus_skills = [
+                "network_security",
+                "penetration_testing",
+                "threat_analysis",
+            ]
         elif role == "blue_team":
             focus_skills = ["incident_response", "threat_hunting", "system_security"]
         else:
@@ -288,7 +356,9 @@ class EvaluationAnalyzer:
             category_scores = {}
             for skill_area in skills:
                 if skill_area in focus_skills:
-                    category_scores[skill_area] = self._calculate_skill_score(skill_area, performance_data)
+                    category_scores[skill_area] = self._calculate_skill_score(
+                        skill_area, performance_data
+                    )
             skill_scores[category] = category_scores
 
         return {
@@ -299,7 +369,9 @@ class EvaluationAnalyzer:
             "overall_skill_level": self._calculate_overall_skill_level(skill_scores),
         }
 
-    def _analyze_team_skills(self, individual_profiles: Dict[str, Any]) -> Dict[str, Any]:
+    def _analyze_team_skills(
+        self, individual_profiles: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """分析团队技能（聚合个人技能得分取平均）。"""
         aggregated = defaultdict(lambda: defaultdict(list))
         for profile in individual_profiles.values():
@@ -312,17 +384,22 @@ class EvaluationAnalyzer:
         for category, skills in aggregated.items():
             team_skills[category] = {
                 skill: round(sum(scores) / len(scores), 1)
-                for skill, scores in skills.items() if scores
+                for skill, scores in skills.items()
+                if scores
             }
 
         return {
             "team_skills": team_skills,
             "strengths": self._identify_team_strengths(team_skills),
             "weaknesses": self._identify_team_weaknesses(team_skills),
-            "collaboration_effectiveness": self._assess_collaboration_effectiveness(individual_profiles),
+            "collaboration_effectiveness": self._assess_collaboration_effectiveness(
+                individual_profiles
+            ),
         }
 
-    def _calculate_skill_score(self, skill_area: str, performance_data: Dict[str, Any]) -> float:
+    def _calculate_skill_score(
+        self, skill_area: str, performance_data: Dict[str, Any]
+    ) -> float:
         """计算技能得分（0-100）。"""
         base = 60
         if skill_area == "penetration_testing":
@@ -387,7 +464,9 @@ class EvaluationAnalyzer:
 
     # ── 改进建议 ────────────────────────────────────────
     def _generate_improvement_suggestions(
-        self, attack_scores: Dict[str, Any], defense_scores: Dict[str, Any],
+        self,
+        attack_scores: Dict[str, Any],
+        defense_scores: Dict[str, Any],
         overall_scores: Dict[str, Any],
     ) -> List[Dict[str, Any]]:
         """生成改进建议（按攻击/防御/整体弱点）。"""
@@ -409,77 +488,199 @@ class EvaluationAnalyzer:
     @staticmethod
     def _generate_attack_suggestion(weakness: str) -> Optional[Dict[str, Any]]:
         suggestions_map = {
-            "success_rate": {"title": "提高攻击成功率", "description": "建议加强漏洞研究和利用技术训练",
-                             "actions": ["学习最新漏洞利用技术", "练习社会工程学攻击", "提升工具使用熟练度"], "priority": "high"},
-            "coverage": {"title": "扩大攻击覆盖面", "description": "建议学习更多攻击向量和横向移动技术",
-                         "actions": ["学习网络横向移动技术", "掌握多种初始访问方法", "提升目标侦察能力"], "priority": "medium"},
-            "stealth": {"title": "提高攻击隐蔽性", "description": "建议学习反检测和规避技术",
-                        "actions": ["学习反病毒规避技术", "掌握流量混淆方法", "提升痕迹清理能力"], "priority": "high"},
-            "efficiency": {"title": "提高攻击效率", "description": "建议优化攻击路径规划与工具链",
-                           "actions": ["精简攻击步骤", "使用自动化工具", "建立攻击模板库"], "priority": "medium"},
-            "innovation": {"title": "提升攻击创新性", "description": "建议探索新型攻击手法",
-                           "actions": ["研究 0day 技术", "组合攻击手法", "跟踪前沿研究"], "priority": "low"},
+            "success_rate": {
+                "title": "提高攻击成功率",
+                "description": "建议加强漏洞研究和利用技术训练",
+                "actions": [
+                    "学习最新漏洞利用技术",
+                    "练习社会工程学攻击",
+                    "提升工具使用熟练度",
+                ],
+                "priority": "high",
+            },
+            "coverage": {
+                "title": "扩大攻击覆盖面",
+                "description": "建议学习更多攻击向量和横向移动技术",
+                "actions": [
+                    "学习网络横向移动技术",
+                    "掌握多种初始访问方法",
+                    "提升目标侦察能力",
+                ],
+                "priority": "medium",
+            },
+            "stealth": {
+                "title": "提高攻击隐蔽性",
+                "description": "建议学习反检测和规避技术",
+                "actions": [
+                    "学习反病毒规避技术",
+                    "掌握流量混淆方法",
+                    "提升痕迹清理能力",
+                ],
+                "priority": "high",
+            },
+            "efficiency": {
+                "title": "提高攻击效率",
+                "description": "建议优化攻击路径规划与工具链",
+                "actions": ["精简攻击步骤", "使用自动化工具", "建立攻击模板库"],
+                "priority": "medium",
+            },
+            "innovation": {
+                "title": "提升攻击创新性",
+                "description": "建议探索新型攻击手法",
+                "actions": ["研究 0day 技术", "组合攻击手法", "跟踪前沿研究"],
+                "priority": "low",
+            },
         }
         return suggestions_map.get(weakness)
 
     @staticmethod
     def _generate_defense_suggestion(weakness: str) -> Optional[Dict[str, Any]]:
         suggestions_map = {
-            "detection_rate": {"title": "提高威胁检测能力", "description": "建议加强威胁狩猎和异常检测技能",
-                               "actions": ["学习威胁狩猎技术", "提升日志分析能力", "掌握行为分析方法"], "priority": "high"},
-            "response_time": {"title": "缩短响应时间", "description": "建议优化响应流程和自动化程度",
-                              "actions": ["建立标准化响应流程", "提升工具自动化水平", "加强团队协作训练"], "priority": "high"},
-            "containment": {"title": "提高威胁遏制能力", "description": "建议加强事件响应和隔离技术",
-                            "actions": ["学习网络隔离技术", "掌握恶意软件清除方法", "提升系统恢复能力"], "priority": "medium"},
-            "recovery": {"title": "提升恢复能力", "description": "建议完善业务连续性方案",
-                         "actions": ["制定恢复演练计划", "建立备份机制", "验证恢复流程"], "priority": "medium"},
-            "collaboration": {"title": "加强协同防御", "description": "建议提升跨团队协作效率",
-                              "actions": ["建立共享情报机制", "统一响应流程", "定期联合演练"], "priority": "medium"},
+            "detection_rate": {
+                "title": "提高威胁检测能力",
+                "description": "建议加强威胁狩猎和异常检测技能",
+                "actions": ["学习威胁狩猎技术", "提升日志分析能力", "掌握行为分析方法"],
+                "priority": "high",
+            },
+            "response_time": {
+                "title": "缩短响应时间",
+                "description": "建议优化响应流程和自动化程度",
+                "actions": [
+                    "建立标准化响应流程",
+                    "提升工具自动化水平",
+                    "加强团队协作训练",
+                ],
+                "priority": "high",
+            },
+            "containment": {
+                "title": "提高威胁遏制能力",
+                "description": "建议加强事件响应和隔离技术",
+                "actions": [
+                    "学习网络隔离技术",
+                    "掌握恶意软件清除方法",
+                    "提升系统恢复能力",
+                ],
+                "priority": "medium",
+            },
+            "recovery": {
+                "title": "提升恢复能力",
+                "description": "建议完善业务连续性方案",
+                "actions": ["制定恢复演练计划", "建立备份机制", "验证恢复流程"],
+                "priority": "medium",
+            },
+            "collaboration": {
+                "title": "加强协同防御",
+                "description": "建议提升跨团队协作效率",
+                "actions": ["建立共享情报机制", "统一响应流程", "定期联合演练"],
+                "priority": "medium",
+            },
         }
         return suggestions_map.get(weakness)
 
     @staticmethod
     def _generate_overall_suggestion(weakness: str) -> Optional[Dict[str, Any]]:
         suggestions_map = {
-            "teamwork": {"title": "加强团队协作", "description": "建议提升团队沟通和协作效率",
-                         "actions": ["建立有效沟通机制", "定期进行团队建设", "明确角色分工"], "priority": "medium"},
-            "adaptability": {"title": "提高适应能力", "description": "建议加强应变能力和灵活性训练",
-                             "actions": ["进行多场景演练", "学习快速决策方法", "提升压力下的表现"], "priority": "medium"},
+            "teamwork": {
+                "title": "加强团队协作",
+                "description": "建议提升团队沟通和协作效率",
+                "actions": ["建立有效沟通机制", "定期进行团队建设", "明确角色分工"],
+                "priority": "medium",
+            },
+            "adaptability": {
+                "title": "提高适应能力",
+                "description": "建议加强应变能力和灵活性训练",
+                "actions": ["进行多场景演练", "学习快速决策方法", "提升压力下的表现"],
+                "priority": "medium",
+            },
         }
         return suggestions_map.get(weakness)
 
     # ── 辅助 ────────────────────────────────────────────
     @staticmethod
     def _identify_skill_strengths(skill_scores: Dict[str, Any]) -> List[str]:
-        return [f"{cat}.{skill}" for cat, skills in skill_scores.items()
-                for skill, score in skills.items() if score >= 80]
+        return [
+            f"{cat}.{skill}"
+            for cat, skills in skill_scores.items()
+            for skill, score in skills.items()
+            if score >= 80
+        ]
 
     @staticmethod
     def _identify_skill_improvements(skill_scores: Dict[str, Any]) -> List[str]:
-        return [f"{cat}.{skill}" for cat, skills in skill_scores.items()
-                for skill, score in skills.items() if score < 60]
+        return [
+            f"{cat}.{skill}"
+            for cat, skills in skill_scores.items()
+            for skill, score in skills.items()
+            if score < 60
+        ]
 
     @staticmethod
     def _calculate_overall_skill_level(skill_scores: Dict[str, Any]) -> float:
-        all_scores = [score for skills in skill_scores.values() for score in skills.values()]
+        all_scores = [
+            score for skills in skill_scores.values() for score in skills.values()
+        ]
         return round(sum(all_scores) / len(all_scores), 1) if all_scores else 0.0
 
     @staticmethod
     def _identify_team_strengths(team_skills: Dict[str, Any]) -> List[str]:
-        return [f"{cat}.{skill}" for cat, skills in team_skills.items()
-                for skill, score in skills.items() if score >= 80]
+        return [
+            f"{cat}.{skill}"
+            for cat, skills in team_skills.items()
+            for skill, score in skills.items()
+            if score >= 80
+        ]
 
     @staticmethod
     def _identify_team_weaknesses(team_skills: Dict[str, Any]) -> List[str]:
-        return [f"{cat}.{skill}" for cat, skills in team_skills.items()
-                for skill, score in skills.items() if score < 60]
+        return [
+            f"{cat}.{skill}"
+            for cat, skills in team_skills.items()
+            for skill, score in skills.items()
+            if score < 60
+        ]
 
     @staticmethod
-    def _assess_collaboration_effectiveness(individual_profiles: Dict[str, Any]) -> float:
-        """评估协作效果（基于技能互补性，简化实现）。"""
+    def _assess_collaboration_effectiveness(
+        individual_profiles: Dict[str, Any],
+    ) -> float:
+        """评估协作效果（基于技能互补性 + 团队覆盖度，去固定值）。
+
+        规则：
+        - 无数据 → 0.0
+        - 红队+蓝队技能域覆盖越全 → 协作越强
+        - 团队弱点越少 → 协作越强
+        """
         if not individual_profiles:
             return 0.0
-        return 75.0
+        profiles = [p for p in individual_profiles.values() if isinstance(p, dict)]
+        if not profiles:
+            return 0.0
+
+        # 1. 角色互补性：红队与蓝队都存在 → 互补加分
+        roles = {p.get("role") for p in profiles}
+        role_bonus = 30.0 if "red_team" in roles and "blue_team" in roles else 10.0
+
+        # 2. 技能覆盖度：所有成员技能域并集占框架总域的比例
+        total_areas = sum(
+            len(skills) for skills in EvaluationAnalyzer().skill_framework.values()
+        )
+        covered: set = set()
+        for p in profiles:
+            for category, skills in p.get("skill_scores", {}).items():
+                covered.update(k for k in skills if skills[k] > 0)
+        coverage_ratio = len(covered) / max(total_areas, 1)
+
+        # 3. 团队弱点惩罚：平均弱点越少越好
+        weakness_counts = [
+            len(p.get("improvement_areas", [])) for p in profiles if isinstance(p, dict)
+        ]
+        avg_weaknesses = (
+            sum(weakness_counts) / len(weakness_counts) if weakness_counts else 0.0
+        )
+        weakness_penalty = min(avg_weaknesses * 2.0, 20.0)
+
+        score = role_bonus + coverage_ratio * 50 + (20 - weakness_penalty)
+        return round(min(max(score, 0.0), 100.0), 1)
 
     @staticmethod
     def to_jsonable(report: Dict[str, Any]) -> Dict[str, Any]:

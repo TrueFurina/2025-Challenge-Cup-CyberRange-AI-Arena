@@ -8,6 +8,7 @@
 - 团队画像：聚合个人技能取平均
 - JSON 可序列化（to_jsonable 防御性转换）
 """
+
 import json
 import sys
 from pathlib import Path
@@ -17,7 +18,10 @@ import pytest
 _ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_ROOT))
 
-from ai_agents.evaluation_analyzer import EvaluationAnalyzer, evaluation_analyzer  # noqa: E402
+from ai_agents.evaluation_analyzer import (  # noqa: E402
+    EvaluationAnalyzer,
+    evaluation_analyzer,
+)
 
 
 def _make_session(total_rounds=5, attack_wins=3):
@@ -25,17 +29,19 @@ def _make_session(total_rounds=5, attack_wins=3):
     rounds = []
     for i in range(total_rounds):
         won = i < attack_wins
-        rounds.append({
-            "result": {"attack_won": won, "defense_won": not won},
-            "attack_decision": {
-                "technique": f"technique-{i % 3}",  # 有限技术多样性
-                "risk_level": "high" if won else "low",
-            },
-            "defense_decision": {
-                "actions": ["告警"] if won else ["告警", "封禁", "隔离"],
-                "threat_level": "high" if won else "low",
-            },
-        })
+        rounds.append(
+            {
+                "result": {"attack_won": won, "defense_won": not won},
+                "attack_decision": {
+                    "technique": f"technique-{i % 3}",  # 有限技术多样性
+                    "risk_level": "high" if won else "low",
+                },
+                "defense_decision": {
+                    "actions": ["告警"] if won else ["告警", "封禁", "隔离"],
+                    "threat_level": "high" if won else "low",
+                },
+            }
+        )
     return {"session_id": "test-eval-01", "rounds": rounds}
 
 
@@ -59,11 +65,16 @@ class TestEvaluateSessionRounds:
         """攻击得手越多，攻击评分应越高。"""
         low = evaluation_analyzer.evaluate_session_rounds(_make_session(5, 1))
         high = evaluation_analyzer.evaluate_session_rounds(_make_session(5, 4))
-        assert high["attack_evaluation"]["total_score"] >= low["attack_evaluation"]["total_score"]
+        assert (
+            high["attack_evaluation"]["total_score"]
+            >= low["attack_evaluation"]["total_score"]
+        )
 
     def test_empty_rounds(self):
         """空回合不崩溃（fail-open）。"""
-        report = evaluation_analyzer.evaluate_session_rounds({"session_id": "empty", "rounds": []})
+        report = evaluation_analyzer.evaluate_session_rounds(
+            {"session_id": "empty", "rounds": []}
+        )
         assert report["comprehensive_score"]["total_score"] == 0.0
         assert report["comprehensive_score"]["grade"] == "D"
 
@@ -88,19 +99,36 @@ class TestEvaluateSessionRounds:
 
 
 class TestGradeBoundaries:
-    @pytest.mark.parametrize("score,grade", [
-        (95, "A+"), (90, "A+"), (88, "A"), (82, "A-"),
-        (77, "B+"), (72, "B"), (67, "B-"), (62, "C+"),
-        (57, "C"), (52, "C-"), (40, "D"),
-    ])
+    @pytest.mark.parametrize(
+        "score,grade",
+        [
+            (95, "A+"),
+            (90, "A+"),
+            (88, "A"),
+            (82, "A-"),
+            (77, "B+"),
+            (72, "B"),
+            (67, "B-"),
+            (62, "C+"),
+            (57, "C"),
+            (52, "C-"),
+            (40, "D"),
+        ],
+    )
     def test_grades(self, score, grade):
         assert EvaluationAnalyzer._calculate_grade(score) == grade
 
 
 class TestPerformanceLevel:
-    @pytest.mark.parametrize("score,level", [
-        (90, "expert"), (75, "proficient"), (60, "developing"), (30, "novice"),
-    ])
+    @pytest.mark.parametrize(
+        "score,level",
+        [
+            (90, "expert"),
+            (75, "proficient"),
+            (60, "developing"),
+            (30, "novice"),
+        ],
+    )
     def test_levels(self, score, level):
         assert EvaluationAnalyzer._determine_performance_level(score) == level
 
@@ -113,7 +141,10 @@ class TestSuggestions:
         assert suggestion["actions"]
 
     def test_unknown_weakness_returns_none(self):
-        assert evaluation_analyzer._generate_attack_suggestion("not_a_real_weakness") is None
+        assert (
+            evaluation_analyzer._generate_attack_suggestion("not_a_real_weakness")
+            is None
+        )
 
     def test_suggestions_generated_from_weaknesses(self):
         """弱项存在时应生成对应建议。"""
@@ -126,14 +157,24 @@ class TestSuggestions:
 class TestTeamAnalysis:
     def test_team_skills_averaged(self):
         profiles = {
-            "red_team": {"skill_scores": {
-                "technical_skills": {"network_security": 80, "incident_response": 60},
-                "analytical_skills": {"threat_analysis": 70},
-            }},
-            "blue_team": {"skill_scores": {
-                "technical_skills": {"network_security": 90, "incident_response": 70},
-                "analytical_skills": {"threat_analysis": 80},
-            }},
+            "red_team": {
+                "skill_scores": {
+                    "technical_skills": {
+                        "network_security": 80,
+                        "incident_response": 60,
+                    },
+                    "analytical_skills": {"threat_analysis": 70},
+                }
+            },
+            "blue_team": {
+                "skill_scores": {
+                    "technical_skills": {
+                        "network_security": 90,
+                        "incident_response": 70,
+                    },
+                    "analytical_skills": {"threat_analysis": 80},
+                }
+            },
         }
         team = evaluation_analyzer._analyze_team_skills(profiles)
         # network_security 平均 = (80+90)/2 = 85

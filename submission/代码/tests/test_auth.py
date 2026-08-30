@@ -6,57 +6,83 @@
 - 鉴权：无 token 401、普通用户访问管理接口 403
 - 提权防护回归：客户端传 role=admin 被忽略
 """
-import pytest
+
+import pytest  # noqa: F401 - fixture 模式隐式使用
 
 
 # ── 注册 ──────────────────────────────────────────────
 class TestRegister:
     def test_register_success(self, client):
-        resp = client.post("/api/auth/register", json={
-            "username": "newuser",
-            "email": "new@test.com",
-            "password": "pass123",
-            "real_name": "新用户",
-            "student_id": "20240099",
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "newuser",
+                "email": "new@test.com",
+                "password": "pass123",
+                "real_name": "新用户",
+                "student_id": "20240099",
+            },
+        )
         assert resp.status_code in (200, 201), resp.get_json()
         body = resp.get_json()
         assert body.get("success") is True or "成功" in str(body.get("message", ""))
 
     def test_register_missing_field(self, client):
-        resp = client.post("/api/auth/register", json={
-            "username": "nouser", "email": "x@test.com", "password": "pass123",
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "nouser",
+                "email": "x@test.com",
+                "password": "pass123",
+            },
+        )
         assert resp.status_code == 400, resp.get_json()
 
     def test_register_invalid_username(self, client):
-        resp = client.post("/api/auth/register", json={
-            "username": "1bad",  # 必须以字母开头
-            "email": "x@test.com", "password": "pass123", "real_name": "测试",
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "1bad",  # 必须以字母开头
+                "email": "x@test.com",
+                "password": "pass123",
+                "real_name": "测试",
+            },
+        )
         assert resp.status_code == 400
 
     def test_register_weak_password(self, client):
-        resp = client.post("/api/auth/register", json={
-            "username": "weakpass", "email": "x@test.com", "password": "123",
-            "real_name": "测试",
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "weakpass",
+                "email": "x@test.com",
+                "password": "123",
+                "real_name": "测试",
+            },
+        )
         assert resp.status_code == 400
 
     # P0 回归：客户端传 role 提权被忽略
     def test_register_role_escalation_blocked(self, client):
-        resp = client.post("/api/auth/register", json={
-            "username": "hacker1",
-            "email": "h@test.com",
-            "password": "pass123",
-            "real_name": "黑客",
-            "role": "admin",  # 恶意提权尝试
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "hacker1",
+                "email": "h@test.com",
+                "password": "pass123",
+                "real_name": "黑客",
+                "role": "admin",  # 恶意提权尝试
+            },
+        )
         assert resp.status_code in (200, 201)
         # 用新账号登录，验证角色不是 admin
-        token_resp = client.post("/api/auth/login", json={
-            "username": "hacker1", "password": "pass123",
-        })
+        token_resp = client.post(
+            "/api/auth/login",
+            json={
+                "username": "hacker1",
+                "password": "pass123",
+            },
+        )
         token = token_resp.get_json().get("token")
         auth_client = client
         auth_client.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
@@ -68,22 +94,34 @@ class TestRegister:
 # ── 登录 ──────────────────────────────────────────────
 class TestLogin:
     def test_login_success(self, client):
-        resp = client.post("/api/auth/login", json={
-            "username": "admin", "password": "admin123",
-        })
+        resp = client.post(
+            "/api/auth/login",
+            json={
+                "username": "admin",
+                "password": "admin123",
+            },
+        )
         assert resp.status_code == 200, resp.get_json()
         assert resp.get_json().get("token"), "登录应签发 token"
 
     def test_login_wrong_password(self, client):
-        resp = client.post("/api/auth/login", json={
-            "username": "admin", "password": "wrong-pass",
-        })
+        resp = client.post(
+            "/api/auth/login",
+            json={
+                "username": "admin",
+                "password": "wrong-pass",
+            },
+        )
         assert resp.status_code in (401, 400)
 
     def test_login_missing_user(self, client):
-        resp = client.post("/api/auth/login", json={
-            "username": "no_such_user", "password": "pass123",
-        })
+        resp = client.post(
+            "/api/auth/login",
+            json={
+                "username": "no_such_user",
+                "password": "pass123",
+            },
+        )
         assert resp.status_code in (401, 400)
 
 

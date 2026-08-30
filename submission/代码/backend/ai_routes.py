@@ -8,14 +8,67 @@
 - GET  /api/ai/sessions            会话列表
 - GET  /api/ai/status              系统 AI 能力状态
 """
-from flask import Blueprint, jsonify, request, Response
+
 import json
 
-from backend.models import Attack, Defense, Vulnerability
-from ai_agents.orchestrator import arena
+from flask import Blueprint, Response, jsonify, request
+
 from ai_agents.evaluation_analyzer import evaluation_analyzer
+from ai_agents.orchestrator import arena
+from backend.models import Attack, Defense, Vulnerability
 
 ai_bp = Blueprint("ai", __name__)
+
+
+# ── P1-2 增强：AI 写操作可选鉴权 + CSRF Origin 校验 ──────────
+# 设计：GET 查询保持公开（评委体验），POST 写操作（建会话/跑对抗/生成场景）
+# 要求已登录（复用 routes.py 的 token 会话机制）。同时校验 Origin 白名单，
+# 免疫 CSRF（Bearer token 不依赖 cookie，天然免疫 + Origin 双重保险）。
+def _optional_user_id():
+    """从 Authorization: Bearer <token> 提取当前用户（未登录返回 None，不阻断）。"""
+    from backend.routes import _current_user_id
+
+    try:
+        return _current_user_id()
+    except Exception:  # noqa: BLE001 - 鉴权解析失败不阻断演示
+        return None
+
+
+def _require_login():
+    """写操作守卫：要求有效登录，否则返回错误响应（None 表示通过）。"""
+    from backend.models import User
+    from backend.routes import _current_user_id
+
+    uid = _current_user_id()
+    if uid is None:
+        return (
+            jsonify({"success": False, "message": "未登录，请先登录后再执行对抗操作"}),
+            401,
+        )
+    user = User.query.get(uid)
+    if user is None or not user.is_active:
+        return jsonify({"success": False, "message": "账户不可用"}), 401
+    return None
+
+
+_ALLOWED_ORIGINS = {
+    "http://127.0.0.1",
+    "http://localhost",
+    "http://127.0.0.1:5000",
+    "http://localhost:5000",
+}
+
+
+def _check_origin():
+    """CSRF Origin 校验：非白名单 Origin 的写操作拒绝（免疫 CSRF）。"""
+    origin = request.headers.get("Origin") or request.headers.get("Referer") or ""
+    if not origin:
+        return None  # 非浏览器客户端（curl/脚本）无 Origin，放行
+    host = origin.split("//")[-1].split("/")[0] if "//" in origin else origin
+    # 允许同源（不带端口或带 5000 端口）
+    if origin in _ALLOWED_ORIGINS or host in ("127.0.0.1", "localhost"):
+        return None
+    return jsonify({"success": False, "message": "跨站请求被拒绝（CSRF 防护）"}), 403
 
 
 # 阶段 3 C1：动态场景生成（赛题功能①）
@@ -26,7 +79,9 @@ def _generate_scenario(vulnerability_library, target_count=3, vuln_density=2):
     os_pool = ["linux", "windows", "centos", "ubuntu"]
     role_pool = ["Web 服务器", "数据库服务器", "文件服务器", "域控", "终端"]
     for i in range(max(1, min(target_count, 8))):
-        vulns = vulnerability_library[i * vuln_density : i * vuln_density + vuln_density]
+        vulns = vulnerability_library[
+            i * vuln_density : i * vuln_density + vuln_density
+        ]
         hosts.append(
             {
                 "id": f"host-{i+1}",
@@ -35,7 +90,9 @@ def _generate_scenario(vulnerability_library, target_count=3, vuln_density=2):
                 "ip": f"10.10.{i + 1}.{i + 1}",
                 "services": service_pool[i : i + 2],
                 "vulnerabilities": [v.get("cve_id", v.get("name", "")) for v in vulns],
-                "severity": max((v.get("severity", "low") for v in vulns), default="low"),
+                "severity": max(
+                    (v.get("severity", "low") for v in vulns), default="low"
+                ),
             }
         )
     return {
@@ -48,19 +105,31 @@ def _generate_scenario(vulnerability_library, target_count=3, vuln_density=2):
 
 @ai_bp.route("/scenario/generate", methods=["POST"])
 def generate_scenario():
-    """动态场景生成：基于漏洞库自动构建网络拓扑。"""
+    """动态场景生成：基于漏洞库自动构建网络拓扑（写操作：登录 + Origin 校验）。"""
+    guard = _check_origin()
+    if guard:
+        return guard
+    login = _require_login()
+    if login:
+        return login
     data = request.get_json(silent=True) or {}
     target_count = int(data.get("target_count", 3))
     vuln_density = int(data.get("vuln_density", 2))
     vulnerability_library = [v.to_dict() for v in Vulnerability.query.all()]
     if not vulnerability_library:
         return jsonify({"error": "漏洞库为空，请先 seed 数据"}), 400
-    return jsonify(_generate_scenario(vulnerability_library, target_count, vuln_density))
+    return jsonify(
+        _generate_scenario(vulnerability_library, target_count, vuln_density)
+    )
 
 
 def _default_target() -> dict:
     """默认目标资产（后续可扩展为动态资产）。"""
-    return {"name": "web-app-01", "os": "linux", "services": ["http/80", "ssh/22", "mysql/3306"]}
+    return {
+        "name": "web-app-01",
+        "os": "linux",
+        "services": ["http/80", "ssh/22", "mysql/3306"],
+    }
 
 
 @ai_bp.route("/status", methods=["GET"])
@@ -88,7 +157,14 @@ def create_session():
     """创建攻防对抗会话（读取攻击库/漏洞库/防御库作为 Agent 知识）。
 
     阶段 3 C3：支持动态环境参数（target_count / vuln_density / defense_strength）。
+    写操作：登录 + Origin 校验。
     """
+    guard = _check_origin()
+    if guard:
+        return guard
+    login = _require_login()
+    if login:
+        return login
     data = request.get_json(silent=True) or {}
     target = data.get("target") or _default_target()
     params = data.get("params") or {}
@@ -102,24 +178,33 @@ def create_session():
         defense_library=defense_library,
         params=params,
     )
-    return jsonify(
-        {
-            "session_id": session["id"],
-            "status": session["status"],
-            "target": session["target"],
-            "params": session.get("params", {}),
-            "knowledge_counts": {
-                "attacks": len(attack_library),
-                "vulnerabilities": len(vulnerability_library),
-                "defenses": len(defense_library),
-            },
-        }
-    ), 201
+    return (
+        jsonify(
+            {
+                "session_id": session["id"],
+                "status": session["status"],
+                "target": session["target"],
+                "params": session.get("params", {}),
+                "knowledge_counts": {
+                    "attacks": len(attack_library),
+                    "vulnerabilities": len(vulnerability_library),
+                    "defenses": len(defense_library),
+                },
+            }
+        ),
+        201,
+    )
 
 
 @ai_bp.route("/session/<session_id>/round", methods=["POST"])
 def run_round(session_id):
-    """执行一轮攻防对抗。"""
+    """执行一轮攻防对抗（写操作：登录 + Origin 校验）。"""
+    guard = _check_origin()
+    if guard:
+        return guard
+    login = _require_login()
+    if login:
+        return login
     result = arena.run_round(session_id)
     if "error" in result:
         return jsonify(result), 404
@@ -128,7 +213,13 @@ def run_round(session_id):
 
 @ai_bp.route("/session/<session_id>/run", methods=["POST"])
 def run_all(session_id):
-    """一键执行全部回合。"""
+    """一键执行全部回合（写操作：登录 + Origin 校验）。"""
+    guard = _check_origin()
+    if guard:
+        return guard
+    login = _require_login()
+    if login:
+        return login
     result = arena.run_all(session_id)
     if "error" in result:
         return jsonify(result), 404
@@ -191,10 +282,30 @@ def evaluate_session(session_id):
     # FN: 攻击得手但未被识别（漏报）
     # FP: 防御成功但误判为攻击（误报）
     # TN: 防御成功且确实非攻击（正确拒绝）
-    tp = sum(1 for r in rounds if r.get("result", {}).get("attack_won") and r.get("attack_decision", {}).get("risk_level") in ("high", "critical"))
-    fn = sum(1 for r in rounds if r.get("result", {}).get("attack_won") and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical"))
-    fp = sum(1 for r in rounds if r.get("result", {}).get("defense_won") and r.get("attack_decision", {}).get("risk_level") in ("high", "critical"))
-    tn = sum(1 for r in rounds if r.get("result", {}).get("defense_won") and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical"))
+    tp = sum(
+        1
+        for r in rounds
+        if r.get("result", {}).get("attack_won")
+        and r.get("attack_decision", {}).get("risk_level") in ("high", "critical")
+    )
+    fn = sum(
+        1
+        for r in rounds
+        if r.get("result", {}).get("attack_won")
+        and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical")
+    )
+    fp = sum(
+        1
+        for r in rounds
+        if r.get("result", {}).get("defense_won")
+        and r.get("attack_decision", {}).get("risk_level") in ("high", "critical")
+    )
+    tn = sum(
+        1
+        for r in rounds
+        if r.get("result", {}).get("defense_won")
+        and r.get("attack_decision", {}).get("risk_level") not in ("high", "critical")
+    )
 
     return jsonify(
         {
@@ -207,11 +318,18 @@ def evaluate_session(session_id):
             "avg_defense_actions": avg_defense_actions,
             "threat_distribution": threat_dist,
             "confusion_matrix": {
-                "tp": tp, "fn": fn, "fp": fp, "tn": tn,
-                "description": "攻击判定 2×2（TP:攻击正确识别 / FN:攻击漏报 / FP:防御误报 / TN:正确拒绝）"
+                "tp": tp,
+                "fn": fn,
+                "fp": fp,
+                "tn": tn,
+                "description": "攻击判定 2×2（TP:攻击正确识别 / FN:攻击漏报 / FP:防御误报 / TN:正确拒绝）",
             },
             "cost_estimate": round(arena.memory.count() * 0.001, 4),
-            "verdict": "攻击方占优" if attack_success_rate > 0.5 else ("势均力敌" if attack_success_rate == 0.5 else "防御方占优"),
+            "verdict": (
+                "攻击方占优"
+                if attack_success_rate > 0.5
+                else ("势均力敌" if attack_success_rate == 0.5 else "防御方占优")
+            ),
         }
     )
 
@@ -237,7 +355,8 @@ def export_session_report(session_id):
 body{{font-family:sans-serif;margin:32px;background:#fff;color:#1b1e23}}
 h1{{color:#0e6ba8}}table{{border-collapse:collapse;margin:12px 0}}
 th,td{{border:1px solid #d9d1c3;padding:8px 12px;text-align:left}}
-th{{background:#f3efe5}}.tag{{display:inline-block;padding:4px 8px;border-radius:999px;background:rgba(14,107,168,0.1);font-size:12px;font-weight:700}}
+th{{background:#f3efe5}}.tag{{display:inline-block;padding:4px 8px;border-radius:999px;
+  background:rgba(14,107,168,0.1);font-size:12px;font-weight:700}}
 pre{{background:#161a20;color:#e8ecf3;padding:14px;border-radius:10px;overflow:auto}}
 </style></head><body>
 <h1>演练评测报告</h1><p class="tag">会话 {session_id}</p>
@@ -248,7 +367,7 @@ pre{{background:#161a20;color:#e8ecf3;padding:14px;border-radius:10px;overflow:a
 <tr><td>防御成功率</td><td>{data.get('defense_success_rate')}</td></tr>
 <tr><td>综合判定</td><td><strong>{data.get('verdict')}</strong></td></tr></table>
 <h2>混淆矩阵（攻击判定 2×2）</h2>
-<table class="table"><tr><th>实际 \ 预期</th><th>预期攻击</th><th>预期非攻击</th></tr>
+<table class="table"><tr><th>实际 \\ 预期</th><th>预期攻击</th><th>预期非攻击</th></tr>
 <tr><td>判定攻击</td><td>{cm.get('tp',0)}</td><td>{cm.get('fp',0)}</td></tr>
 <tr><td>判定非攻击</td><td>{cm.get('fn',0)}</td><td>{cm.get('tn',0)}</td></tr></table>
 <h2>逐回合明细</h2><pre>{json.dumps(session.get('rounds',[]), ensure_ascii=False, indent=2)}</pre>

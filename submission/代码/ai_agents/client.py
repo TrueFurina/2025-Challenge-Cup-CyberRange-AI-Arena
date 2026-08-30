@@ -5,6 +5,7 @@
 - 无 API Key / 网络异常 / 解析失败 → 返回 None，调用方走规则兜底
 - 防御性 JSON 解析：剥离代码围栏 + 提取 JSON 对象
 """
+
 from __future__ import annotations
 
 import json
@@ -20,11 +21,7 @@ DEFAULT_MODEL = "deepseek-chat"
 
 def _resolve_settings() -> dict:
     """解析 LLM 设置：环境变量优先，其次默认值。"""
-    api_key = (
-        os.environ.get("DEEPSEEK_API_KEY")
-        or os.environ.get("LLM_API_KEY")
-        or ""
-    )
+    api_key = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("LLM_API_KEY") or ""
     return {
         "api_key": api_key,
         "base_url": os.environ.get("LLM_BASE_URL", DEFAULT_BASE_URL),
@@ -32,8 +29,16 @@ def _resolve_settings() -> dict:
     }
 
 
-def _post_chat(messages: list[dict], settings: dict, temperature: float, max_tokens: int) -> Optional[str]:
-    """调用 OpenAI 兼容 chat/completions 端点。"""
+def _post_chat(
+    messages: list[dict], settings: dict, temperature: float, max_tokens: int
+) -> Optional[str]:
+    """调用 OpenAI 兼容 chat/completions 端点（带指数退避重试）。
+
+    P1-4 增强：网络抖动/服务端 5xx 时自动重试，最多 2 次（1s/2s），
+    重试仍失败才返回 None 交给调用方 fail-open 规则兜底。
+    """
+    import time
+
     import requests  # 项目已依赖 requests
 
     payload = {
@@ -46,19 +51,33 @@ def _post_chat(messages: list[dict], settings: dict, temperature: float, max_tok
         "Authorization": f"Bearer {settings['api_key']}",
         "Content-Type": "application/json",
     }
-    resp = requests.post(
-        f"{settings['base_url'].rstrip('/')}/chat/completions",
-        json=payload,
-        headers=headers,
-        timeout=30,
-    )
-    resp.raise_for_status()
-    data = resp.json()
-    try:
-        return data["choices"][0]["message"]["content"]
-    except (KeyError, IndexError, TypeError):
-        logger.warning("LLM 响应结构异常: %s", str(data)[:200])
-        return None
+    url = f"{settings['base_url'].rstrip('/')}/chat/completions"
+
+    max_retries = 2  # 1 次原始 + 2 次重试 = 3 次尝试
+    last_exc: Optional[Exception] = None
+    for attempt in range(max_retries + 1):
+        try:
+            resp = requests.post(url, json=payload, headers=headers, timeout=60)
+            resp.raise_for_status()
+            data = resp.json()
+            try:
+                return data["choices"][0]["message"]["content"]
+            except (KeyError, IndexError, TypeError):
+                logger.warning("LLM 响应结构异常: %s", str(data)[:200])
+                return None
+        except Exception as exc:  # noqa: BLE001 - 网络/5xx 等均重试
+            last_exc = exc
+            if attempt < max_retries:
+                backoff = 1 << attempt  # 1s, 2s
+                logger.warning(
+                    "LLM 调用第 %d 次失败（%s），%.0fs 后重试",
+                    attempt + 1,
+                    exc,
+                    backoff,
+                )
+                time.sleep(backoff)
+    logger.warning("LLM 调用重试耗尽（共 %d 次）: %s", max_retries + 1, last_exc)
+    return None
 
 
 def ai_chat(
@@ -100,7 +119,9 @@ def ai_chat_json(
     max_tokens: int = 1024,
 ) -> Optional[dict]:
     """调用 LLM 并解析 JSON 对象回复（失败开放）。"""
-    content = ai_chat(messages, system=system, temperature=temperature, max_tokens=max_tokens)
+    content = ai_chat(
+        messages, system=system, temperature=temperature, max_tokens=max_tokens
+    )
     if content is None:
         return None
     return extract_json_object(content)

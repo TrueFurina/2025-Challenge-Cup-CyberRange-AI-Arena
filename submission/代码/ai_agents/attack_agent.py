@@ -3,11 +3,11 @@
 输入：目标资产信息（漏洞库/攻击库）
 输出：攻击路径（技术选择 + 理由 + 置信度）——fail-open：LLM 不可用时规则推荐
 """
+
 from __future__ import annotations
 
-import json
 import logging
-from typing import Any, Optional
+from typing import Optional
 
 from ai_agents.client import ai_chat_json
 
@@ -47,7 +47,9 @@ class AttackAgent:
     def __init__(self, model_name: Optional[str] = None):
         self.model_name = model_name
 
-    def plan_attack(self, target_info: dict, attack_library: list, vulnerability_library: list) -> dict:
+    def plan_attack(
+        self, target_info: dict, attack_library: list, vulnerability_library: list
+    ) -> dict:
         """规划攻击路径（fail-open：LLM 不可用时规则兜底）。
 
         Args:
@@ -56,7 +58,9 @@ class AttackAgent:
             vulnerability_library: 漏洞库列表（Vulnerability 模型 to_dict）
         """
         try:
-            prompt = self._build_prompt(target_info, attack_library, vulnerability_library)
+            prompt = self._build_prompt(
+                target_info, attack_library, vulnerability_library
+            )
             payload = ai_chat_json(
                 [{"role": "user", "content": prompt}],
                 system=ATTACK_SYSTEM_PROMPT,
@@ -70,15 +74,23 @@ class AttackAgent:
             logger.warning("攻击 Agent LLM 决策失败，走规则兜底: %s", exc)
         return self._heuristic_plan(target_info, attack_library, vulnerability_library)
 
-    def _build_prompt(self, target_info: dict, attack_library: list, vulnerability_library: list) -> str:
-        attacks = "\n".join(
-            f"- {a['name']}: {a.get('description', '')} (CWE: {a.get('cwe_id', '无')})"
-            for a in attack_library[:10]
-        ) or "- 攻击库为空"
-        vulns = "\n".join(
-            f"- {v['name']}: {v.get('description', '')} (CVE: {v.get('cve_id', '无')}, 严重度: {v.get('severity', '无')})"
-            for v in vulnerability_library[:10]
-        ) or "- 漏洞库为空"
+    def _build_prompt(
+        self, target_info: dict, attack_library: list, vulnerability_library: list
+    ) -> str:
+        attacks = (
+            "\n".join(
+                f"- {a['name']}: {a.get('description', '')} (CWE: {a.get('cwe_id', '无')})"
+                for a in attack_library[:10]
+            )
+            or "- 攻击库为空"
+        )
+        vulns = (
+            "\n".join(
+                f"- {v['name']}: {v.get('description', '')} (CVE: {v.get('cve_id', '无')}, 严重度: {v.get('severity', '无')})"
+                for v in vulnerability_library[:10]
+            )
+            or "- 漏洞库为空"
+        )
         return f"""请为以下目标规划攻击路径。
 
 ## 目标资产
@@ -97,7 +109,9 @@ class AttackAgent:
 
 请仅输出 JSON 对象，不要附带其他说明文字。"""
 
-    def _heuristic_plan(self, target_info: dict, attack_library: list, vulnerability_library: list) -> dict:
+    def _heuristic_plan(
+        self, target_info: dict, attack_library: list, vulnerability_library: list
+    ) -> dict:
         """规则兜底：按漏洞严重度优先推荐攻击技术（无 LLM 也能工作）。"""
         steps = []
         for idx, vuln in enumerate(vulnerability_library[:3], start=1):
@@ -124,11 +138,25 @@ class AttackAgent:
             )
         return {
             "summary": "规则引擎兜底生成的攻击路径",
-            "steps": steps or [
-                {"order": 1, "technique": "端口扫描与指纹识别", "target": target_info.get("name", "未知"),
-                 "rationale": "无已知漏洞，先进行侦察", "expected_effect": "获取开放服务信息", "confidence": 0.5}
+            "steps": steps
+            or [
+                {
+                    "order": 1,
+                    "technique": "端口扫描与指纹识别",
+                    "target": target_info.get("name", "未知"),
+                    "rationale": "无已知漏洞，先进行侦察",
+                    "expected_effect": "获取开放服务信息",
+                    "confidence": 0.5,
+                }
             ],
-            "risk_level": "high" if any(v.get("severity") in ("high", "critical") for v in vulnerability_library[:3]) else "medium",
+            "risk_level": (
+                "high"
+                if any(
+                    v.get("severity") in ("high", "critical")
+                    for v in vulnerability_library[:3]
+                )
+                else "medium"
+            ),
             "source": "rules",
         }
 

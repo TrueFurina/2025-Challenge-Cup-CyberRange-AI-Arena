@@ -6,17 +6,18 @@
 - 每轮输出决策记录（思考/动作/结果/状态），供前端轮询展示
 - fail-open：任一 Agent 失败降级，对抗不中断
 """
+
 from __future__ import annotations
 
 import logging
 import time
 import uuid
-from typing import Any, Optional
+from typing import Optional
 
 from ai_agents.attack_agent import AttackAgent
 from ai_agents.defense_agent import DefenseAgent
-from memory import MemoryStore
 from ledger import LedgerStore
+from memory import MemoryStore
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,11 @@ class AgentArena:
             return {"error": f"会话不存在: {session_id}"}
         if session["current_round"] >= self.MAX_ROUNDS:
             session["status"] = "finished"
-            return {"session_id": session_id, "status": "finished", "message": "已达到最大回合数"}
+            return {
+                "session_id": session_id,
+                "status": "finished",
+                "message": "已达到最大回合数",
+            }
 
         session["status"] = "running"
         round_no = session["current_round"] + 1
@@ -151,7 +156,9 @@ class AgentArena:
         )
 
         # 3) 本轮结果判定（简单规则：攻击命中漏洞则攻击得手，否则防御成功）
-        attack_won = bool(attack_plan.get("steps")) and attack_plan.get("source") != "error"
+        attack_won = (
+            bool(attack_plan.get("steps")) and attack_plan.get("source") != "error"
+        )
         defense_won = not attack_won or defense_plan.get("source") == "rules"
 
         round_record = {
@@ -180,27 +187,41 @@ class AgentArena:
         session["current_round"] = round_no
 
         # 阶段 6：写入误报记忆（持久化本轮决策）
-        self.memory.append({
-            "event_id": session_id,
-            "host": target.get("host", ""),
-            "process": first_step.get("technique", ""),
-            "behavior": attack_plan.get("summary", ""),
-            "event_type": "攻击" if attack_won else "防御",
-            "risk_level": attack_plan.get("risk_level", "medium"),
-            "confidence": "high" if attack_plan.get("source") == "llm" else "medium",
-            "is_false_positive": defense_won,
-        })
+        self.memory.append(
+            {
+                "event_id": session_id,
+                "host": target.get("host", ""),
+                "process": first_step.get("technique", ""),
+                "behavior": attack_plan.get("summary", ""),
+                "event_type": "攻击" if attack_won else "防御",
+                "risk_level": attack_plan.get("risk_level", "medium"),
+                "confidence": (
+                    "high" if attack_plan.get("source") == "llm" else "medium"
+                ),
+                "is_false_positive": defense_won,
+            }
+        )
 
         # 阶段 8：记录审计账本
         ledger_rec = self.ledger.begin(session_id, "攻防推演")
         if ledger_rec:
-            ledger_rec.record_step("attack", technique=first_step.get("technique", ""), risk_level=attack_plan.get("risk_level", "medium"))
-            ledger_rec.record_step("defense", actions=len(defense_plan.get("actions", [])), threat_level=defense_plan.get("threat_level", "medium"))
-            ledger_rec.finalize({
-                "round": round_no,
-                "verdict": "攻击得手" if attack_won else "防御成功",
-                "risk_level": attack_plan.get("risk_level", "medium"),
-            })
+            ledger_rec.record_step(
+                "attack",
+                technique=first_step.get("technique", ""),
+                risk_level=attack_plan.get("risk_level", "medium"),
+            )
+            ledger_rec.record_step(
+                "defense",
+                actions=len(defense_plan.get("actions", [])),
+                threat_level=defense_plan.get("threat_level", "medium"),
+            )
+            ledger_rec.finalize(
+                {
+                    "round": round_no,
+                    "verdict": "攻击得手" if attack_won else "防御成功",
+                    "risk_level": attack_plan.get("risk_level", "medium"),
+                }
+            )
 
         if round_no >= self.MAX_ROUNDS:
             session["status"] = "finished"
@@ -266,7 +287,9 @@ class AgentArena:
         return min(defense_won / max(total, 1) * 100, 100.0)
 
     @staticmethod
-    def _assess_threat_level(attack_intensity: float, defense_effectiveness: float) -> str:
+    def _assess_threat_level(
+        attack_intensity: float, defense_effectiveness: float
+    ) -> str:
         """评估威胁等级：攻击强度 - 防御效果 → very_low/low/medium/high/critical。"""
         threat_index = attack_intensity - defense_effectiveness
         if threat_index < -20:
@@ -299,31 +322,43 @@ class AgentArena:
         """更新实时态势数据（每轮对抗后调用）。"""
         attack_intensity = self._calculate_attack_intensity(session)
         defense_effectiveness = self._calculate_defense_effectiveness(session)
-        threat_level = self._assess_threat_level(attack_intensity, defense_effectiveness)
+        threat_level = self._assess_threat_level(
+            attack_intensity, defense_effectiveness
+        )
         security_level = self._calculate_security_level(session)
-        session["real_time_data"].update({
-            "attack_intensity": round(attack_intensity, 2),
-            "defense_effectiveness": round(defense_effectiveness, 2),
-            "threat_level": threat_level,
-            "security_level": security_level,
-        })
+        session["real_time_data"].update(
+            {
+                "attack_intensity": round(attack_intensity, 2),
+                "defense_effectiveness": round(defense_effectiveness, 2),
+                "threat_level": threat_level,
+                "security_level": security_level,
+            }
+        )
         # 协调事件记录（阈值 30s 简化为每轮记录一次关键状态变化）
-        self._record_coordination_event(session, "situation_analysis", {
-            "attack_intensity": round(attack_intensity, 2),
-            "defense_effectiveness": round(defense_effectiveness, 2),
-            "threat_level": threat_level,
-            "security_level": security_level,
-        })
+        self._record_coordination_event(
+            session,
+            "situation_analysis",
+            {
+                "attack_intensity": round(attack_intensity, 2),
+                "defense_effectiveness": round(defense_effectiveness, 2),
+                "threat_level": threat_level,
+                "security_level": security_level,
+            },
+        )
 
-    def _record_coordination_event(self, session: dict, event_type: str, details: dict) -> None:
+    def _record_coordination_event(
+        self, session: dict, event_type: str, details: dict
+    ) -> None:
         """记录协调事件到 coordination_history。"""
         try:
-            session["coordination_history"].append({
-                "timestamp": time.time(),
-                "event_type": event_type,
-                "round": session["current_round"],
-                "details": details,
-            })
+            session["coordination_history"].append(
+                {
+                    "timestamp": time.time(),
+                    "event_type": event_type,
+                    "round": session["current_round"],
+                    "details": details,
+                }
+            )
         except Exception as exc:  # noqa: BLE001 - 记录失败不影响主链路
             logger.warning("协调事件记录失败（已忽略）: %s", exc)
 
@@ -337,18 +372,26 @@ class AgentArena:
 
         if threat_level in ("high", "critical") and defense_strength != "high":
             session["params"]["defense_strength"] = "high"
-            self._record_coordination_event(session, "defense_escalated", {
-                "reason": f"threat_level={threat_level}",
-                "from": defense_strength,
-                "to": "high",
-            })
+            self._record_coordination_event(
+                session,
+                "defense_escalated",
+                {
+                    "reason": f"threat_level={threat_level}",
+                    "from": defense_strength,
+                    "to": "high",
+                },
+            )
         elif threat_level == "very_low" and defense_strength != "low":
             session["params"]["defense_strength"] = "low"
-            self._record_coordination_event(session, "defense_relaxed", {
-                "reason": "threat_level=very_low",
-                "from": defense_strength,
-                "to": "low",
-            })
+            self._record_coordination_event(
+                session,
+                "defense_relaxed",
+                {
+                    "reason": "threat_level=very_low",
+                    "from": defense_strength,
+                    "to": "low",
+                },
+            )
 
 
 # 全局单例（供 API 路由复用会话状态）

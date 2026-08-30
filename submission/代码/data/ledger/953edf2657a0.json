@@ -1,0 +1,25 @@
+{
+  "event_id": "953edf2657a0",
+  "scenario": "攻防推演",
+  "started_at": "2026-08-30T08:27:37.137774Z",
+  "finalized_at": "2026-08-30T08:27:37.137774Z",
+  "steps": [
+    {
+      "phase": "attack",
+      "timestamp": "2026-08-30T08:27:37.137774Z",
+      "technique": "Apache 路径穿越",
+      "risk_level": "high"
+    },
+    {
+      "phase": "defense",
+      "timestamp": "2026-08-30T08:27:37.137774Z",
+      "actions": 3,
+      "threat_level": "high"
+    }
+  ],
+  "final_verdict": {
+    "round": 1,
+    "verdict": "攻击得手",
+    "risk_level": "high"
+  }
+}

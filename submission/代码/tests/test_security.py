@@ -9,7 +9,8 @@
 - 配置安全：debug 关闭（app.config TESTING 时不暴露）
 - 未授权访问维护/监控接口（若存在）
 """
-import pytest
+
+import pytest  # noqa: F401 - fixture 模式隐式使用
 
 
 # ── IDOR 越权 ────────────────────────────────────────
@@ -42,7 +43,9 @@ class TestCORS:
 
     def test_foreign_origin_not_echoed(self, client):
         """非白名单 Origin 不应被回显（CORS 全开漏洞回归）。"""
-        resp = client.get("/api/ai/status", headers={"Origin": "http://evil.example.com"})
+        resp = client.get(
+            "/api/ai/status", headers={"Origin": "http://evil.example.com"}
+        )
         acao = resp.headers.get("Access-Control-Allow-Origin")
         assert acao != "*", "CORS 全开漏洞回归失败：任意 Origin 被允许"
         assert acao != "http://evil.example.com", "非白名单 Origin 被回显"
@@ -57,27 +60,41 @@ class TestCORS:
 class TestInjection:
     def test_login_sql_injection(self, client):
         """SQL 注入登录尝试不应成功。"""
-        resp = client.post("/api/auth/login", json={
-            "username": "' OR '1'='1", "password": "' OR '1'='1",
-        })
+        resp = client.post(
+            "/api/auth/login",
+            json={
+                "username": "' OR '1'='1",
+                "password": "' OR '1'='1",
+            },
+        )
         assert resp.status_code in (401, 400), "SQL 注入登录不应成功"
 
     def test_register_sql_injection(self, client):
         """注入字段注册应被格式校验拒绝或安全处理。"""
-        resp = client.post("/api/auth/register", json={
-            "username": "x' OR 1=1 --",
-            "email": "a@b.com", "password": "pass123", "real_name": "注入",
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "x' OR 1=1 --",
+                "email": "a@b.com",
+                "password": "pass123",
+                "real_name": "注入",
+            },
+        )
         # 用户名格式校验应拒绝引号/空格
         assert resp.status_code == 400
 
     def test_username_special_chars_rejected(self, client):
         """用户名含 SQL 特殊字符应被拒绝（参数化 + 格式校验双保险）。"""
-        for bad in ("admin'--", "a;DROP TABLE users;", "a\" OR \"a\"=\"a"):
-            resp = client.post("/api/auth/register", json={
-                "username": bad, "email": "x@test.com",
-                "password": "pass123", "real_name": "测试",
-            })
+        for bad in ("admin'--", "a;DROP TABLE users;", 'a" OR "a"="a'):
+            resp = client.post(
+                "/api/auth/register",
+                json={
+                    "username": bad,
+                    "email": "x@test.com",
+                    "password": "pass123",
+                    "real_name": "测试",
+                },
+            )
             assert resp.status_code == 400, f"非法用户名 {bad!r} 应被拒绝"
 
 
@@ -106,22 +123,34 @@ class TestSessionSecurity:
     def test_token_not_guessable(self, app):
         """token 应为随机十六进制（secrets.token_hex）。"""
         import re
+
         from backend.routes import _issue_token
+
         token = _issue_token(1)
         assert re.fullmatch(r"[0-9a-f]{32}", token), "token 应为 32 位十六进制"
 
     def test_register_role_field_ignored(self, client):
         """注册请求携带 role 字段时不会创建 admin（防提权回归）。"""
-        resp = client.post("/api/auth/register", json={
-            "username": "rolehack", "email": "rh@test.com",
-            "password": "pass123", "real_name": "提权尝试",
-            "role": "admin", "role_id": 1,
-        })
+        resp = client.post(
+            "/api/auth/register",
+            json={
+                "username": "rolehack",
+                "email": "rh@test.com",
+                "password": "pass123",
+                "real_name": "提权尝试",
+                "role": "admin",
+                "role_id": 1,
+            },
+        )
         assert resp.status_code in (200, 201)
         # 登录后访问用户列表应 403
-        login = client.post("/api/auth/login", json={
-            "username": "rolehack", "password": "pass123",
-        })
+        login = client.post(
+            "/api/auth/login",
+            json={
+                "username": "rolehack",
+                "password": "pass123",
+            },
+        )
         token = login.get_json().get("token")
         c = client
         c.environ_base["HTTP_AUTHORIZATION"] = f"Bearer {token}"
